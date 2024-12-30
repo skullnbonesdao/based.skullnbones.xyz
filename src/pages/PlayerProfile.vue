@@ -5,7 +5,7 @@ import { getSigner } from 'components/squads/SignerFinder'
 import { useGameStore } from '../stores/game-store'
 import { useFactionStore } from 'stores/faction-store'
 import PlayerProfileOverview from 'components/staratlas/playerProfile/PlayerProfileOverview.vue'
-import PlayerProfilePermissions from 'components/staratlas/playerProfile/PlayerProfilePermissions.vue'
+import PlayerProfilePermissions from 'components/staratlas/playerProfile/permissions/PlayerProfilePermissions.vue'
 import CreatePlayerProfile from 'components/staratlas/playerProfile/actions/CreatePlayerProfile.vue'
 import { usePointsStore } from 'stores/points-store'
 

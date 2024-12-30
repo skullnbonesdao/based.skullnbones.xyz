@@ -2,15 +2,11 @@
 import { ref } from 'vue'
 import { SAGE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/connector'
 import { PlayerProfile } from '@staratlas/player-profile'
-import {
-  addStaratlasTransactionToTransaction,
-  walletStoreToAsyncSigner,
-} from 'components/staratlas/helper'
+import { handleStaratlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { SagePermissions } from '@staratlas/sage'
-import { PublicKey, Transaction } from '@solana/web3.js'
-import { handleTransaction } from 'src/solana/handleTransaction'
+import { PublicKey } from '@solana/web3.js'
 
 const optionsScope = [SAGE_PROGRAM_ID]
 
@@ -20,28 +16,28 @@ const inputExpireTime = ref(0)
 const permissions = ref()
 
 async function sendTX() {
-  const tx = new Transaction()
-
   const signer = walletStoreToAsyncSigner(useWallet())
-  const instruction = await PlayerProfile.addKeys(
-    useWorkspaceAdapter()!.playerProfileProgram.value,
-    signer,
-    usePlayerProfileStore()!.playerProfile,
-    SagePermissions,
-    SAGE_PROGRAM_ID,
-    [
-      {
-        key: new PublicKey(inputKey.value),
-        permissions: SagePermissions.all(),
-        expireTime: inputExpireTime.value == 0 ? null : inputExpireTime.value,
-      },
-    ],
-  )(signer)
+  const staratlasIxs = []
 
-  addStaratlasTransactionToTransaction(instruction, tx)
+  staratlasIxs.push(
+    PlayerProfile.addKeys(
+      useWorkspaceAdapter()!.playerProfileProgram.value,
+      signer,
+      usePlayerProfileStore()!.playerProfile as PlayerProfile,
+      SagePermissions,
+      SAGE_PROGRAM_ID,
+      [
+        {
+          key: new PublicKey(inputKey.value),
+          permissions: SagePermissions.all(),
+          expireTime: inputExpireTime.value == 0 ? null : inputExpireTime.value,
+        },
+      ],
+    ),
+  )
 
-  await handleTransaction(tx, 'Add Account to Player Profile')
-
+  await handleStaratlasTransaction(`Add permission account`, staratlasIxs, signer)
+  await usePlayerProfileStore().updateStore()
   console.log('Sending TX')
 }
 </script>

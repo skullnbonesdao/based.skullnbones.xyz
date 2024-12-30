@@ -73,9 +73,9 @@ function updateEnables() {
 
 async function sendTx() {
   const signer = walletStoreToAsyncSigner(useWallet())
-  const playerProfile = keypairToAsyncSigner(Keypair.generate())
-
   const staratlasIxs = []
+
+  const playerProfile = keypairToAsyncSigner(Keypair.generate())
 
   if (enable_createPlayerProfile.value) {
     staratlasIxs.push(

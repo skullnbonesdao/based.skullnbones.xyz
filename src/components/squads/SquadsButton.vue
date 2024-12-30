@@ -1,21 +1,25 @@
 <script lang="ts" setup>
 import { useSquadsStore } from 'components/squads/SquadsStore'
+import SquadsBadge from 'components/squads/SquadsBadge.vue'
 </script>
 
 <template>
-  <div class="row">
+  <div class="row q-pa-md bg-style items-center">
     <q-toggle
       v-model="useSquadsStore().useSquads"
-      checked-icon="check"
+      checked-icon="group"
+      color="secondary"
       dense
       label=""
       unchecked-icon="clear"
     />
     <div class="col items-center">
-      <div class="col text-center">Sign As:</div>
       <SquadsBadge />
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style lang="sass" scoped>
+.bg-style
+  background-color: #2d2d2d
+</style>

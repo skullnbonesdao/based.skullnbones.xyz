@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import { usePlayerProfileStore } from 'stores/player-profile-store'
-import { ProfilePermissions } from '@staratlas/player-profile'
 import PermissionsAddAccount from 'components/staratlas/playerProfile/actions/PermissionsAddAccount.vue'
-import { PLAYER_PROFILE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'components/staratlas/connector'
-import { SagePermissions } from '@staratlas/sage'
+import PermissionEditable from 'components/staratlas/playerProfile/actions/PermissionEditable.vue'
 </script>
 
 <template>
@@ -35,33 +33,14 @@ import { SagePermissions } from '@staratlas/sage'
             <div>{{ k.expireTime }}</div>
           </div>
         </q-card-section>
-        <q-card-section v-if="k.scope.toString() == PLAYER_PROFILE_PROGRAM_ID.toString()">
-          <div
-            v-for="permission in Object.keys(ProfilePermissions.fromPermissions(k.permissions))"
-            :key="permission"
-            class="row"
-          >
-            <div class="col">
-              {{ permission }}
-            </div>
-            <div>
-              {{ ProfilePermissions.fromPermissions(k.permissions)[permission as String] }}
-            </div>
-          </div>
-        </q-card-section>
-        <q-card-section v-if="k.scope.toString() == SAGE_PROGRAM_ID.toString()">
-          <div
-            v-for="permission in Object.keys(SagePermissions.fromPermissions(k.permissions))"
-            :key="permission"
-            class="row"
-          >
-            <div class="col">
-              {{ permission }}
-            </div>
-            <div>
-              {{ SagePermissions.fromPermissions(k.permissions)[permission as String] }}
-            </div>
-          </div>
+
+        <q-card-section>
+          <PermissionEditable
+            :expire-time="k.expireTime"
+            :input-permissions="k.permissions"
+            :publicKey="k.key"
+            :scope="k.scope"
+          ></PermissionEditable>
         </q-card-section>
       </q-card>
     </q-card-section>

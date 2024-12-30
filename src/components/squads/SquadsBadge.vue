@@ -3,7 +3,7 @@ import { useSquadsStore } from 'components/squads/SquadsStore'
 </script>
 
 <template>
-  <q-badge color="" text-color="black">
+  <q-badge color="secondary">
     <div style="font-size: 12px">
       {{ useSquadsStore().store.find((s: any) => s.value == useSquadsStore().multisigPDA)?.label }}
     </div>
