@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useSquadsStore } from './SquadsStore'
+import { useSquadsStore } from 'components/squads/SquadsStore'
 import { ref, watch } from 'vue'
 
 const newMultisigLabel = ref('')
@@ -58,16 +58,16 @@ watch(
               <div class="col items-center">
                 <div class="col">
                   <div class="row q-gutter-x-md">
-                    <div class="col text-right text-weight-light">Multisig Account</div>
-                    <div class="col-3">
+                    <div class="col-2 text-right text-weight-light">Multisig Account</div>
+                    <div class="col">
                       {{ useSquadsStore().multisigPDA }}
                     </div>
                   </div>
                 </div>
                 <div class="col">
                   <div class="row q-gutter-x-md">
-                    <div class="col text-right text-weight-light">Squads Account</div>
-                    <div class="col-3">
+                    <div class="col-2 text-right text-weight-light">Squads Account</div>
+                    <div class="col">
                       {{ useSquadsStore().getVaultPDA }}
                     </div>
                   </div>
