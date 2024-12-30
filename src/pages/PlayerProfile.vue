@@ -7,12 +7,14 @@ import { useFactionStore } from 'stores/faction-store'
 import PlayerProfileOverview from 'components/staratlas/playerProfile/PlayerProfileOverview.vue'
 import PlayerProfilePermissions from 'components/staratlas/playerProfile/PlayerProfilePermissions.vue'
 import CreatePlayerProfile from 'components/staratlas/playerProfile/actions/CreatePlayerProfile.vue'
+import { usePointsStore } from 'stores/points-store'
 
 onMounted(async () => {
   usePlayerProfileStore().wallet = getSigner()
   await usePlayerProfileStore().updateStore()
-  await useFactionStore().updateStore()
   await useGameStore().updateStore()
+  await useFactionStore().updateStore()
+  await usePointsStore().updateStore()
 })
 
 const tab = ref('overview')
@@ -26,8 +28,8 @@ const tab = ref('overview')
     </q-tabs>
     <q-tab-panels v-model="tab">
       <q-tab-panel class="q-gutter-md" name="overview">
-        <CreatePlayerProfile />
         <PlayerProfileOverview />
+        <CreatePlayerProfile />
       </q-tab-panel>
       <q-tab-panel name="permissions">
         <PlayerProfilePermissions />

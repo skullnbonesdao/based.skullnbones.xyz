@@ -1,70 +1,105 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
-import { Keypair, Transaction } from '@solana/web3.js'
+import { computed, ref, watch } from 'vue'
+import { Keypair } from '@solana/web3.js'
 import {
-  addStaratlasTransactionToTransaction,
-  publicKeyToAsyncSigner,
+  getEnumByKey,
+  getEnumKeys,
+  handleStaratlasTransaction,
   walletStoreToAsyncSigner,
 } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
 import { PlayerProfile, ProfilePermissions } from '@staratlas/player-profile'
 import { PLAYER_PROFILE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/connector'
-import { handleTransaction } from 'src/solana/handleTransaction'
-import { getSigner } from 'components/squads/SignerFinder'
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { useFactionStore } from 'stores/faction-store'
 import { useGameStore } from 'stores/game-store'
+import { keypairToAsyncSigner } from '@staratlas/data-source/src/asyncSigner'
+import { Faction, ProfileFactionAccount } from '@staratlas/profile-faction'
+import { SagePlayerProfile } from '@staratlas/sage'
+import { UserPoints } from '@staratlas/points'
+import { usePointsStore } from 'stores/points-store'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
+const enable_chooseFaction = ref(false)
+const enable_createSagePlayerProfile = ref(false)
+const enable_createPoints = ref<boolean[]>([])
 
-const inputName = ref()
+const factionOptions = getEnumKeys(Faction)
+
+const inputName = ref('test')
+const inputFaction = ref(factionOptions[1])
 
 updateEnables()
 
+const combinedValues = computed(() => ({
+  playerProfile: usePlayerProfileStore().playerProfile,
+  faction: useFactionStore().profileFaction,
+  sagePlayerProfile: useGameStore().sagePlayerProfile,
+  pointsCategories: usePointsStore().pointsCategories,
+}))
+
 watch(
-  () => usePlayerProfileStore().playerProfile,
+  () => combinedValues,
   () => updateEnables(),
+  { deep: true },
 )
 
 function updateEnables() {
+  enable_createPlayerProfile.value = false
+  enable_createPlayerProfileName.value = false
+  enable_chooseFaction.value = false
+  enable_createSagePlayerProfile.value = false
+
+  usePointsStore().pointsCategories.forEach(() => {
+    enable_createPoints.value.push(false)
+  })
+
   if (!usePlayerProfileStore().hasProfile) {
     enable_createPlayerProfile.value = true
-    enable_createPlayerProfileName.value = false
+  }
+  if (usePlayerProfileStore().hasProfile) {
+    if (!usePlayerProfileStore().playerName?.key) enable_createPlayerProfileName.value = true
+    if (!useFactionStore().profileFaction?.data) enable_chooseFaction.value = true
+    if (!useGameStore().sagePlayerProfile?.data) enable_createSagePlayerProfile.value = true
+
+    enable_createPoints.value = []
+    usePointsStore().pointsCategories.forEach((category) => {
+      if (!category.pointsCategory) enable_createPoints.value.push(true)
+      else enable_createPoints.value.push(false)
+    })
   }
 }
 
 async function sendTx() {
-  const tx = new Transaction()
-
   const signer = walletStoreToAsyncSigner(useWallet())
+  const playerProfile = keypairToAsyncSigner(Keypair.generate())
 
-  const playerProfile = publicKeyToAsyncSigner(Keypair.generate().publicKey)
+  const staratlasIxs = []
 
   if (enable_createPlayerProfile.value) {
-    const instruction = await PlayerProfile.createProfile(
-      useWorkspaceAdapter()!.playerProfileProgram.value,
-      playerProfile,
-      [
-        {
-          key: getSigner(),
-          expireTime: null,
-          scope: PLAYER_PROFILE_PROGRAM_ID,
-          permissions: ProfilePermissions.all(),
-        },
-      ],
-      1,
-    )(signer)
-    console.log(instruction)
-
-    addStaratlasTransactionToTransaction(instruction, tx)
+    staratlasIxs.push(
+      PlayerProfile.createProfile(
+        useWorkspaceAdapter()!.playerProfileProgram.value,
+        playerProfile,
+        [
+          {
+            key: signer.publicKey(),
+            expireTime: null,
+            scope: PLAYER_PROFILE_PROGRAM_ID,
+            permissions: ProfilePermissions.all(),
+          },
+        ],
+        1,
+      ),
+    )
   }
 
-  /*if (enable_createPlayerProfileName.value) {
-    const { instructions, _name } = PlayerProfile.setName(
+  if (enable_createPlayerProfileName.value) {
+    const { instructions } = PlayerProfile.setName(
       useWorkspaceAdapter()!.playerProfileProgram.value,
       {
-        profile: usePlayerProfileStore()!.playerProfile,
+        profile: usePlayerProfileStore()!.playerProfile as PlayerProfile,
         key: signer,
         playerProfileProgram: useWorkspaceAdapter()!.playerProfileProgram.value,
       },
@@ -72,12 +107,48 @@ async function sendTx() {
       inputName.value,
     )
 
-    const i = await instructions(signer)
-    addStaratlasTransactionToTransaction(i, tx)
-  }*/
+    staratlasIxs.push(instructions)
+  }
 
-  console.log(tx)
-  await handleTransaction(tx, 'Add Account to Player Profile')
+  if (enable_chooseFaction.value) {
+    const { instructions } = ProfileFactionAccount.chooseFaction(
+      useWorkspaceAdapter()!.profileFactionProgram.value,
+      {
+        profile: usePlayerProfileStore()!.playerProfile as PlayerProfile,
+        key: signer,
+        playerProfileProgram: useWorkspaceAdapter()!.playerProfileProgram.value,
+      },
+      getEnumByKey(inputFaction.value),
+    )
+    staratlasIxs.push(instructions)
+  }
+
+  if (enable_createSagePlayerProfile.value) {
+    const instruction = SagePlayerProfile.registerSagePlayerProfile(
+      useWorkspaceAdapter()!.sageProgram.value,
+      usePlayerProfileStore()!.playerProfile!.key,
+      useGameStore().game!.key,
+      useGameStore().game!.data.gameState,
+    )
+    staratlasIxs.push(instruction)
+  }
+
+  enable_createPoints.value.forEach((create, idx) => {
+    if (create) {
+      const { instructions } = UserPoints.createUserPointAccount(
+        useWorkspaceAdapter()!.pointsProgram.value,
+        usePlayerProfileStore()!.playerProfile!.key,
+        usePointsStore().pointsCategories[idx]!.key,
+      )
+      staratlasIxs.push(instructions)
+    }
+  })
+
+  await handleStaratlasTransaction(
+    `Create Profile Instructions LEN=${staratlasIxs.length}`,
+    staratlasIxs,
+    signer || playerProfile,
+  )
 
   await usePlayerProfileStore().updateStore()
   await useFactionStore().updateStore()
@@ -88,13 +159,14 @@ async function sendTx() {
 
 <template>
   <q-card bordered flat>
-    <q-card-section>
+    <q-card-section class="row items-center q-gutter-md">
+      <q-icon name="create" size="md"></q-icon>
       <div class="text-h6">Create Accounts</div>
     </q-card-section>
 
     <q-card-section>
-      <q-list bordered separator>
-        <q-item v-ripple clickable>
+      <q-list bordered class="rounded-borders" separator>
+        <q-item v-ripple :disable="usePlayerProfileStore().hasProfile" clickable>
           <q-toggle
             v-model="enable_createPlayerProfile"
             checked-icon="check"
@@ -106,9 +178,9 @@ async function sendTx() {
             <q-item-label caption>Create the player profile account</q-item-label>
           </div>
         </q-item>
-        <q-item v-ripple :disabled="!usePlayerProfileStore().hasProfile" clickable>
-          <div>
-            <div class="row">
+        <q-item v-ripple :disable="!usePlayerProfileStore().hasProfile" clickable>
+          <div class="col row q-gutter-sm">
+            <div class="col row">
               <q-toggle
                 v-model="enable_createPlayerProfileName"
                 checked-icon="check"
@@ -120,9 +192,63 @@ async function sendTx() {
                 <q-item-label caption>Create the player name account</q-item-label>
               </div>
             </div>
-            <div class="row">
-              <div class="col"></div>
-              <q-input v-model="inputName" dense label="Player name" />
+            <q-input v-model="inputName" class="col" dense label="Player name" />
+          </div>
+        </q-item>
+
+        <q-item v-ripple :disable="!usePlayerProfileStore().hasProfile" clickable>
+          <div class="col row q-gutter-sm">
+            <div class="col row">
+              <q-toggle
+                v-model="enable_chooseFaction"
+                checked-icon="check"
+                color="secondary"
+                unchecked-icon="clear"
+              />
+              <div>
+                <q-item-section>Faction</q-item-section>
+                <q-item-label caption>Choose a faction</q-item-label>
+              </div>
+            </div>
+            <q-select v-model="inputFaction" :options="factionOptions" class="col" dense></q-select>
+          </div>
+        </q-item>
+        <q-item v-ripple :disable="!usePlayerProfileStore().hasProfile" clickable>
+          <div class="col row q-gutter-sm">
+            <div class="col row">
+              <q-toggle
+                v-model="enable_createSagePlayerProfile"
+                checked-icon="check"
+                color="secondary"
+                unchecked-icon="clear"
+              />
+              <div>
+                <q-item-section>Sage Profile</q-item-section>
+                <q-item-label caption>Create sage player profile</q-item-label>
+              </div>
+            </div>
+          </div>
+        </q-item>
+
+        <q-item
+          v-for="(categroy, idx) in usePointsStore().pointsCategories"
+          :key="idx"
+          v-ripple
+          :disable="!usePlayerProfileStore().hasProfile"
+          clickable
+        >
+          <div class="col row q-gutter-sm">
+            <div class="col row">
+              <q-toggle
+                v-model="enable_createPoints[idx]"
+                checked-icon="check"
+                color="secondary"
+                unchecked-icon="clear"
+              />
+              <div>
+                <q-item-section>Points {{ categroy.name }}</q-item-section>
+                <q-item-label caption>Create point</q-item-label>
+              </div>
             </div>
           </div>
         </q-item>

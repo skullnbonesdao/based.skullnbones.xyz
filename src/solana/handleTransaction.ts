@@ -24,7 +24,7 @@ export const handleTransaction = async (tx: Transaction, label = 'Unlabeled tran
 
     let signature = ''
     if (!useSquadsStore().useSquads) {
-      signature = await sendTransaction(tx, useRPCStore().connection, { skipPreflight: true })
+      signature = await sendTransaction(tx, useRPCStore().connection)
     } else {
       console.log(tx.instructions)
       const blockhash = await useRPCStore().connection.getLatestBlockhash()

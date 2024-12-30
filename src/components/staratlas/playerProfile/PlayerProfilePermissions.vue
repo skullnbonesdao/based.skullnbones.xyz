@@ -7,7 +7,12 @@ import { SagePermissions } from '@staratlas/sage'
 </script>
 
 <template>
-  <q-card flat>
+  <q-card bordered flat>
+    <q-card-section class="row items-center q-gutter-md">
+      <q-icon name="vpn_key" size="md"></q-icon>
+      <div class="text-h6">Permissions</div>
+    </q-card-section>
+
     <q-card-section v-if="usePlayerProfileStore().playerProfile" class="q-gutter-y-md">
       <q-card
         v-for="(k, idx) in usePlayerProfileStore().playerProfile!.profileKeys"

@@ -7,26 +7,30 @@ import { useRPCStore } from 'stores/rpcStore'
 
 export const useFactionStore = defineStore('factionStore', {
   state: () => ({
-    profileFaction: {} as ProfileFactionAccount | undefined,
+    profileFaction: undefined as ProfileFactionAccount | undefined,
   }),
 
   actions: {
     async updateStore() {
-      if (usePlayerProfileStore().hasProfile) {
-        const profileFactionKey = ProfileFactionAccount.findAddress(
-          useWorkspaceAdapter()!.profileFactionProgram.value,
-          usePlayerProfileStore()!.playerProfile!.key,
-        )[0]
+      try {
+        if (usePlayerProfileStore().hasProfile) {
+          const profileFactionKey = ProfileFactionAccount.findAddress(
+            useWorkspaceAdapter()!.profileFactionProgram.value,
+            usePlayerProfileStore()!.playerProfile!.key,
+          )[0]
 
-        this.profileFaction = await readFromRPCOrError(
-          useRPCStore().connection,
-          useWorkspaceAdapter()!.profileFactionProgram.value,
-          profileFactionKey,
-          ProfileFactionAccount,
-        )
+          this.profileFaction = await readFromRPCOrError(
+            useRPCStore().connection,
+            useWorkspaceAdapter()!.profileFactionProgram.value,
+            profileFactionKey,
+            ProfileFactionAccount,
+          )
+        }
+      } catch (error) {
+        console.warn(`[${this.$id}] waring:`, error)
+      } finally {
+        console.log(`[${this.$id}] updated`)
       }
-
-      console.log('[FactionStore] updated')
     },
   },
 })

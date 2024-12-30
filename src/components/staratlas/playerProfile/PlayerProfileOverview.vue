@@ -2,15 +2,17 @@
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { useGameStore } from 'stores/game-store'
 import { useFactionStore } from 'stores/faction-store'
+import { usePointsStore } from 'stores/points-store'
 </script>
 
 <template>
   <q-card bordered flat>
-    <q-card-section>
-      <div class="text-h6">Player Accounts</div>
+    <q-card-section class="row items-center q-gutter-md">
+      <q-icon name="visibility" size="md"></q-icon>
+      <div class="text-h6">View Accounts</div>
     </q-card-section>
     <q-card-section class="row">
-      <q-list class="rounded-borders full-width">
+      <q-list bordered class="rounded-borders full-width" separator>
         <q-expansion-item
           :caption="usePlayerProfileStore().wallet?.toString()"
           icon="perm_identity"
@@ -30,7 +32,7 @@ import { useFactionStore } from 'stores/faction-store'
                 class="row"
               >
                 <div class="col">{{ data }}</div>
-                <div>{{ usePlayerProfileStore().playerProfile?.data[data] ?? 'none' }}</div>
+                <div>{{ usePlayerProfileStore().playerProfile!.data[data] ?? 'none' }}</div>
               </div>
             </q-card-section>
           </q-card>
@@ -52,7 +54,7 @@ import { useFactionStore } from 'stores/faction-store'
                 class="row"
               >
                 <div class="col">{{ data }}</div>
-                <div>{{ usePlayerProfileStore().playerName?.data[data] ?? 'none' }}</div>
+                <div>{{ usePlayerProfileStore().playerName!.data[data as any] }}</div>
               </div>
             </q-card-section>
           </q-card>
@@ -66,7 +68,7 @@ import { useFactionStore } from 'stores/faction-store'
             <q-card-section v-if="useGameStore().game?.data">
               <div v-for="data in Object.keys(useGameStore().game!.data)" :key="data" class="row">
                 <div class="col">{{ data }}</div>
-                <div>{{ useGameStore().game?.data[data as string] ?? 'none' }}</div>
+                <div>{{ useGameStore().game!.data[data as any] as any }}</div>
               </div>
             </q-card-section>
           </q-card>
@@ -86,7 +88,7 @@ import { useFactionStore } from 'stores/faction-store'
               >
                 <div class="col">{{ data }}</div>
                 <div>
-                  {{ useFactionStore().profileFaction!.data[data.toString()] }}
+                  {{ useFactionStore().profileFaction!.data[data as any] }}
                 </div>
               </div>
             </q-card-section>
@@ -107,9 +109,46 @@ import { useFactionStore } from 'stores/faction-store'
               >
                 <div class="col">{{ data }}</div>
                 <div>
-                  {{ useGameStore().sagePlayerProfile!.data[data.toString()] }}
+                  {{ useGameStore().sagePlayerProfile!.data[data as any] }}
                 </div>
               </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+
+        <q-expansion-item icon="perm_identity" label="Points">
+          <q-card>
+            <q-card-section>
+              <q-list>
+                <q-expansion-item
+                  v-for="(categroy, idx) in usePointsStore().pointsCategories"
+                  :key="idx"
+                  :caption="categroy.pointsCategory?.key.toString() ?? 'not-found'"
+                  :label="categroy.name"
+                  icon="perm_identity"
+                >
+                  <q-card>
+                    <q-card-section v-if="usePointsStore().pointsCategories[idx]?.pointsCategory">
+                      <div
+                        v-for="(data, i) in Object.keys(
+                          usePointsStore().pointsCategories[idx]!.pointsCategory!.data,
+                        )"
+                        :key="i"
+                        class="row"
+                      >
+                        <div class="col">{{ data }}</div>
+                        <div>
+                          {{
+                            usePointsStore().pointsCategories[idx]!.pointsCategory!.data[
+                              data as any
+                            ]
+                          }}
+                        </div>
+                      </div>
+                    </q-card-section>
+                  </q-card>
+                </q-expansion-item>
+              </q-list>
             </q-card-section>
           </q-card>
         </q-expansion-item>

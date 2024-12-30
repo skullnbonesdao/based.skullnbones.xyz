@@ -3,12 +3,7 @@ import { PublicKey } from '@solana/web3.js'
 import { useRPCStore } from 'stores/rpcStore'
 import { PlayerName, PlayerProfile } from '@staratlas/player-profile'
 import { readFromRPCOrError } from '@staratlas/data-source'
-import {
-  GAME_ID,
-  PLAYER_PROFILE_PROGRAM_ID,
-  useWorkspaceAdapter,
-} from 'components/staratlas/connector'
-import { SagePlayerProfile } from '@staratlas/sage'
+import { PLAYER_PROFILE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/connector'
 
 export const usePlayerProfileStore = defineStore('playerProfile', {
   state: () => ({
@@ -20,57 +15,53 @@ export const usePlayerProfileStore = defineStore('playerProfile', {
 
   actions: {
     async updateStore() {
-      if (this.wallet) {
-        const [accountInfo] = await useRPCStore().connection.getProgramAccounts(
-          PLAYER_PROFILE_PROGRAM_ID,
-          {
-            filters: [
-              {
-                memcmp: {
-                  offset: PlayerProfile.MIN_DATA_SIZE + 2,
-                  bytes: this.wallet!.toBase58(),
+      try {
+        if (this.wallet) {
+          const [accountInfo] = await useRPCStore().connection.getProgramAccounts(
+            PLAYER_PROFILE_PROGRAM_ID,
+            {
+              filters: [
+                {
+                  memcmp: {
+                    offset: PlayerProfile.MIN_DATA_SIZE + 2,
+                    bytes: this.wallet!.toBase58(),
+                  },
                 },
-              },
-            ],
-          },
-        )
-
-        if (accountInfo?.pubkey) {
-          const profileKey = accountInfo.pubkey
-          this.hasProfile = true
-
-          this.playerProfile = await readFromRPCOrError(
-            useRPCStore().connection,
-            useWorkspaceAdapter()!.playerProfileProgram.value,
-            profileKey,
-            PlayerProfile,
-            'confirmed',
+              ],
+            },
           )
 
-          const profileNameKey = PlayerName.findAddress(
-            useWorkspaceAdapter()!.playerProfileProgram.value,
-            profileKey,
-          )[0]
+          if (accountInfo?.pubkey) {
+            const profileKey = accountInfo.pubkey
+            this.hasProfile = true
 
-          this.playerName = await readFromRPCOrError(
-            useRPCStore().connection,
-            useWorkspaceAdapter()!.playerProfileProgram.value,
-            profileNameKey,
-            PlayerName,
-            'confirmed',
-          )
-
-          console.log(
-            SagePlayerProfile.findAddress(
-              useWorkspaceAdapter()!.sageProgram.value,
+            this.playerProfile = await readFromRPCOrError(
+              useRPCStore().connection,
+              useWorkspaceAdapter()!.playerProfileProgram.value,
               profileKey,
-              GAME_ID,
-            ),
-          )
-        }
-      }
+              PlayerProfile,
+              'confirmed',
+            )
 
-      console.log('[PlayerProfileStore] updated')
+            const profileNameKey = PlayerName.findAddress(
+              useWorkspaceAdapter()!.playerProfileProgram.value,
+              profileKey,
+            )[0]
+
+            this.playerName = await readFromRPCOrError(
+              useRPCStore().connection,
+              useWorkspaceAdapter()!.playerProfileProgram.value,
+              profileNameKey,
+              PlayerName,
+              'confirmed',
+            )
+          }
+        }
+      } catch (error) {
+        console.warn(`[${this.$id}] waring:`, error)
+      } finally {
+        console.log(`[${this.$id}] updated`)
+      }
     },
   },
 })
