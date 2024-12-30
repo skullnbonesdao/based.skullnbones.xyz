@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
-import { Connection } from '@solana/web3.js';
-import { RPC_NETWORKS } from './interfaces/RPC_Networks';
-import { useLocalStorage } from '@vueuse/core';
+import { defineStore } from 'pinia'
+import { Connection } from '@solana/web3.js'
+import { RPC_NETWORKS } from './interfaces/RPC_Networks'
+import { useLocalStorage } from '@vueuse/core'
 
 export const useRPCStore = defineStore('rpcStore', {
   state: () => ({
@@ -13,19 +13,18 @@ export const useRPCStore = defineStore('rpcStore', {
   }),
   getters: {
     connection(state) {
-      return new Connection(state.rpc_selected.url);
+      return new Connection(state.rpc_selected.url)
     },
   },
   actions: {
     update_connection() {
       const rpc =
-        RPC_NETWORKS.find((rpc) => rpc.name.includes(this.rpc_stored_name)) ??
-        RPC_NETWORKS[0];
+        RPC_NETWORKS.find((rpc) => rpc.name.includes(this.rpc_stored_name)) ?? RPC_NETWORKS[0]
 
-      this.rpc_stored_name = rpc.name;
-      this.rpc_selected = rpc;
+      this.rpc_stored_name = rpc.name
+      this.rpc_selected = rpc
 
-      console.log('RPC is set to: ' + this.rpc_selected.name);
+      console.log('[Updated] RPC=' + this.rpc_selected.name)
     },
   },
-});
+})

@@ -1,29 +1,33 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
 import { useRPCStore } from 'stores/rpcStore'
-import { AnchorProvider, Program } from '@staratlas/anchor'
-import { PLAYER_PROFILE_IDL, PlayerProfile } from '@staratlas/player-profile'
+import { PlayerName, PlayerProfile } from '@staratlas/player-profile'
 import { readFromRPCOrError } from '@staratlas/data-source'
-import { useAnchorWallet } from 'solana-wallets-vue'
+import {
+  GAME_ID,
+  PLAYER_PROFILE_PROGRAM_ID,
+  useWorkspaceAdapter,
+} from 'components/staratlas/connector'
+import { SagePlayerProfile } from '@staratlas/sage'
 
 export const usePlayerProfileStore = defineStore('playerProfile', {
   state: () => ({
     hasProfile: false,
     wallet: undefined as PublicKey | undefined,
-    profileKey: undefined as PublicKey | undefined,
-    profileData: undefined as PlayerProfile | undefined,
+    playerProfile: undefined as PlayerProfile | undefined,
+    playerName: undefined as PlayerName | undefined,
   }),
 
   actions: {
     async updateStore() {
       if (this.wallet) {
         const [accountInfo] = await useRPCStore().connection.getProgramAccounts(
-          new PublicKey('pprofELXjL5Kck7Jn5hCpwAL82DpTkSYBENzahVtbc9'),
+          PLAYER_PROFILE_PROGRAM_ID,
           {
             filters: [
               {
                 memcmp: {
-                  offset: 30, // PlayerProfile.MIN_DATA_SIZE + 2
+                  offset: PlayerProfile.MIN_DATA_SIZE + 2,
                   bytes: this.wallet!.toBase58(),
                 },
               },
@@ -32,29 +36,40 @@ export const usePlayerProfileStore = defineStore('playerProfile', {
         )
 
         if (accountInfo?.pubkey) {
-          this.profileKey = accountInfo.pubkey
+          const profileKey = accountInfo.pubkey
+          this.hasProfile = true
 
-          const provider = new AnchorProvider(
+          this.playerProfile = await readFromRPCOrError(
             useRPCStore().connection,
-            useAnchorWallet().value!,
-            AnchorProvider.defaultOptions(),
-          )
-
-          const program = new Program(
-            PLAYER_PROFILE_IDL,
-            new PublicKey('pprofELXjL5Kck7Jn5hCpwAL82DpTkSYBENzahVtbc9'),
-            provider,
-          )
-
-          this.profileData = await readFromRPCOrError(
-            useRPCStore().connection,
-            program,
-            this.profileKey,
+            useWorkspaceAdapter()!.playerProfileProgram.value,
+            profileKey,
             PlayerProfile,
             'confirmed',
           )
+
+          const profileNameKey = PlayerName.findAddress(
+            useWorkspaceAdapter()!.playerProfileProgram.value,
+            profileKey,
+          )[0]
+
+          this.playerName = await readFromRPCOrError(
+            useRPCStore().connection,
+            useWorkspaceAdapter()!.playerProfileProgram.value,
+            profileNameKey,
+            PlayerName,
+            'confirmed',
+          )
+
+          console.log(
+            SagePlayerProfile.findAddress(
+              useWorkspaceAdapter()!.sageProgram.value,
+              profileKey,
+              GAME_ID,
+            ),
+          )
         }
       }
+
       console.log('[PlayerProfileStore] updated')
     },
   },

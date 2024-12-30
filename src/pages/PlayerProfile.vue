@@ -1,30 +1,38 @@
 <script lang="ts" setup>
-import { useWallet } from 'solana-wallets-vue'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { usePlayerProfileStore } from '../stores/player-profile-store'
+import { getSigner } from 'components/squads/SignerFinder'
+import { useGameStore } from '../stores/game-store'
+import { useFactionStore } from 'stores/faction-store'
+import PlayerProfileOverview from 'components/staratlas/playerProfile/PlayerProfileOverview.vue'
+import PlayerProfilePermissions from 'components/staratlas/playerProfile/PlayerProfilePermissions.vue'
+import CreatePlayerProfile from 'components/staratlas/playerProfile/actions/CreatePlayerProfile.vue'
 
 onMounted(async () => {
-  usePlayerProfileStore().wallet = useWallet().publicKey.value!
+  usePlayerProfileStore().wallet = getSigner()
   await usePlayerProfileStore().updateStore()
+  await useFactionStore().updateStore()
+  await useGameStore().updateStore()
 })
+
+const tab = ref('overview')
 </script>
 
 <template>
   <div class="col">
-    <div class="row">
-      <div>Wallet</div>
-      <div>
-        {{ usePlayerProfileStore().wallet }}
-      </div>
-    </div>
-    <div class="row">
-      <div>ProfileKey</div>
-      <div>{{ usePlayerProfileStore().profileKey }}</div>
-    </div>
-    <div class="row">
-      <div>ProfileData</div>
-      <div>{{ usePlayerProfileStore().profileData }}</div>
-    </div>
+    <q-tabs v-model="tab">
+      <q-tab icon="dashboard" label="Overview" name="overview" />
+      <q-tab icon="settings" label="Permissions" name="permissions" />
+    </q-tabs>
+    <q-tab-panels v-model="tab">
+      <q-tab-panel class="q-gutter-md" name="overview">
+        <CreatePlayerProfile />
+        <PlayerProfileOverview />
+      </q-tab-panel>
+      <q-tab-panel name="permissions">
+        <PlayerProfilePermissions />
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
 </template>
 

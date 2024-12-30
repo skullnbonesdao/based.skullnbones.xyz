@@ -2,9 +2,13 @@
   <router-view />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
+import { useQuasar } from 'quasar'
+import { initWorkspaceAdapter, useWorkspaceAdapter } from 'components/staratlas/connector'
+import { useRPCStore } from 'stores/rpcStore'
 
-import {useQuasar} from "quasar";
-
-useQuasar().dark.set(true);
+useQuasar().dark.set(true)
+useRPCStore().update_connection()
+useWorkspaceAdapter()
+initWorkspaceAdapter()
 </script>
