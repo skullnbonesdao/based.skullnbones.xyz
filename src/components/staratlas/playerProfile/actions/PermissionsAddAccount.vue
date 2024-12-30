@@ -52,12 +52,12 @@ async function sendTX() {
       <div class="text-weight-thin text-center col">Add a new wallet to the permission list</div>
     </q-card-actions>
     <q-card-section>
-      <q-input v-model="inputKey" filled label="Key" square />
-      <q-select v-model="inputScope" :options="optionsScope" filled label="Scope" square />
-      <q-input v-model="inputExpireTime" filled label="Expire Time" square type="number" />
+      <q-input v-model="inputKey" label="Key" square />
+      <q-select v-model="inputScope" :options="optionsScope" label="Scope" square />
+      <q-input v-model="inputExpireTime" label="Expire Time" square type="number" />
     </q-card-section>
     <q-card-actions>
-      <q-btn class="full-width" color="secondary" @click="sendTX">ADD</q-btn>
+      <q-btn class="full-width" color="primary" @click="sendTX">ADD</q-btn>
     </q-card-actions>
   </q-card>
 </template>

@@ -51,6 +51,11 @@ import SquadsButton from 'components/squads/SquadsButton.vue'
 
 const navigationLinks: NavigationLinkProps[] = [
   {
+    title: 'Home',
+    icon: 'home',
+    to: '/',
+  },
+  {
     title: 'PlayerProfile',
     caption: 'Manage and view',
     icon: 'person',

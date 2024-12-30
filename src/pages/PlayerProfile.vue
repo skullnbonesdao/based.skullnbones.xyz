@@ -22,7 +22,7 @@ const tab = ref('overview')
 
 <template>
   <div class="col">
-    <q-tabs v-model="tab">
+    <q-tabs v-model="tab" align="justify" inline-label>
       <q-tab icon="dashboard" label="Overview" name="overview" />
       <q-tab icon="settings" label="Permissions" name="permissions" />
     </q-tabs>

@@ -18,7 +18,7 @@ const route = useRouter().currentRoute
 </script>
 
 <template>
-  <q-item :active="route.path.includes(to)" :to="to" active-class="menu-link" clickable tag="a">
+  <q-item :active="route.path == to" :to="to" active-class="menu-link" clickable tag="a">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>

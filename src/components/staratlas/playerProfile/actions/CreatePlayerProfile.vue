@@ -254,6 +254,7 @@ async function sendTx() {
         </q-item>
       </q-list>
     </q-card-section>
+
     <q-card-section>
       <q-btn class="full-width" color="primary" label="Send" @click="sendTx"></q-btn>
     </q-card-section>
