@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { useRouter } from 'vue-router'
+
 export interface NavigationLinkProps {
   title: string
   caption?: string
@@ -11,10 +13,12 @@ withDefaults(defineProps<NavigationLinkProps>(), {
   to: '#',
   icon: '',
 })
+
+const route = useRouter().currentRoute
 </script>
 
 <template>
-  <q-item :to="to" clickable tag="a">
+  <q-item :active="route.path.includes(to)" :to="to" active-class="menu-link" clickable tag="a">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
@@ -26,4 +30,8 @@ withDefaults(defineProps<NavigationLinkProps>(), {
   </q-item>
 </template>
 
-<style scoped></style>
+<style lang="sass" scoped>
+.menu-link
+  color: white
+  background: $secondary
+</style>
