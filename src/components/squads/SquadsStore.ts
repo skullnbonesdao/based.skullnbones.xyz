@@ -68,39 +68,12 @@ export const useSquadsStore = defineStore('squadsStore', {
         )
       } catch (error) {}
     },
-    async loadMultisigInfo() {
+    async update() {
       this.multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
         useRPCStore().connection as Connection,
         new PublicKey(this.multisigPDA),
       )
+      console.log('[Updated] Squads store')
     },
   },
 })
-
-/*
-export async function convert2squadsTransaction(
-  instructions: Transaction,
-  memo: string,
-) {
-  await useSquadsStore().loadMultisigInfo();
-
-  const transactionMessage = new TransactionMessage({
-    payerKey: new PublicKey(useSquadsStore().vaultPDA),
-    recentBlockhash: (await useRPCStore().connection.getLatestBlockhash())
-      .blockhash,
-    instructions: instructions.instructions,
-  });
-
-  const tx = multisig.instructions.vaultTransactionCreate({
-    multisigPda: new PublicKey(useSquadsStore().multisigPDA),
-    transactionIndex: useSquadsStore().getNewTransactionIndex,
-    creator: useWallet().publicKey.value!,
-    vaultIndex: 0,
-    ephemeralSigners: 0,
-    transactionMessage: transactionMessage,
-    memo: memo,
-  });
-
-  return tx;
-}
-*/

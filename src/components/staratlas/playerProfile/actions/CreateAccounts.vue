@@ -5,6 +5,7 @@ import {
   getEnumByKey,
   getEnumKeys,
   handleStaratlasTransaction,
+  publicKeyToAsyncSigner,
   walletStoreToAsyncSigner,
 } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
@@ -18,6 +19,8 @@ import { Faction, ProfileFactionAccount } from '@staratlas/profile-faction'
 import { SagePlayerProfile } from '@staratlas/sage'
 import { UserPoints } from '@staratlas/points'
 import { usePointsStore } from 'stores/points-store'
+import { useSquadsStore } from 'components/squads/SquadsStore'
+import { getSigner } from 'components/squads/SignerFinder'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -72,7 +75,9 @@ function updateEnables() {
 }
 
 async function sendTx() {
-  const signer = walletStoreToAsyncSigner(useWallet())
+  const signer = useSquadsStore().useSquads
+    ? publicKeyToAsyncSigner(getSigner())
+    : walletStoreToAsyncSigner(useWallet())
   const staratlasIxs = []
 
   const playerProfile = keypairToAsyncSigner(Keypair.generate())
@@ -147,7 +152,7 @@ async function sendTx() {
   await handleStaratlasTransaction(
     `Create Profile Instructions LEN=${staratlasIxs.length}`,
     staratlasIxs,
-    signer || playerProfile,
+    signer,
   )
 
   await usePlayerProfileStore().updateStore()
