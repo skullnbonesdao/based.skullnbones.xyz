@@ -19,6 +19,7 @@ import { useRPCStore } from 'stores/rpcStore'
 import { Faction } from '@staratlas/profile-faction'
 import * as multisig from '@sqds/multisig'
 import { useWallet } from 'solana-wallets-vue'
+import { getSigner } from 'components/squads/SignerFinder'
 
 export function getEnumKeys<T>(enumObj: T): string[] {
   return Object.keys(enumObj as never).filter((key) => isNaN(Number(key)))
@@ -61,6 +62,7 @@ export async function handleStaratlasTransaction(
   label = 'Unlabeled transaction',
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
+  playerProfile: AsyncSigner,
   retryInterval = 3000,
   maxRetries = 10,
 ) {
@@ -124,47 +126,60 @@ async function prepareSquadsTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
   label: string,
-): Promise<Transaction> {
+) {
   const blockhash = await useRPCStore().connection.getLatestBlockhash()
 
   const transactionMessage = new TransactionMessage({
-    payerKey: new PublicKey(useSquadsStore().vaultPDA),
+    payerKey: getSigner(),
     recentBlockhash: blockhash.blockhash,
     instructions: [],
   })
 
+  const LUT = (
+    await useRPCStore().connection.getAddressLookupTable(
+      new PublicKey('5NrYTRkLRsSSJGgfX2vNRbSXiEFi9yUHV5n7bs7VM9P2'),
+    )
+  ).value
+
   const d = await buildDynamicTransactionsNoSigning(instructions, feePayer)
 
-  const signers: any[] = []
   d.map((instructionsWithSignersAndLUTs: InstructionsWithSignersAndLUTs[]) => {
     console.log(instructionsWithSignersAndLUTs)
     instructionsWithSignersAndLUTs.forEach((inner) =>
       inner.instructions.forEach((instruction) => {
         transactionMessage.instructions.push(instruction.instruction)
-        instruction.signers.map((s) => signers.push(s))
       }),
     )
   })
 
   await useSquadsStore().update()
+  console.log(transactionMessage)
 
-  const squadsTX = multisig.instructions.vaultTransactionCreate({
-    multisigPda: new PublicKey(useSquadsStore().multisigPDA),
+  const squadsInstructions = multisig.instructions.vaultTransactionCreate({
+    multisigPda: new PublicKey(useSquadsStore().multisigPDA.toString()),
     transactionIndex: useSquadsStore().getNewTransactionIndex,
     creator: useWallet().publicKey.value!,
+    rentPayer: useWallet().publicKey.value!,
     vaultIndex: 0,
     ephemeralSigners: 0,
     transactionMessage: transactionMessage,
     memo: label,
   })
+  const transaction = new Transaction().add(squadsInstructions)
+  // transaction.feePayer = getSigner()
 
-  const transaction = new Transaction().add(squadsTX)
+  console.log(transaction)
 
   return transaction
 }
 
 async function sendSquadsAndCheck(tx: Transaction, notif: any) {
-  const signature = await useWallet().sendTransaction(tx, useRPCStore().connection)
+  const { sendTransaction } = useWallet()
+
+  const signature = await sendTransaction(tx, useRPCStore().connection, {
+    skipPreflight: true,
+  })
+
   const blockhash = await useRPCStore().connection.getLatestBlockhash()
 
   let result

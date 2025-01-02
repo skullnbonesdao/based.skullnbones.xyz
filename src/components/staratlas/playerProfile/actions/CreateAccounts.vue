@@ -14,7 +14,6 @@ import { PLAYER_PROFILE_PROGRAM_ID, useWorkspaceAdapter } from 'components/stara
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { useFactionStore } from 'stores/faction-store'
 import { useGameStore } from 'stores/game-store'
-import { keypairToAsyncSigner } from '@staratlas/data-source/src/asyncSigner'
 import { Faction, ProfileFactionAccount } from '@staratlas/profile-faction'
 import { SagePlayerProfile } from '@staratlas/sage'
 import { UserPoints } from '@staratlas/points'
@@ -62,9 +61,9 @@ function updateEnables() {
     enable_createPlayerProfile.value = true
   }
   if (usePlayerProfileStore().hasProfile) {
-    if (!usePlayerProfileStore().playerName?.key) enable_createPlayerProfileName.value = true
-    if (!useFactionStore().profileFaction?.data) enable_chooseFaction.value = true
-    if (!useGameStore().sagePlayerProfile?.data) enable_createSagePlayerProfile.value = true
+    if (!usePlayerProfileStore().playerName) enable_createPlayerProfileName.value = true
+    if (!useFactionStore().profileFaction) enable_chooseFaction.value = true
+    if (!useGameStore().sagePlayerProfile) enable_createSagePlayerProfile.value = true
 
     enable_createPoints.value = []
     usePointsStore().pointsCategories.forEach((category) => {
@@ -80,7 +79,8 @@ async function sendTx() {
     : walletStoreToAsyncSigner(useWallet())
   const staratlasIxs = []
 
-  const playerProfile = keypairToAsyncSigner(Keypair.generate())
+  const playerProfile = publicKeyToAsyncSigner(Keypair.generate().publicKey)
+  //    keypairToAsyncSigner(Keypair.generate())
 
   if (enable_createPlayerProfile.value) {
     staratlasIxs.push(
@@ -153,6 +153,7 @@ async function sendTx() {
     `Create Profile Instructions LEN=${staratlasIxs.length}`,
     staratlasIxs,
     signer,
+    playerProfile,
   )
 
   await usePlayerProfileStore().updateStore()

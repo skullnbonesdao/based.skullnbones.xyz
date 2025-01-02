@@ -1,21 +1,21 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
-import { usePlayerProfileStore } from '../stores/player-profile-store'
+import { onMounted, ref, watch } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
-import { useGameStore } from '../stores/game-store'
-import { useFactionStore } from 'stores/faction-store'
 import PlayerProfileOverview from 'components/staratlas/playerProfile/PlayerProfileOverview.vue'
 import PlayerProfilePermissions from 'components/staratlas/playerProfile/permissions/PlayerProfilePermissions.vue'
 import CreatePlayerProfile from 'components/staratlas/playerProfile/actions/CreateAccounts.vue'
-import { usePointsStore } from 'stores/points-store'
+import { updateStores } from 'stores/updateStores'
 
 onMounted(async () => {
-  usePlayerProfileStore().wallet = getSigner()
-  await usePlayerProfileStore().updateStore()
-  await useGameStore().updateStore()
-  await useFactionStore().updateStore()
-  await usePointsStore().updateStore()
+  await updateStores()
 })
+
+watch(
+  () => getSigner(),
+  async () => {
+    await updateStores()
+  },
+)
 
 const tab = ref('overview')
 </script>

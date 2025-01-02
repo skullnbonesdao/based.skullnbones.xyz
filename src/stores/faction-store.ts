@@ -12,6 +12,7 @@ export const useFactionStore = defineStore('factionStore', {
 
   actions: {
     async updateStore() {
+      this.profileFaction = undefined
       try {
         if (usePlayerProfileStore().hasProfile) {
           const profileFactionKey = ProfileFactionAccount.findAddress(

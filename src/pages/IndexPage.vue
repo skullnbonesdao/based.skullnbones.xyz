@@ -12,6 +12,11 @@
         <q-card-section class="items-center q-gutter-md">
           <div class="text-h5 text-center text-uppercase">manage your StarAtlas</div>
         </q-card-section>
+        <q-card-section class="items-center q-gutter-md row">
+          <div class="col"></div>
+          <WalletMultiButton dark />
+          <div class="col"></div>
+        </q-card-section>
       </q-card>
     </div>
   </q-page>
@@ -20,6 +25,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { Meta, Todo } from 'components/models'
+import { WalletMultiButton } from 'solana-wallets-vue'
 
 const todos = ref<Todo[]>([
   {

@@ -20,7 +20,7 @@
           <div class="col"></div>
           <div>
             <WalletMultiButton dark />
-            <SquadsButton />
+            <SquadsButton v-if="useSquadsStore().storeSelected?.label" />
           </div>
           <div class="col"></div>
         </q-card-section>
@@ -48,6 +48,7 @@ import { WalletMultiButton } from 'solana-wallets-vue'
 import NavigationLinks, { NavigationLinkProps } from 'components/NavigationLinks.vue'
 import RPCSelect from 'components/rpc/RPCSelect.vue'
 import SquadsButton from 'components/squads/SquadsButton.vue'
+import { useSquadsStore } from 'components/squads/SquadsStore'
 
 const navigationLinks: NavigationLinkProps[] = [
   {
@@ -66,6 +67,12 @@ const navigationLinks: NavigationLinkProps[] = [
     caption: 'use squads multisig',
     icon: 'groups',
     to: '/squads',
+  },
+  {
+    title: 'Portal',
+    caption: 'Deposit and Withdraw',
+    icon: 'groups',
+    to: '/portal',
   },
 ]
 

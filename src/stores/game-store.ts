@@ -15,6 +15,9 @@ export const useGameStore = defineStore('GameStore', {
 
   actions: {
     async updateStore() {
+      this.game = undefined
+      this.sagePlayerProfile = undefined
+
       try {
         this.game = await readFromRPCOrError(
           useRPCStore().connection,

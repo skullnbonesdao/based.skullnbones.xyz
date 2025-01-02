@@ -16,6 +16,10 @@ export const usePlayerProfileStore = defineStore('playerProfile', {
   actions: {
     async updateStore() {
       try {
+        this.hasProfile = false
+        this.playerProfile = undefined
+        this.playerName = undefined
+
         if (this.wallet) {
           const [accountInfo] = await useRPCStore().connection.getProgramAccounts(
             PLAYER_PROFILE_PROGRAM_ID,
