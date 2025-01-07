@@ -3,6 +3,7 @@ import { onMounted, watch } from 'vue'
 import { updateStores } from 'stores/updateStores'
 import { getSigner } from 'components/squads/SignerFinder'
 import { useStarbaseStore } from 'stores/starbase-store'
+import DepositResources from 'components/staratlas/sage/portal/DepositResources.vue'
 import { byteArrayToString } from '@staratlas/data-source'
 
 onMounted(async () => {
@@ -18,7 +19,7 @@ watch(
 )
 
 watch(
-  () => useStarbaseStore().starbaseSelected,
+  () => useStarbaseStore().starbase,
   async () => {
     await useStarbaseStore().updateStore()
   },
@@ -27,11 +28,11 @@ watch(
 <template>
   <q-page class="">
     <q-select
-      v-model="useStarbaseStore().starbaseSelected"
-      :option-label="(value) => byteArrayToString(value.account.name)"
+      v-model="useStarbaseStore().starbase"
+      :option-label="(value) => byteArrayToString(value.data.name)"
       :options="
         useStarbaseStore().starbases?.filter((starbase) =>
-          byteArrayToString(starbase.account.name).includes('Central'),
+          byteArrayToString(starbase.data.name).includes('Central'),
         )
       "
       label="Selected Starbase"
@@ -48,7 +49,9 @@ watch(
     <div>
       <q-card flat>
         <q-card-section> PORT</q-card-section>
-
+        <DepositResources />
+        <!--        {{ useStarbaseStore().starbase }}
+                {{ useStarbaseStore().starbasePlayer }}-->
         {{ useStarbaseStore().starbase }}
       </q-card>
     </div>

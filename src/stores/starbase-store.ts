@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { useWorkspaceAdapter } from 'components/staratlas/connector'
-import { Starbase } from '@staratlas/sage'
+import { SagePlayerProfile, Starbase, StarbasePlayer } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
-import { readFromRPCOrError } from '@staratlas/data-source'
+import { readAllFromRPC, readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
+import { usePlayerProfileStore } from 'stores/player-profile-store'
+import { useGameStore } from 'stores/game-store'
 
 interface StarbaseAccount {
   publicKey: PublicKey
@@ -12,25 +14,49 @@ interface StarbaseAccount {
 
 export const useStarbaseStore = defineStore('StarBaseStore', {
   state: () => ({
-    starbases: undefined as StarbaseAccount[] | undefined,
-    starbaseSelected: undefined as StarbaseAccount | undefined,
+    starbases: [] as Starbase[] | undefined,
     starbase: undefined as Starbase | undefined,
-    starbasePlayerProfile: undefined as SagePlayerProfile | undefined,
+    starbasePlayer: undefined as StarbasePlayer | undefined,
   }),
 
   actions: {
     async updateStore() {
-      this.starbases = undefined
+      this.starbases = []
 
       try {
-        this.starbases = await useWorkspaceAdapter()?.sageProgram.value.account.starbase.all()
+        if (!this.starbases.length) {
+          const temp = await readAllFromRPC(
+            useRPCStore().connection,
+            useWorkspaceAdapter()!.sageProgram.value!,
+            Starbase,
+          )
 
-        this.starbase = await readFromRPCOrError(
-          useRPCStore().connection,
-          useWorkspaceAdapter()!.sageProgram.value,
-          this.starbaseSelected!.publicKey,
-          Starbase,
-        )
+          temp.map((d) => {
+            if (d.type == 'ok') {
+              this.starbases!.push(
+                new Starbase(d.data.data, d.data.key, d.data.upgradeIngredientAmounts),
+              )
+            }
+          })
+        }
+
+        if (this.starbase) {
+          this.starbasePlayer = await readFromRPCOrError(
+            useRPCStore().connection,
+            useWorkspaceAdapter()!.sageProgram.value,
+            StarbasePlayer.findAddress(
+              useWorkspaceAdapter()!.sageProgram.value,
+              this.starbase!.key,
+              SagePlayerProfile.findAddress(
+                useWorkspaceAdapter()!.sageProgram.value,
+                usePlayerProfileStore().playerProfile!.key,
+                useGameStore().gameID,
+              )[0],
+              this.starbase!.data.seqId,
+            )[0],
+            StarbasePlayer,
+          )
+        }
       } catch (error) {
         console.warn(`[${this.$id}] waring:`, error)
       } finally {

@@ -12,6 +12,7 @@ import type { ProfileFactionIDLProgram } from '@staratlas/profile-faction'
 import { PROFILE_FACTION_IDL } from '@staratlas/profile-faction'
 import { SAGE_IDL, SageIDLProgram } from '@staratlas/sage'
 import { POINTS_IDL, PointsIDLProgram } from '@staratlas/points'
+import { CARGO_IDL, CargoIDLProgram } from '@staratlas/cargo'
 
 const preflightCommitment = 'processed'
 const commitment = 'confirmed'
@@ -28,7 +29,7 @@ export const SAGE_PROGRAM_ID = new PublicKey('SAGE2HAwep459SNq61LHvjxPk4pLPEJLoM
 export const GAME_PROGRAM_ID = new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr')
 
 //export const CREW_PROGRAM_ID = new PublicKey('')
-//export const CARGO_PROGRAM_ID = new PublicKey('CArGoi989iv3VL3xArrJXmYYDNhjwCX5ey5sY5KKwMG')
+export const CARGO_PROGRAM_ID = new PublicKey('CArGoi989iv3VL3xArrJXmYYDNhjwCX5ey5sY5KKwMG')
 export const POINTS_PROGRAM_ID = new PublicKey('Point2iBvz7j5TMVef8nEgpmz4pDr7tU7v3RjAfkQbM')
 
 interface Workspace {
@@ -40,6 +41,7 @@ interface Workspace {
   profileFactionProgram: ComputedRef<ProfileFactionIDLProgram>
   sageProgram: ComputedRef<SageIDLProgram>
   pointsProgram: ComputedRef<PointsIDLProgram>
+  cargoProgram: ComputedRef<CargoIDLProgram>
 }
 
 let workspace: Workspace | undefined = undefined
@@ -70,6 +72,8 @@ export const initWorkspaceAdapter = () => {
 
   const pointsProgram = computed(() => new Program(POINTS_IDL, POINTS_PROGRAM_ID, provider.value))
 
+  const cargoProgram = computed(() => new Program(CARGO_IDL, CARGO_PROGRAM_ID, provider.value))
+
   /*
     const cargoProgram = computed(() => new Program(CARGO_IDL, CARGO_PROGRAM_ID, provider.value))
     const crewProgram = computed(() => new Program(CREW_IDL, CREW_PROGRAM_ID, provider.value))
@@ -86,5 +90,6 @@ export const initWorkspaceAdapter = () => {
     profileFactionProgram: profileFactionProgram,
     sageProgram: sageProgram,
     pointsProgram: pointsProgram,
+    cargoProgram: cargoProgram,
   } as Workspace
 }

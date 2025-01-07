@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { Keypair } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import {
   getEnumByKey,
   getEnumKeys,
@@ -78,6 +78,23 @@ async function sendTx() {
     ? publicKeyToAsyncSigner(getSigner())
     : walletStoreToAsyncSigner(useWallet())
   const staratlasIxs = []
+
+  if (useSquadsStore().useSquads) {
+    const { wallet } = useWallet()
+    const adapter = wallet.value?.adapter
+
+    const ephemeralSignerAddress =
+      adapter &&
+      'standard' in adapter &&
+      'fuse:getEphemeralSigners' in adapter.wallet.features &&
+      (await adapter.wallet.features['fuse:getEphemeralSigners'].getEphemeralSigners(1))[0]
+
+    const ephemeralSignerPubkey = ephemeralSignerAddress
+      ? new PublicKey(ephemeralSignerAddress)
+      : null
+    console.log('ephemeralSignerPubkey')
+    console.log(ephemeralSignerPubkey)
+  }
 
   const playerProfile = publicKeyToAsyncSigner(Keypair.generate().publicKey)
   //    keypairToAsyncSigner(Keypair.generate())
