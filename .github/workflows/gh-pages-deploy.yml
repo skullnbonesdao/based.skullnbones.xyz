@@ -24,12 +24,6 @@ jobs:
       - run: yarn --ignore-engines && npm run build
         env:
           NODE_OPTIONS: "--max_old_space_size=6144"
-          VITE_DISCORD_WEBHOOK: ${{ secrets.VITE_DISCORD_WEBHOOK }}
-          VITE_ADMINS: ${{ secrets.VITE_ADMINS }}
-          VITE_FEE_WALLET: ${{ secrets.VITE_FEE_WALLET }}
-          VITE_PROGRAM_RAFFLE: ${{ secrets.VITE_PROGRAM_RAFFLE }}
-          VITE_PROGRAM_WHITELIST: ${{ secrets.VITE_PROGRAM_WHITELIST }}
-          VITE_JSONBINKEY: ${{ secrets.VITE_JSONBINKEY }}
 
           VITE_RPC_1_NAME: ${{ secrets.VITE_RPC_1_NAME }}
           VITE_RPC_1_URL: ${{ secrets.VITE_RPC_1_URL }}
