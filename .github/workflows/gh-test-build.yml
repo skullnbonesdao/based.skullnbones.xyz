@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: yarn && npm run build
+      - run: yarn --ignore-engines && npm run build
         env:
           NODE_OPTIONS: "--max_old_space_size=6144"
           VITE_DISCORD_WEBHOOK: ${{ secrets.VITE_DISCORD_WEBHOOK }}
