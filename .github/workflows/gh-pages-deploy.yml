@@ -1,0 +1,46 @@
+name: Node.js deploy
+
+on:
+  push:
+    branches: [ "master" ]
+jobs:
+  gh-pages-deploy:
+    name: Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: yarn && npm run build
+        env:
+          NODE_OPTIONS: "--max_old_space_size=6144"
+          VITE_DISCORD_WEBHOOK: ${{ secrets.VITE_DISCORD_WEBHOOK }}
+          VITE_ADMINS: ${{ secrets.VITE_ADMINS }}
+          VITE_FEE_WALLET: ${{ secrets.VITE_FEE_WALLET }}
+          VITE_PROGRAM_RAFFLE: ${{ secrets.VITE_PROGRAM_RAFFLE }}
+          VITE_PROGRAM_WHITELIST: ${{ secrets.VITE_PROGRAM_WHITELIST }}
+          VITE_JSONBINKEY: ${{ secrets.VITE_JSONBINKEY }}
+
+          VITE_RPC_1_NAME: ${{ secrets.VITE_RPC_1_NAME }}
+          VITE_RPC_1_URL: ${{ secrets.VITE_RPC_1_URL }}
+          VITE_RPC_2_NAME: ${{ secrets.VITE_RPC_2_NAME }}
+          VITE_RPC_2_URL: ${{ secrets.VITE_RPC_2_URL }}
+          VITE_RPC_3_NAME: ${{ secrets.VITE_RPC_3_NAME }}
+          VITE_RPC_3_URL: ${{ secrets.VITE_RPC_3_URL }}
+
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/spa
