@@ -1,7 +1,7 @@
 {
-  "name": "sage-skullnbones-xyz",
+  "name": "based-skullnbones-xyz",
   "version": "0.0.1",
-  "description": "A Sage Interface Project",
+  "description": "A StarBase (Sage) Interface Project",
   "productName": "SAGEMAN",
   "author": "skullnbones",
   "type": "module",
