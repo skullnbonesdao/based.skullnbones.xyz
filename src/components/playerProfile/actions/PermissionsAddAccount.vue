@@ -4,9 +4,10 @@ import { SAGE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/conne
 import { PlayerProfile } from '@staratlas/player-profile'
 import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
-import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
+import { useProfileStore } from 'stores/profileStore'
+import { getSigner } from 'components/squads/SignerFinder'
 
 const optionsScope = [SAGE_PROGRAM_ID]
 
@@ -23,7 +24,7 @@ async function sendTX() {
     PlayerProfile.addKeys(
       useWorkspaceAdapter()!.playerProfileProgram.value,
       signer,
-      usePlayerProfileStore()!.playerProfile as PlayerProfile,
+      useProfileStore()!.playerProfile as PlayerProfile,
       SagePermissions,
       SAGE_PROGRAM_ID,
       [
@@ -37,7 +38,7 @@ async function sendTX() {
   )
 
   await handleStarAtlasTransaction(`Add permission account`, staratlasIxs, signer)
-  await usePlayerProfileStore().updateStore()
+  await useProfileStore().updateStore(getSigner())
   console.log('Sending TX')
 }
 </script>

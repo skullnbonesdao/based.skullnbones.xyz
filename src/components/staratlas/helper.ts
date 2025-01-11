@@ -1,14 +1,13 @@
-import { PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
-import type { WalletStore } from 'solana-wallets-vue/dist/types'
-import {
+import type { VersionedTransaction } from '@solana/web3.js'
+import { PublicKey, TransactionMessage } from '@solana/web3.js'
+import type {
   AnyTransaction,
   AsyncSigner,
-  buildAndSignTransaction,
-  buildDynamicTransactionsNoSigning,
   InstructionReturn,
   InstructionsWithSignersAndLUTs,
   TransactionReturn,
 } from '@staratlas/data-source'
+import { buildAndSignTransaction, buildDynamicTransactionsNoSigning } from '@staratlas/data-source'
 import { err, ok } from 'neverthrow'
 import {
   isVersionedTransaction,
@@ -20,6 +19,7 @@ import { useRPCStore } from 'stores/rpcStore'
 import * as multisig from '@sqds/multisig'
 import { useWallet } from 'solana-wallets-vue'
 import { getSigner } from 'components/squads/SignerFinder'
+import type { WalletStore } from 'solana-wallets-vue/dist/types'
 
 export function publicKeyToAsyncSigner(publicKey: PublicKey): AsyncSigner<WalletStore> {
   return {
@@ -159,6 +159,7 @@ async function prepareSquadsTransaction(
     vaultIndex: 0,
     ephemeralSigners: ephemeralSigners,
     transactionMessage: transactionMessage,
+    addressLookupTableAccounts: [LUT!],
     memo: label,
   })
 

@@ -4,10 +4,12 @@ import { ProfilePermissions } from '@staratlas/player-profile'
 import { ref } from 'vue'
 import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
-import { usePlayerProfileStore } from 'stores/player-profile-store'
+
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
 import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
+import { useProfileStore } from 'stores/profileStore'
+import { getSigner } from 'components/squads/SignerFinder'
 
 const props = defineProps(['publicKey', 'scope', 'inputPermissions', 'expireTime'])
 
@@ -27,7 +29,7 @@ async function sendDelete() {
 
   await handleStarAtlasTransaction(`Update profile permissions`, staratlasIxs, signer)
 
-  await usePlayerProfileStore().updateStore()
+  await useProfileStore().updateStore(getSigner())
 }
 
 async function sendUpdate() {
@@ -48,7 +50,7 @@ async function sendUpdate() {
 
   await handleStarAtlasTransaction(`Update profile permissions`, staratlasIxs, signer)
 
-  await usePlayerProfileStore().updateStore()
+  await useProfileStore().updateStore(getSigner())
 }
 </script>
 

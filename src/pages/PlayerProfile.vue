@@ -5,7 +5,7 @@ import PlayerProfileOverview from 'components/playerProfile/PlayerProfileOvervie
 import PlayerProfilePermissions from 'components/playerProfile/permissions/PlayerProfilePermissions.vue'
 import CreatePlayerProfile from 'components/playerProfile/actions/CreateAccounts.vue'
 import { useProfileStore } from 'stores/profileStore'
-import { useGameStore } from 'stores/game-store'
+import { useSageStore } from 'stores/sageStore'
 
 onMounted(async () => {
   await update()
@@ -20,7 +20,7 @@ watch(
 
 async function update() {
   await useProfileStore().updateStore(getSigner())
-  await useGameStore().updateStore()
+  await useSageStore().updateStore()
 }
 
 const tab = ref('overview')
