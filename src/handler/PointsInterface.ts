@@ -13,10 +13,6 @@ export enum PointsCategoryEnum {
   CRAFT,
 }
 
-export function gePointsCategoryEnumString(value: PointsCategoryEnum): string {
-  return PointsCategoryEnum[value]
-}
-
 export const PointsCategories = [
   {
     kind: PointsCategoryEnum.LP,

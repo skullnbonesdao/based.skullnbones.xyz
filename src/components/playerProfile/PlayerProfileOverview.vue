@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useProfileStore } from 'stores/profileStore'
 import AccountExpansionItem from 'components/playerProfile/accounts/AccountExpansionItem.vue'
-import { gePointsCategoryEnumString } from 'src/handler/PointsInterface'
+import { getPointsCategoryEnumString } from 'src/handler/EnumToString'
 </script>
 
 <template>
@@ -31,7 +31,7 @@ import { gePointsCategoryEnumString } from 'src/handler/PointsInterface'
           v-for="(point, idx) in useProfileStore().points"
           :key="idx"
           :account="point.points"
-          :label="gePointsCategoryEnumString(point.category) + ' Points'"
+          :label="getPointsCategoryEnumString(point.category) + ' Points'"
         />
       </q-list>
     </q-card-section>

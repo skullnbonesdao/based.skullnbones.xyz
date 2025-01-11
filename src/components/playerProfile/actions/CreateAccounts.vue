@@ -12,7 +12,6 @@ import { useFactionStore } from 'stores/faction-store'
 import { useGameStore } from 'stores/game-store'
 import { Faction } from '@staratlas/profile-faction'
 import { UserPoints } from '@staratlas/points'
-import { usePointsStore } from 'stores/points-store'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import { getSigner } from 'components/squads/SignerFinder'
 import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
@@ -20,6 +19,7 @@ import { useProfileStore } from 'stores/profileStore'
 import * as multisig from '@sqds/multisig'
 import { getEphemeralSignerPda } from '@sqds/multisig'
 import { Keypair, PublicKey } from '@solana/web3.js'
+import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/EnumToString'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -30,7 +30,7 @@ const enable_createPoints = ref<boolean[]>([])
 const factionOptions = [Faction.MUD, Faction.ONI, Faction.Ustur]
 
 const inputName = ref('test')
-const inputFaction = ref(factionOptions[1])
+const inputFaction = ref(factionOptions[0])
 
 updateEnables()
 
@@ -99,11 +99,15 @@ async function sendTx() {
   }
 
   if (enable_createPlayerProfileName.value) {
+    if (!inputName.value) throw Error('Player name can not be empty!')
+
     staratlasIxs.push(profileInstructionHandler.createPlayerProfileNameIx(inputName.value))
     labels.push('nameProfile')
   }
 
   if (enable_chooseFaction.value) {
+    if (!inputFaction.value) throw Error('Please select a faction!')
+
     staratlasIxs.push(profileInstructionHandler.createChooseFactionIx(inputFaction.value))
     labels.push('factionProfile')
   }
@@ -117,10 +121,10 @@ async function sendTx() {
     if (create) {
       const { instructions } = UserPoints.createUserPointAccount(
         useWorkspaceAdapter()!.pointsProgram.value,
-        usePlayerProfileStore()!.playerProfile!.key,
-        usePointsStore().pointsCategories[idx]!.key,
+        useProfileStore()!.playerProfile!.key,
+        useProfileStore().points[idx]!.address!,
       )
-      labels.push('points')
+      labels.push(`points-${getPointsCategoryEnumString(useProfileStore().points[idx]!.category)}`)
       staratlasIxs.push(instructions)
     }
   })
@@ -192,7 +196,14 @@ async function sendTx() {
                 <q-item-label caption>Choose faction</q-item-label>
               </div>
             </div>
-            <q-select v-model="inputFaction" :options="factionOptions" class="col" dense></q-select>
+
+            <q-select
+              v-model="inputFaction"
+              :option-label="(option) => getFactionEnumString(option)"
+              :options="factionOptions"
+              class="col"
+              dense
+            ></q-select>
           </div>
         </q-item>
         <q-item v-ripple clickable>
@@ -212,12 +223,7 @@ async function sendTx() {
           </div>
         </q-item>
 
-        <q-item
-          v-for="(categroy, idx) in usePointsStore().pointsCategories"
-          :key="idx"
-          v-ripple
-          clickable
-        >
+        <q-item v-for="(point, idx) in useProfileStore().points" :key="idx" v-ripple clickable>
           <div class="col row q-gutter-sm">
             <div class="col row">
               <q-toggle
@@ -227,7 +233,9 @@ async function sendTx() {
                 unchecked-icon="clear"
               />
               <div>
-                <q-item-section>Points {{ categroy.name }}</q-item-section>
+                <q-item-section
+                  >Points {{ getPointsCategoryEnumString(point.category) }}
+                </q-item-section>
                 <q-item-label caption>Create point</q-item-label>
               </div>
             </div>

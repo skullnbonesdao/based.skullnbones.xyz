@@ -12,13 +12,10 @@ import type { PlayerName, PlayerProfile } from '@staratlas/player-profile'
 import type { ProfileFactionAccount } from '@staratlas/profile-faction'
 import type { SagePlayerProfile } from '@staratlas/sage/src'
 import { findSageProfileAddress, loadSageProfile } from 'src/handler/SageInterface'
-import {
-  findPointsAddress,
-  gePointsCategoryEnumString,
-  loadPoints,
-  PointsCategoryEnum,
-} from 'src/handler/PointsInterface'
+import { findPointsAddress, loadPoints, PointsCategoryEnum } from 'src/handler/PointsInterface'
 import type { UserPoints } from '@staratlas/points'
+import { getPointsCategoryEnumString } from 'src/handler/EnumToString'
+import { useGameStore } from 'stores/game-store'
 
 export interface IPoints {
   category: PointsCategoryEnum
@@ -85,7 +82,10 @@ export const useProfileStore = defineStore('profileStore', {
         if (this.playerProfileAddress) {
           this.nameProfileAddress = findProfileNameAddress(this.playerProfileAddress)
           this.factionProfileAddress = findFactionProfileAddress(this.playerProfileAddress)
-          this.sageProfileAddress = findSageProfileAddress(this.playerProfileAddress, this.gameID)
+          this.sageProfileAddress = findSageProfileAddress(
+            this.playerProfileAddress,
+            useGameStore().gameID,
+          )
 
           this.points.map(
             (point) =>
@@ -115,7 +115,7 @@ export const useProfileStore = defineStore('profileStore', {
           this.points.map(async (point) => {
             point.points = await loadPoints(point.address!).catch(() => {
               console.warn(
-                `[${this.$id}] points profile ${gePointsCategoryEnumString(point.category)} does not exist!`,
+                `[${this.$id}] points profile ${getPointsCategoryEnumString(point.category)} does not exist!`,
               )
               return undefined
             })
