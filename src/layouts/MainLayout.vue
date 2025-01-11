@@ -4,9 +4,9 @@
       <q-toolbar>
         <q-btn aria-label="Menu" dense flat icon="menu" round @click="toggleLeftDrawer" />
 
-        <q-toolbar-title>
-          <q-img class="q-my-sm" fit="scale-down" height="50px" src="icon_cut.png"></q-img>
-        </q-toolbar-title>
+        <q-avatar size="100px">
+          <q-img class="" fit="scale-down" src="icon_cut.png"></q-img>
+        </q-avatar>
       </q-toolbar>
     </q-header>
 

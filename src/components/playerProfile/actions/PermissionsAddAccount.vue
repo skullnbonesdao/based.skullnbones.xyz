@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { SAGE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/connector'
 import { PlayerProfile } from '@staratlas/player-profile'
-import { handleStaratlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
+import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { SagePermissions } from '@staratlas/sage'
@@ -36,7 +36,7 @@ async function sendTX() {
     ),
   )
 
-  await handleStaratlasTransaction(`Add permission account`, staratlasIxs, signer)
+  await handleStarAtlasTransaction(`Add permission account`, staratlasIxs, signer)
   await usePlayerProfileStore().updateStore()
   console.log('Sending TX')
 }

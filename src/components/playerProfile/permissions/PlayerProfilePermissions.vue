@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { usePlayerProfileStore } from 'stores/player-profile-store'
-import PermissionsAddAccount from 'components/staratlas/playerProfile/actions/PermissionsAddAccount.vue'
-import PermissionEditable from 'components/staratlas/playerProfile/actions/PermissionEditable.vue'
+import PermissionsAddAccount from 'components/playerProfile/actions/PermissionsAddAccount.vue'
+import PermissionEditable from 'components/playerProfile/actions/PermissionEditable.vue'
+import { useProfileStore } from 'stores/profileStore'
 </script>
 
 <template>
@@ -11,9 +11,9 @@ import PermissionEditable from 'components/staratlas/playerProfile/actions/Permi
       <div class="text-h6">Permissions</div>
     </q-card-section>
 
-    <q-card-section v-if="usePlayerProfileStore().playerProfile" class="q-gutter-y-md">
+    <q-card-section v-if="useProfileStore().playerProfile" class="q-gutter-y-md">
       <q-card
-        v-for="(k, idx) in usePlayerProfileStore().playerProfile!.profileKeys"
+        v-for="(k, idx) in useProfileStore().playerProfile!.profileKeys"
         :key="idx"
         bordered
         class="col"

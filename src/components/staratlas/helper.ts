@@ -58,11 +58,11 @@ export function walletStoreToAsyncSigner(wallet: WalletStore): AsyncSigner<Walle
   }
 }
 
-export async function handleStaratlasTransaction(
+export async function handleStarAtlasTransaction(
   label = 'Unlabeled transaction',
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
-  playerProfile: AsyncSigner,
+  ephemeralSigners: number = 0,
   retryInterval = 3000,
   maxRetries = 10,
 ) {
@@ -80,7 +80,7 @@ export async function handleStaratlasTransaction(
     })
 
     if (useSquadsStore().useSquads) {
-      const tx = await prepareSquadsTransaction(instructions, feePayer, label)
+      const tx = await prepareSquadsTransaction(instructions, feePayer, label, ephemeralSigners)
       await sendSquadsAndCheck(tx, notif)
     } else {
       const tx = await prepareWalletTransaction(instructions, feePayer)
@@ -126,6 +126,7 @@ async function prepareSquadsTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
   label: string,
+  ephemeralSigners: number = 0,
 ) {
   const blockhash = await useRPCStore().connection.getLatestBlockhash()
 
@@ -155,22 +156,40 @@ async function prepareSquadsTransaction(
   await useSquadsStore().update()
   console.log(transactionMessage)
 
-  const squadsInstructions = multisig.instructions.vaultTransactionCreate({
+  const squadsTransaction = multisig.transactions.vaultTransactionCreate({
+    blockhash: blockhash.blockhash,
+    feePayer: useWallet().publicKey.value!,
     multisigPda: new PublicKey(useSquadsStore().multisigPDA.toString()),
     transactionIndex: useSquadsStore().getNewTransactionIndex,
     creator: useWallet().publicKey.value!,
     rentPayer: useWallet().publicKey.value!,
     vaultIndex: 0,
-    ephemeralSigners: 0,
+    ephemeralSigners: ephemeralSigners,
+    transactionMessage: transactionMessage,
+    memo: label,
+  })
+
+  console.log(squadsTransaction)
+
+  const squadsInstructions = multisig.instructions.vaultTransactionCreate({
+    multisigPda: new PublicKey(useSquadsStore().multisigPDA.toString()),
+    transactionIndex: useSquadsStore().getNewTransactionIndex,
+    creator: useWallet().publicKey.value!,
+    vaultIndex: 0,
+    ephemeralSigners: 1,
     transactionMessage: transactionMessage,
     memo: label,
   })
   const transaction = new Transaction().add(squadsInstructions)
+
+  //squadsTransaction.sign([keypair])
   // transaction.feePayer = getSigner()
 
-  console.log(transaction)
+  //console.log(transaction)
+  //squadsTransaction.addSignature(keypair.publicKey, keypair.secretKey)
+  //squadsTransaction.sign(keypair)
 
-  return transaction
+  return squadsTransaction
 }
 
 async function sendSquadsAndCheck(tx: Transaction, notif: any) {

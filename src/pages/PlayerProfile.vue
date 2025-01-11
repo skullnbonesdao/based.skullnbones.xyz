@@ -1,19 +1,19 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
-import PlayerProfileOverview from 'components/staratlas/playerProfile/PlayerProfileOverview.vue'
-import PlayerProfilePermissions from 'components/staratlas/playerProfile/permissions/PlayerProfilePermissions.vue'
-import CreatePlayerProfile from 'components/staratlas/playerProfile/actions/CreateAccounts.vue'
-import { updateStores } from 'stores/updateStores'
+import PlayerProfileOverview from 'components/playerProfile/PlayerProfileOverview.vue'
+import PlayerProfilePermissions from 'components/playerProfile/permissions/PlayerProfilePermissions.vue'
+import CreatePlayerProfile from 'components/playerProfile/actions/CreateAccounts.vue'
+import { useProfileStore } from 'stores/profileStore'
 
 onMounted(async () => {
-  await updateStores()
+  await useProfileStore().updateStore(getSigner())
 })
 
 watch(
   () => getSigner(),
   async () => {
-    await updateStores()
+    await useProfileStore().updateStore(getSigner())
   },
 )
 

@@ -1,17 +1,13 @@
 <script lang="ts" setup>
-import {
-  PLAYER_PROFILE_PROGRAM_ID,
-  SAGE_PROGRAM_ID,
-  useWorkspaceAdapter,
-} from 'components/staratlas/connector'
-import { PlayerProfile, ProfilePermissions } from '@staratlas/player-profile'
+import { PLAYER_PROFILE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'components/staratlas/connector'
+import { ProfilePermissions } from '@staratlas/player-profile'
 import { ref } from 'vue'
-import { handleStaratlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
+import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
 import { usePlayerProfileStore } from 'stores/player-profile-store'
 import { SagePermissions } from '@staratlas/sage'
-import { getSigner } from 'components/squads/SignerFinder'
 import { PublicKey } from '@solana/web3.js'
+import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
 
 const props = defineProps(['publicKey', 'scope', 'inputPermissions', 'expireTime'])
 
@@ -22,42 +18,35 @@ if (props.scope.toString() == PLAYER_PROFILE_PROGRAM_ID.toString())
 if (props.scope.toString() == SAGE_PROGRAM_ID.toString())
   permissions.value = SagePermissions.fromPermissions(props.inputPermissions)
 
-async function sendTx() {
+async function sendDelete() {
+  const signer = walletStoreToAsyncSigner(useWallet())
+  const staratlasIxs = []
+  const profileInstructionHandler = new ProfileInstructionHandler(signer)
+
+  staratlasIxs.push(profileInstructionHandler.removeKeyFromProfileIx([1, 2]))
+
+  await handleStarAtlasTransaction(`Update profile permissions`, staratlasIxs, signer)
+
+  await usePlayerProfileStore().updateStore()
+}
+
+async function sendUpdate() {
   const signer = walletStoreToAsyncSigner(useWallet())
   const staratlasIxs = []
 
+  const profileInstructionHandler = new ProfileInstructionHandler(signer)
+
+  staratlasIxs.push(profileInstructionHandler.removeKeyFromProfileIx([1, 2]))
+
   staratlasIxs.push(
-    PlayerProfile.removeKeys(
-      useWorkspaceAdapter()!.playerProfileProgram.value,
-      {
-        profileKey: usePlayerProfileStore().playerProfile?.key as PublicKey,
-        key: signer,
-        keyIndex: 0,
-        playerProfileProgram: useWorkspaceAdapter()!.playerProfileProgram.value,
-      },
-      getSigner(),
-      [1, 2],
+    profileInstructionHandler.addSageKeyToProfileIx(
+      new PublicKey(props.publicKey.toString()),
+      permissions.value,
+      props.expireTime >= 0 ? null : props.expireTime,
     ),
   )
 
-  staratlasIxs.push(
-    PlayerProfile.addKeys(
-      useWorkspaceAdapter()!.playerProfileProgram.value,
-      signer,
-      usePlayerProfileStore()!.playerProfile as PlayerProfile,
-      SagePermissions,
-      SAGE_PROGRAM_ID,
-      [
-        {
-          key: new PublicKey(props.publicKey.toString()),
-          permissions: permissions.value,
-          expireTime: props.expireTime >= 0 ? null : props.expireTime,
-        },
-      ],
-    ),
-  )
-
-  await handleStaratlasTransaction(`Update profile permissions`, staratlasIxs, signer)
+  await handleStarAtlasTransaction(`Update profile permissions`, staratlasIxs, signer)
 
   await usePlayerProfileStore().updateStore()
 }
@@ -81,13 +70,18 @@ async function sendTx() {
       </div>
     </div>
   </q-card-section>
-  <q-card-section v-if="scope.toString() != PLAYER_PROFILE_PROGRAM_ID.toString()">
+  <q-card-section
+    v-if="scope.toString() != PLAYER_PROFILE_PROGRAM_ID.toString()"
+    class="q-gutter-x-sm row"
+  >
+    <q-btn class="col" color="primary" label="Delete" @click.prevent="sendDelete"></q-btn>
+
     <q-btn
       :disable="permissions?.getPermissions().toString() == inputPermissions.toString()"
-      class="full-width"
+      class="col"
       color="primary"
       label="Update"
-      @click="sendTx"
+      @click.prevent="sendUpdate"
     ></q-btn>
   </q-card-section>
 </template>
