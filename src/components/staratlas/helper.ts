@@ -129,11 +129,16 @@ async function prepareSquadsTransaction(
     instructions: [],
   })
 
-  const LUT = (
+  const addressLookupTableAccounts = []
+  const LUT1 = (
     await useRPCStore().connection.getAddressLookupTable(
       new PublicKey('5NrYTRkLRsSSJGgfX2vNRbSXiEFi9yUHV5n7bs7VM9P2'),
     )
   ).value
+
+  if (LUT1) {
+    addressLookupTableAccounts.push(LUT1)
+  }
 
   const d = await buildDynamicTransactionsNoSigning(instructions, feePayer)
 
@@ -159,7 +164,7 @@ async function prepareSquadsTransaction(
     vaultIndex: 0,
     ephemeralSigners: ephemeralSigners,
     transactionMessage: transactionMessage,
-    addressLookupTableAccounts: [LUT!],
+    addressLookupTableAccounts: addressLookupTableAccounts,
     memo: label,
   })
 

@@ -4,8 +4,6 @@ import { SagePlayerProfile, Starbase, StarbasePlayer } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
 import { readAllFromRPC, readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
-import { usePlayerProfileStore } from 'stores/player-profile-store'
-import { useGameStore } from 'stores/game-store'
 
 interface StarbaseAccount {
   publicKey: PublicKey

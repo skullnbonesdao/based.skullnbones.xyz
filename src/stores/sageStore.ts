@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
 import { Game } from '@staratlas/sage'
-import { loadGame } from 'src/handler/SageInterface'
+import { loadGame } from 'src/handler/interfaces/SageInterface'
 
 export const useSageStore = defineStore('sageStore', {
   state: () => ({

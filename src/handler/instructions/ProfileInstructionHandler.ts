@@ -13,6 +13,7 @@ import type { AsyncSigner } from '@staratlas/data-source'
 
 import { UserPoints } from '@staratlas/points'
 import { useSageStore } from 'stores/sageStore'
+import { BN } from '@staratlas/anchor'
 
 export class ProfileInstructionHandler {
   signer: AsyncSigner
@@ -82,12 +83,12 @@ export class ProfileInstructionHandler {
     return instructions
   }
 
-  addSageKeyToProfileIx(key: PublicKey, permissions: never, expireTime: number | null = null) {
+  addSageKeyToProfileIx(key: PublicKey, permissions: never, expireTime: BN | null = null) {
     return PlayerProfile.addKeys(
       useWorkspaceAdapter()!.playerProfileProgram.value,
       this.signer,
       useProfileStore()!.playerProfile as PlayerProfile,
-      SagePermissions,
+      SagePermissions as unknown as never,
       SAGE_PROGRAM_ID,
       [
         {

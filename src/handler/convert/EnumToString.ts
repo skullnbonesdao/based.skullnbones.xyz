@@ -1,4 +1,4 @@
-import { PointsCategoryEnum } from 'src/handler/PointsInterface'
+import { PointsCategoryEnum } from 'src/handler/interfaces/PointsInterface'
 import { Faction } from '@staratlas/profile-faction'
 
 export function getPointsCategoryEnumString(value: PointsCategoryEnum): string {

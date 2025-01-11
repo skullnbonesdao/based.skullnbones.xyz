@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useProfileStore } from 'stores/profileStore'
 import AccountExpansionItem from 'components/playerProfile/accounts/AccountExpansionItem.vue'
-import { getPointsCategoryEnumString } from 'src/handler/EnumToString'
+import { getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
 </script>
 
 <template>

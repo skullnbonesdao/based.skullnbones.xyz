@@ -1,20 +1,21 @@
 <script lang="ts" setup>
 import { onMounted, watch } from 'vue'
-import { updateStores } from 'stores/updateStores'
+
 import { getSigner } from 'components/squads/SignerFinder'
 import { useStarbaseStore } from 'stores/starbase-store'
 import DepositResources from 'components/staratlas/sage/portal/DepositResources.vue'
 import { byteArrayToString } from '@staratlas/data-source'
+import { useProfileStore } from 'stores/profileStore'
 
 onMounted(async () => {
-  await updateStores()
+  await useProfileStore().updateStore(getSigner())
   await useStarbaseStore().updateStore()
 })
 
 watch(
   () => getSigner(),
   async () => {
-    await updateStores()
+    await useProfileStore().updateStore(getSigner())
   },
 )
 

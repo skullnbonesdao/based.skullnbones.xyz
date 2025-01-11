@@ -7,9 +7,10 @@ import { useWallet } from 'solana-wallets-vue'
 
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
-import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
+import { ProfileInstructionHandler } from 'src/handler/instructions/ProfileInstructionHandler'
 import { useProfileStore } from 'stores/profileStore'
 import { getSigner } from 'components/squads/SignerFinder'
+import { BN } from '@staratlas/anchor'
 
 const props = defineProps(['publicKey', 'scope', 'inputPermissions', 'expireTime'])
 
@@ -43,8 +44,8 @@ async function sendUpdate() {
   staratlasIxs.push(
     profileInstructionHandler.addSageKeyToProfileIx(
       new PublicKey(props.publicKey.toString()),
-      permissions.value,
-      props.expireTime >= 0 ? null : props.expireTime,
+      permissions.value as never,
+      props.expireTime >= 0 ? null : new BN(props.expireTime),
     ),
   )
 

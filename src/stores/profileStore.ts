@@ -7,14 +7,18 @@ import {
   loadPlayerName,
   loadPlayerProfile,
   loadPlayerProfileAddress,
-} from 'src/handler/ProfileInterface'
+} from 'src/handler/interfaces/ProfileInterface'
 import type { PlayerName, PlayerProfile } from '@staratlas/player-profile'
 import type { ProfileFactionAccount } from '@staratlas/profile-faction'
 import type { SagePlayerProfile } from '@staratlas/sage/src'
-import { findSageProfileAddress, loadSageProfile } from 'src/handler/SageInterface'
-import { findPointsAddress, loadPoints, PointsCategoryEnum } from 'src/handler/PointsInterface'
+import { findSageProfileAddress, loadSageProfile } from 'src/handler/interfaces/SageInterface'
+import {
+  findPointsAddress,
+  loadPoints,
+  PointsCategoryEnum,
+} from 'src/handler/interfaces/PointsInterface'
 import type { UserPoints } from '@staratlas/points'
-import { getPointsCategoryEnumString } from 'src/handler/EnumToString'
+import { getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
 import { useSageStore } from 'stores/sageStore'
 
 export interface IPoints {

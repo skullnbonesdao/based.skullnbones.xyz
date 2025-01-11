@@ -9,14 +9,14 @@ import { useWallet } from 'solana-wallets-vue'
 import { Faction } from '@staratlas/profile-faction'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import { getSigner } from 'components/squads/SignerFinder'
-import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
+import { ProfileInstructionHandler } from 'src/handler/instructions/ProfileInstructionHandler'
 import { useProfileStore } from 'stores/profileStore'
 import * as multisig from '@sqds/multisig'
 import { getEphemeralSignerPda } from '@sqds/multisig'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/EnumToString'
+import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
 import { keypairToAsyncSigner } from '@staratlas/data-source'
-import { PointsCategories } from 'src/handler/PointsInterface'
+import { PointsCategories } from 'src/handler/interfaces/PointsInterface'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
