@@ -12,7 +12,6 @@ import { useProfileStore } from 'stores/profileStore'
 import { AsyncSigner } from '@staratlas/data-source'
 import { useGameStore } from 'stores/game-store'
 import { UserPoints } from '@staratlas/points'
-import { usePlayerProfileStore } from 'stores/player-profile-store'
 
 export class ProfileInstructionHandler {
   signer: AsyncSigner
@@ -73,11 +72,11 @@ export class ProfileInstructionHandler {
     )
   }
 
-  createPointsIx(pointsKey: PublicKey) {
+  createPointsIx(pointsCategoryKey: PublicKey) {
     const { instructions } = UserPoints.createUserPointAccount(
       useWorkspaceAdapter()!.pointsProgram.value,
-      usePlayerProfileStore()!.playerProfile!.key,
-      pointsKey,
+      useProfileStore()!.playerProfile!.key,
+      pointsCategoryKey,
     )
     return instructions
   }

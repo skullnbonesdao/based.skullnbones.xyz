@@ -6,12 +6,7 @@ import {
   walletStoreToAsyncSigner,
 } from 'components/staratlas/helper'
 import { useWallet } from 'solana-wallets-vue'
-import { useWorkspaceAdapter } from 'components/staratlas/connector'
-import { usePlayerProfileStore } from 'stores/player-profile-store'
-import { useFactionStore } from 'stores/faction-store'
-import { useGameStore } from 'stores/game-store'
 import { Faction } from '@staratlas/profile-faction'
-import { UserPoints } from '@staratlas/points'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import { getSigner } from 'components/squads/SignerFinder'
 import { ProfileInstructionHandler } from 'src/handler/ProfileInstructionHandler'
@@ -20,6 +15,8 @@ import * as multisig from '@sqds/multisig'
 import { getEphemeralSignerPda } from '@sqds/multisig'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/EnumToString'
+import { keypairToAsyncSigner } from '@staratlas/data-source'
+import { PointsCategories } from 'src/handler/PointsInterface'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -91,7 +88,7 @@ async function sendTx() {
 
       ephemeralSigners += 1
     } else {
-      playerProfile = publicKeyToAsyncSigner(Keypair.generate().publicKey)
+      playerProfile = keypairToAsyncSigner(Keypair.generate())
     }
 
     staratlasIxs.push(profileInstructionHandler.createPlayerProfileIx(getSigner(), playerProfile))
@@ -119,13 +116,14 @@ async function sendTx() {
 
   enable_createPoints.value.forEach((create, idx) => {
     if (create) {
-      const { instructions } = UserPoints.createUserPointAccount(
-        useWorkspaceAdapter()!.pointsProgram.value,
-        useProfileStore()!.playerProfile!.key,
-        useProfileStore().points[idx]!.address!,
+      staratlasIxs.push(
+        profileInstructionHandler.createPointsIx(
+          PointsCategories.find(
+            (categroy) => categroy.kind == useProfileStore().points[idx]!.category,
+          )?.key ?? new PublicKey(''),
+        ),
       )
       labels.push(`points-${getPointsCategoryEnumString(useProfileStore().points[idx]!.category)}`)
-      staratlasIxs.push(instructions)
     }
   })
 
@@ -136,9 +134,7 @@ async function sendTx() {
     ephemeralSigners,
   )
 
-  await usePlayerProfileStore().updateStore()
-  await useFactionStore().updateStore()
-  await useGameStore().updateStore()
+  await useProfileStore().updateStore(getSigner())
   return
 }
 </script>
