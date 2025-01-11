@@ -12,12 +12,9 @@ import {
 
 import type { SageGameHandler } from './SageGameHandler'
 import { BN } from '@staratlas/anchor'
-import { publicKeyToAsyncSigner, walletStoreToAsyncSigner } from 'components/staratlas/helper'
-import { getSigner } from 'components/squads/SignerFinder'
-import { useSquadsStore } from 'components/squads/SquadsStore'
 import { useRPCStore } from 'stores/rpcStore'
-import { useWallet } from 'solana-wallets-vue'
 import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@staratlas/anchor/dist/cjs/utils/token'
+import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 
 export class StarbasePlayerHandler {
   constructor(private _gameHandler: SageGameHandler) {}
@@ -48,9 +45,7 @@ export class StarbasePlayerHandler {
 
     const profileFaction = this._gameHandler.getProfileFactionAddress(playerProfile)
 
-    const signer = useSquadsStore().useSquads
-      ? publicKeyToAsyncSigner(getSigner())
-      : walletStoreToAsyncSigner(useWallet())
+    const signer = getAsyncSigner()
 
     const cargoPods = await getCargoPodsByAuthority(
       useRPCStore().connection,

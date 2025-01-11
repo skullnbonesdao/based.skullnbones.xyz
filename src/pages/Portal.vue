@@ -2,14 +2,15 @@
 import { onMounted, watch } from 'vue'
 
 import { getSigner } from 'components/squads/SignerFinder'
-import { useStarbaseStore } from 'stores/starbase-store'
+
 import DepositResources from 'components/staratlas/sage/portal/DepositResources.vue'
 import { byteArrayToString } from '@staratlas/data-source'
 import { useProfileStore } from 'stores/profileStore'
+import { useGameStore } from 'stores/gameStore'
 
 onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
-  await useStarbaseStore().updateStore()
+  await useGameStore().updateStore()
 })
 
 watch(
@@ -20,19 +21,19 @@ watch(
 )
 
 watch(
-  () => useStarbaseStore().starbase,
+  () => useGameStore().starbase,
   async () => {
-    await useStarbaseStore().updateStore()
+    await useGameStore().updateStore()
   },
 )
 </script>
 <template>
   <q-page class="">
     <q-select
-      v-model="useStarbaseStore().starbase"
+      v-model="useGameStore().starbase"
       :option-label="(value) => byteArrayToString(value.data.name)"
       :options="
-        useStarbaseStore().starbases?.filter((starbase) =>
+        useGameStore().starbases?.filter((starbase) =>
           byteArrayToString(starbase.data.name).includes('Central'),
         )
       "
@@ -53,7 +54,7 @@ watch(
         <DepositResources />
         <!--        {{ useStarbaseStore().starbase }}
                 {{ useStarbaseStore().starbasePlayer }}-->
-        {{ useStarbaseStore().starbase }}
+        {{ useGameStore().starbase }}
       </q-card>
     </div>
   </q-page>

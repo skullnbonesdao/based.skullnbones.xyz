@@ -3,7 +3,7 @@ import {
   PLAYER_PROFILE_PROGRAM_ID,
   SAGE_PROGRAM_ID,
   useWorkspaceAdapter,
-} from 'components/staratlas/connector'
+} from 'src/handler/connector'
 import type { PublicKey } from '@solana/web3.js'
 import type { Faction } from '@staratlas/profile-faction'
 import { ProfileFactionAccount } from '@staratlas/profile-faction'
@@ -12,7 +12,7 @@ import { useProfileStore } from 'stores/profileStore'
 import type { AsyncSigner } from '@staratlas/data-source'
 
 import { UserPoints } from '@staratlas/points'
-import { useSageStore } from 'stores/sageStore'
+import { useGameStore } from 'stores/gameStore'
 import { BN } from '@staratlas/anchor'
 
 export class ProfileInstructionHandler {
@@ -69,8 +69,8 @@ export class ProfileInstructionHandler {
     return SagePlayerProfile.registerSagePlayerProfile(
       useWorkspaceAdapter()!.sageProgram.value,
       useProfileStore().playerProfileAddress!,
-      useSageStore().game!.key,
-      useSageStore().game!.data.gameState,
+      useGameStore().game!.key,
+      useGameStore().game!.data.gameState,
     )
   }
 

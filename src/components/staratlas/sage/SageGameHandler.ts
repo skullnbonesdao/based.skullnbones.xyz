@@ -36,7 +36,7 @@ import {
 } from '@staratlas/sage'
 import { AnchorWallet } from 'solana-wallets-vue'
 import { getSigner } from 'components/squads/SignerFinder'
-import { publicKeyToAsyncSigner } from 'components/staratlas/helper'
+import { publicKeyToAsyncSigner } from 'src/handler/wallet/sendAndSign'
 
 const findGame = async (provider: AnchorProvider) => {
   const program = await sageProgram(provider)

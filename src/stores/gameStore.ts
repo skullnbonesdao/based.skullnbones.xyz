@@ -1,19 +1,22 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
-import { Game } from '@staratlas/sage'
-import { loadGame } from 'src/handler/interfaces/SageInterface'
+import type { Game, Starbase } from '@staratlas/sage'
+import { loadGame, loadStarbases } from 'src/handler/interfaces/SageInterface'
 
-export const useSageStore = defineStore('sageStore', {
+export const useGameStore = defineStore('gameStore', {
   state: () => ({
     wallet: undefined as PublicKey | undefined,
     gameID: new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr'),
     game: undefined as Game | undefined,
+    starbases: [] as Starbase[] | undefined,
+    starbase: undefined as Starbase | undefined,
   }),
 
   actions: {
     async updateStore() {
       try {
         this.game = await loadGame(this.gameID)
+        this.starbases = await loadStarbases()
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {

@@ -56,23 +56,26 @@ const navigationLinks: NavigationLinkProps[] = [
     icon: 'home',
     to: '/',
   },
+
   {
     title: 'PlayerProfile',
     caption: 'Manage and view',
     icon: 'person',
     to: '/playerProfile',
   },
+
+  {
+    title: 'Portal',
+    caption: 'Deposit and Withdraw',
+    icon: 'door_front',
+    to: '/portal',
+  },
+
   {
     title: 'Squads',
     caption: 'use squads multisig',
     icon: 'groups',
     to: '/squads',
-  },
-  {
-    title: 'Portal',
-    caption: 'Deposit and Withdraw',
-    icon: 'groups',
-    to: '/portal',
   },
 ]
 

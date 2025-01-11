@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import { PLAYER_PROFILE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'components/staratlas/connector'
+import { PLAYER_PROFILE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'src/handler/connector'
 import { ProfilePermissions } from '@staratlas/player-profile'
 import { ref } from 'vue'
-import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
-import { useWallet } from 'solana-wallets-vue'
+import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
@@ -11,6 +10,7 @@ import { ProfileInstructionHandler } from 'src/handler/instructions/ProfileInstr
 import { useProfileStore } from 'stores/profileStore'
 import { getSigner } from 'components/squads/SignerFinder'
 import { BN } from '@staratlas/anchor'
+import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 
 const props = defineProps(['publicKey', 'scope', 'inputPermissions', 'expireTime'])
 
@@ -22,7 +22,7 @@ if (props.scope.toString() == SAGE_PROGRAM_ID.toString())
   permissions.value = SagePermissions.fromPermissions(props.inputPermissions)
 
 async function sendDelete() {
-  const signer = walletStoreToAsyncSigner(useWallet())
+  const signer = getAsyncSigner()
   const staratlasIxs = []
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
 
@@ -34,7 +34,7 @@ async function sendDelete() {
 }
 
 async function sendUpdate() {
-  const signer = walletStoreToAsyncSigner(useWallet())
+  const signer = getAsyncSigner()
   const staratlasIxs = []
 
   const profileInstructionHandler = new ProfileInstructionHandler(signer)

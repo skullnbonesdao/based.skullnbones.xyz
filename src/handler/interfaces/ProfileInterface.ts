@@ -2,7 +2,7 @@ import { PLAYER_PROFILE_PROGRAM_ID } from 'src/handler/constants'
 import { PublicKey } from '@solana/web3.js'
 import { useRPCStore } from 'stores/rpcStore'
 import { PlayerName, PlayerProfile } from '@staratlas/player-profile'
-import { useWorkspaceAdapter } from 'components/staratlas/connector'
+import { useWorkspaceAdapter } from 'src/handler/connector'
 import { ProfileFactionAccount } from '@staratlas/profile-faction'
 import { readFromRPCOrError } from '@staratlas/data-source'
 

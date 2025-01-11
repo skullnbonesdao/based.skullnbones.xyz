@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { SAGE_PROGRAM_ID, useWorkspaceAdapter } from 'components/staratlas/connector'
+import { SAGE_PROGRAM_ID, useWorkspaceAdapter } from 'src/handler/connector'
 import { PlayerProfile } from '@staratlas/player-profile'
-import { handleStarAtlasTransaction, walletStoreToAsyncSigner } from 'components/staratlas/helper'
-import { useWallet } from 'solana-wallets-vue'
+import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
+
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
 import { useProfileStore } from 'stores/profileStore'
 import { getSigner } from 'components/squads/SignerFinder'
+import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 
 const optionsScope = [SAGE_PROGRAM_ID]
 
@@ -17,7 +18,8 @@ const inputExpireTime = ref(0)
 const permissions = ref()
 
 async function sendTX() {
-  const signer = walletStoreToAsyncSigner(useWallet())
+  const signer = getAsyncSigner()
+
   const staratlasIxs = []
 
   staratlasIxs.push(

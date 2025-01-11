@@ -19,7 +19,7 @@ import {
 } from 'src/handler/interfaces/PointsInterface'
 import type { UserPoints } from '@staratlas/points'
 import { getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
-import { useSageStore } from 'stores/sageStore'
+import { useGameStore } from 'stores/gameStore'
 
 export interface IPoints {
   category: PointsCategoryEnum
@@ -88,7 +88,7 @@ export const useProfileStore = defineStore('profileStore', {
           this.factionProfileAddress = findFactionProfileAddress(this.playerProfileAddress)
           this.sageProfileAddress = findSageProfileAddress(
             this.playerProfileAddress,
-            useSageStore().gameID,
+            useGameStore().gameID,
           )
 
           this.points.map(

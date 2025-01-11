@@ -33,7 +33,7 @@ import {
   SageGameSector,
   SageGameShip,
 } from 'components/staratlas/sage/types'
-import { useWorkspaceAdapter } from 'components/staratlas/connector'
+import { useWorkspaceAdapter } from 'src/handler/connector'
 import { useRPCStore } from 'stores/rpcStore'
 import { Sector } from '@staratlas/sage'
 import { useStarbaseStore } from 'stores/starbase-store'

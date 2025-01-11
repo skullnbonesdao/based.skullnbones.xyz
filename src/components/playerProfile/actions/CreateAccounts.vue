@@ -1,11 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import {
-  handleStarAtlasTransaction,
-  publicKeyToAsyncSigner,
-  walletStoreToAsyncSigner,
-} from 'components/staratlas/helper'
-import { useWallet } from 'solana-wallets-vue'
+import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { Faction } from '@staratlas/profile-faction'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import { getSigner } from 'components/squads/SignerFinder'
@@ -17,6 +12,7 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
 import { keypairToAsyncSigner } from '@staratlas/data-source'
 import { PointsCategories } from 'src/handler/interfaces/PointsInterface'
+import { getAsyncSigner, publicKeyToAsyncSigner } from 'src/handler/convert/ToSigner'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -63,9 +59,7 @@ function updateEnables() {
 }
 
 async function sendTx() {
-  const signer = useSquadsStore().useSquads
-    ? publicKeyToAsyncSigner(getSigner())
-    : walletStoreToAsyncSigner(useWallet())
+  const signer = getAsyncSigner()
   const staratlasIxs = []
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
   let ephemeralSigners = 0

@@ -1,7 +1,6 @@
 import type { VersionedTransaction } from '@solana/web3.js'
 import { PublicKey, TransactionMessage } from '@solana/web3.js'
 import type {
-  AnyTransaction,
   AsyncSigner,
   InstructionReturn,
   InstructionsWithSignersAndLUTs,
@@ -19,36 +18,6 @@ import { useRPCStore } from 'stores/rpcStore'
 import * as multisig from '@sqds/multisig'
 import { useWallet } from 'solana-wallets-vue'
 import { getSigner } from 'components/squads/SignerFinder'
-import type { WalletStore } from 'solana-wallets-vue/dist/types'
-
-export function publicKeyToAsyncSigner(publicKey: PublicKey): AsyncSigner<WalletStore> {
-  return {
-    publicKey: () => publicKey,
-    requiresAsync(): boolean {
-      return true
-    },
-  } as never
-}
-
-export function walletStoreToAsyncSigner(wallet: WalletStore): AsyncSigner<WalletStore> {
-  return {
-    inner(): WalletStore {
-      return wallet
-    },
-    publicKey(): PublicKey {
-      return wallet.publicKey.value!
-    },
-    requiresAsync(): boolean {
-      return true
-    },
-    sign<TT extends AnyTransaction>(tx: TT): Promise<TT> {
-      return wallet.signTransaction.value!(tx)
-    },
-    signAll<TT extends AnyTransaction>(txs: TT[]): Promise<TT[]> {
-      return wallet.signAllTransactions.value!(txs)
-    },
-  }
-}
 
 export async function handleStarAtlasTransaction(
   label = 'Unlabeled transaction',

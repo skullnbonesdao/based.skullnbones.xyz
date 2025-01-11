@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js'
-import { useWorkspaceAdapter } from 'components/staratlas/connector'
+import { useWorkspaceAdapter } from 'src/handler/connector'
 import { UserPoints } from '@staratlas/points'
 import { readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
