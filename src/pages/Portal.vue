@@ -54,18 +54,21 @@ watch(
     <q-tab-panels v-model="tabItemType" animated>
       <q-tab-panel name="ship">
         <TokenTable
+          :item-type="tabItemType"
           :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
         />
       </q-tab-panel>
 
       <q-tab-panel name="resource">
         <TokenTable
+          :item-type="tabItemType"
           :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
         />
       </q-tab-panel>
 
       <q-tab-panel name="crew">
         <TokenTable
+          :item-type="tabItemType"
           :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
         />
       </q-tab-panel>

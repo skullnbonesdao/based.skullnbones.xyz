@@ -4,7 +4,7 @@ import { GameInstructionHandler } from 'src/handler/instructions/GameInstruction
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { useQuasar } from 'quasar'
 
-const props = defineProps(['mint', 'amount'])
+const props = defineProps(['mint', 'amount', 'itemType'])
 
 const $q = useQuasar()
 
@@ -14,10 +14,21 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    staratlasIxs.push(
-      ...(await gameInstructionHandler.depositCargoToGameIx(props.mint, props.amount)),
-    )
-    await handleStarAtlasTransaction(`Instructions Deposit`, staratlasIxs, signer)
+    switch (props.itemType) {
+      case 'ship':
+        staratlasIxs.push(
+          ...(await gameInstructionHandler.depositShipToGameIx(props.mint, props.amount)),
+        )
+        break
+      case 'resource':
+        staratlasIxs.push(
+          ...(await gameInstructionHandler.depositCargoToGameIx(props.mint, props.amount)),
+        )
+        break
+    }
+
+    if (staratlasIxs.length > 0)
+      await handleStarAtlasTransaction(`Instructions Deposit`, staratlasIxs, signer)
   } catch (error: any) {
     $q.notify({
       type: 'warning',

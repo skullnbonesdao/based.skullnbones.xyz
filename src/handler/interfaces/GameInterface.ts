@@ -1,9 +1,9 @@
-import type { PublicKey } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { SagePlayerProfile } from '@staratlas/sage/src'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { readAllFromRPC, readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
-import { Game, Starbase, StarbasePlayer } from '@staratlas/sage'
+import { Game, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
 import { useGameStore } from 'stores/gameStore'
 import { useProfileStore } from 'stores/profileStore'
 
@@ -60,6 +60,30 @@ export async function loadStarbases() {
   })
 
   return starbases
+}
+
+export async function loadShips() {
+  const data = await readAllFromRPC(
+    useRPCStore().connection,
+    useWorkspaceAdapter()!.sageProgram.value!,
+    Ship,
+  )
+
+  const ships: Ship[] = []
+  data.map((d) => {
+    if (d.type == 'ok') {
+      ships.push(new Ship(d.data.data, d.data.key))
+    }
+  })
+  return ships
+}
+
+export function findShipByMint(mint: PublicKey) {
+  return useGameStore().ships?.find(
+    (ship) =>
+      ship.data.mint.toString() == mint.toString() &&
+      ship.data.next.key.toString() == PublicKey.default.toString(),
+  )!.key
 }
 
 export async function loadStarbasePlayer() {

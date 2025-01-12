@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { TokenAccount } from 'stores/tokenStore'
-import DepositResource from 'components/portal/DepositResource.vue'
+import type { TokenAccount } from 'stores/tokenStore'
+import Deposit from 'components/portal/Deposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 
-const props = defineProps(['rows'])
+const props = defineProps(['rows', 'itemType'])
 
 const columns = [
   {
@@ -78,11 +78,12 @@ const columns = [
           pad-start="10"
         />
 
-        <DepositResource
+        <Deposit
           v-else-if="props.col.name == 'action'"
           :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
+          :item-type="itemType"
           :mint="props.row.mint"
-        ></DepositResource>
+        ></Deposit>
         <div v-else>{{ props.row[props.col.name] }}</div>
       </q-td>
     </template>
