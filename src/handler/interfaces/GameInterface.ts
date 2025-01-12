@@ -19,7 +19,7 @@ export function findStarbasePlayerAddress() {
   return StarbasePlayer.findAddress(
     useWorkspaceAdapter()!.sageProgram.value,
     useGameStore().starbase!.key,
-    useProfileStore().playerProfileAddress!,
+    findSageProfileAddress(useProfileStore().playerProfileAddress!, useGameStore().gameID),
     useGameStore().starbase!.data.seqId,
   )[0]
 }

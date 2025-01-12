@@ -11,7 +11,7 @@ import {
 import type { PlayerName, PlayerProfile } from '@staratlas/player-profile'
 import type { ProfileFactionAccount } from '@staratlas/profile-faction'
 import type { SagePlayerProfile } from '@staratlas/sage/src'
-import { findSageProfileAddress, loadSageProfile } from 'src/handler/interfaces/SageInterface'
+import { findSageProfileAddress, loadSageProfile } from 'src/handler/interfaces/GameInterface'
 import {
   findPointsAddress,
   loadPoints,

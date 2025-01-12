@@ -29,7 +29,7 @@ export const SAGE_PROGRAM_ID = new PublicKey('SAGE2HAwep459SNq61LHvjxPk4pLPEJLoM
 export const GAME_PROGRAM_ID = new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr')
 
 //export const CREW_PROGRAM_ID = new PublicKey('')
-export const CARGO_PROGRAM_ID = new PublicKey('CArGoi989iv3VL3xArrJXmYYDNhjwCX5ey5sY5KKwMG')
+export const CARGO_PROGRAM_ID = new PublicKey('Cargo2VNTPPTi9c1vq1Jw5d3BWUNr18MjRtSupAghKEk')
 export const POINTS_PROGRAM_ID = new PublicKey('Point2iBvz7j5TMVef8nEgpmz4pDr7tU7v3RjAfkQbM')
 
 interface Workspace {

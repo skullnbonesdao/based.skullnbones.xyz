@@ -1,16 +1,18 @@
 <script lang="ts" setup>
-import { onMounted, watch } from 'vue'
-
+import { onMounted, ref, watch } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
-
-import DepositResources from 'components/staratlas/sage/portal/DepositResources.vue'
 import { byteArrayToString } from '@staratlas/data-source'
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
+import { useTokenStore } from 'stores/tokenStore'
+import TokenTable from 'components/portal/TokenTable.vue'
+
+const tabItemType = ref()
 
 onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
+  await useTokenStore().updateStore(getSigner())
 })
 
 watch(
@@ -43,19 +45,30 @@ watch(
       <q-tab label="IN"></q-tab>
       <q-tab label="OUT"></q-tab>
     </q-tabs>
-    <q-tabs align="justify">
-      <q-tab label="Ships"></q-tab>
-      <q-tab label="Resources"></q-tab>
-      <q-tab label="Crew"></q-tab>
+    <q-tabs v-model="tabItemType" align="justify">
+      <q-tab label="Ships" name="ship"></q-tab>
+      <q-tab label="Resources" name="resource"></q-tab>
+      <q-tab label="Crew" name="crew"></q-tab>
     </q-tabs>
-    <div>
-      <q-card flat>
-        <q-card-section> PORT</q-card-section>
-        <DepositResources />
-        <!--        {{ useStarbaseStore().starbase }}
-                {{ useStarbaseStore().starbasePlayer }}-->
-        {{ useGameStore().starbase }}
-      </q-card>
-    </div>
+
+    <q-tab-panels v-model="tabItemType" animated>
+      <q-tab-panel name="ship">
+        <TokenTable
+          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        />
+      </q-tab-panel>
+
+      <q-tab-panel name="resource">
+        <TokenTable
+          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        />
+      </q-tab-panel>
+
+      <q-tab-panel name="crew">
+        <TokenTable
+          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        />
+      </q-tab-panel>
+    </q-tab-panels>
   </q-page>
 </template>
