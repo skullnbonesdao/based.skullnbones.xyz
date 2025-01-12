@@ -7,12 +7,12 @@ import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
 
-const tabItemType = ref()
+const tabDirection = ref('deposit')
+const tabItemType = ref('ship')
 
 onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
-  await useTokenStore().updateStore(getSigner())
 })
 
 watch(
@@ -26,6 +26,7 @@ watch(
   () => useGameStore().starbase,
   async () => {
     await useGameStore().updateStore()
+    await useTokenStore().updateStore(getSigner())
   },
 )
 </script>
@@ -41,37 +42,30 @@ watch(
       "
       label="Selected Starbase"
     />
-    <q-tabs align="justify">
-      <q-tab label="IN"></q-tab>
-      <q-tab label="OUT"></q-tab>
+    <q-tabs v-model="tabDirection" align="justify" inline-label>
+      <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
+      <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
     </q-tabs>
+    <q-separator />
     <q-tabs v-model="tabItemType" align="justify">
       <q-tab label="Ships" name="ship"></q-tab>
       <q-tab label="Resources" name="resource"></q-tab>
       <q-tab label="Crew" name="crew"></q-tab>
     </q-tabs>
+    <q-separator />
 
-    <q-tab-panels v-model="tabItemType" animated>
-      <q-tab-panel name="ship">
-        <TokenTable
-          :item-type="tabItemType"
-          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
-        />
-      </q-tab-panel>
+    <TokenTable
+      v-if="tabDirection === 'deposit' && useTokenStore().walletTokenAccounts"
+      :direction="tabDirection"
+      :item-type="tabItemType"
+      :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+    />
 
-      <q-tab-panel name="resource">
-        <TokenTable
-          :item-type="tabItemType"
-          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
-        />
-      </q-tab-panel>
-
-      <q-tab-panel name="crew">
-        <TokenTable
-          :item-type="tabItemType"
-          :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
-        />
-      </q-tab-panel>
-    </q-tab-panels>
+    <TokenTable
+      v-if="tabDirection === 'withdraw' && useTokenStore().cargoPodTokenAccounts"
+      :direction="tabDirection"
+      :item-type="tabItemType"
+      :rows="useTokenStore().cargoPodTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+    />
   </q-page>
 </template>

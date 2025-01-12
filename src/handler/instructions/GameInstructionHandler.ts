@@ -6,14 +6,9 @@ import { findShipByMint, findStarbasePlayerAddress } from 'src/handler/interface
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { PublicKey } from '@solana/web3.js'
-import {
-  AddShipEscrowInput,
-  getCargoPodsByAuthority,
-  StarbaseDepositCargoToGameInput,
-} from '@staratlas/sage'
-import { findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
+import { AddShipEscrowInput, StarbaseDepositCargoToGameInput } from '@staratlas/sage'
+import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
-import { useRPCStore } from 'stores/rpcStore'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -79,13 +74,7 @@ export class GameInstructionHandler {
     if (!useGameStore().starbase) throw Error('no starbase selected')
     const ixs = []
 
-    const cargoPod = (
-      await getCargoPodsByAuthority(
-        useRPCStore().connection,
-        useWorkspaceAdapter()!.cargoProgram.value!,
-        findStarbasePlayerAddress(),
-      )
-    )[0]!.key
+    const cargoPod = findCargoPodAddress()
 
     //  const cargoPod = new PublicKey('6uJuzcGKXiFfCXPkrAx9xzgfUAn8LoAD9ieTs43Um3H9')
 
