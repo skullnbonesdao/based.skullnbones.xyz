@@ -28,10 +28,11 @@ const tab = ref('overview')
 
 <template>
   <div class="col">
-    <q-tabs v-model="tab" align="justify" inline-label>
+    <q-tabs v-model="tab" active-bg-color="primary" align="justify" inline-label>
       <q-tab icon="dashboard" label="Overview" name="overview" />
       <q-tab icon="settings" label="Permissions" name="permissions" />
     </q-tabs>
+    <q-separator />
     <q-tab-panels v-model="tab">
       <q-tab-panel class="q-gutter-md" name="overview">
         <PlayerProfileOverview />

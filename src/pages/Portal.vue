@@ -31,7 +31,7 @@ watch(
 )
 </script>
 <template>
-  <q-page class="q-pa-sm">
+  <q-page class="">
     <q-select
       v-model="useGameStore().starbase"
       :option-label="(value) => byteArrayToString(value.data.name)"
