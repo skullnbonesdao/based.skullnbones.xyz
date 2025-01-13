@@ -31,7 +31,7 @@ watch(
 )
 </script>
 <template>
-  <q-page class="">
+  <q-page class="q-pa-sm">
     <q-select
       v-model="useGameStore().starbase"
       :option-label="(value) => byteArrayToString(value.data.name)"
@@ -40,14 +40,22 @@ watch(
           byteArrayToString(starbase.data.name).includes('Central'),
         )
       "
+      class=""
       label="Selected Starbase"
-    />
-    <q-tabs v-model="tabDirection" align="justify" inline-label>
+      square
+      standout
+    >
+      <template v-slot:prepend>
+        <q-icon name="home" />
+      </template>
+    </q-select>
+    <q-separator />
+    <q-tabs v-model="tabDirection" active-bg-color="primary" align="justify" inline-label>
       <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
       <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
     </q-tabs>
     <q-separator />
-    <q-tabs v-model="tabItemType" align="justify">
+    <q-tabs v-model="tabItemType" active-bg-color="primary" align="justify">
       <q-tab label="Ships" name="ship"></q-tab>
       <q-tab label="Resources" name="resource"></q-tab>
       <q-tab label="Crew" name="crew"></q-tab>
@@ -62,10 +70,10 @@ watch(
     />
 
     <TokenTable
-      v-if="tabDirection === 'withdraw' && useTokenStore().cargoPodTokenAccounts"
+      v-if="tabDirection === 'withdraw' && useTokenStore().gameTokenAccounts"
       :direction="tabDirection"
       :item-type="tabItemType"
-      :rows="useTokenStore().cargoPodTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+      :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
     />
   </q-page>
 </template>

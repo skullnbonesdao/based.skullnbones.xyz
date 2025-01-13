@@ -3,6 +3,7 @@ import { AccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js'
 import { useRPCStore } from 'stores/rpcStore'
 import tokenList from 'stores/tokenlist/TokenList.json'
 import { findCargoPodAddress } from 'src/handler/interfaces/CargoInterface'
+import { useProfileStore } from 'stores/profileStore'
 
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
 
@@ -20,21 +21,18 @@ export interface TokenAccount {
 
 export const useTokenStore = defineStore('tokenStore', {
   state: () => ({
-    wallet: undefined as PublicKey | undefined,
-    cargoPodAddress: undefined as PublicKey | undefined,
     staratlasNFTs: undefined as PublicKey | undefined,
     walletTokenAccounts: undefined as TokenAccount[] | undefined,
-    cargoPodTokenAccounts: undefined as TokenAccount[] | undefined,
+    gameTokenAccounts: undefined as TokenAccount[] | undefined,
   }),
 
   actions: {
     async updateStore(wallet: PublicKey) {
-      this.wallet = wallet
-      this.cargoPodAddress = await findCargoPodAddress()
-
       try {
-        this.walletTokenAccounts = toTokenAccount(await getAccounts(this.wallet))
-        this.cargoPodTokenAccounts = toTokenAccount(await getAccounts(this.cargoPodAddress))
+        this.walletTokenAccounts = toTokenAccount(await getAccounts([wallet]))
+        this.gameTokenAccounts = toTokenAccount(
+          await getAccounts([await findCargoPodAddress(), useProfileStore().sageProfileAddress!]),
+        )
       } catch (err) {
         console.error(`[${this.$id}]`, err)
       } finally {
@@ -42,30 +40,38 @@ export const useTokenStore = defineStore('tokenStore', {
       }
     },
     resetStore() {
-      this.wallet = undefined
+      this.walletTokenAccounts = undefined
+      this.gameTokenAccounts = undefined
     },
   },
 })
 
-async function getAccounts(address: PublicKey): Promise<
+async function getAccounts(addresses: PublicKey[]): Promise<
   {
     pubkey: PublicKey
     account: AccountInfo<Buffer | ParsedAccountData>
   }[]
 > {
-  return await useRPCStore().connection.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
-    filters: [
-      {
-        dataSize: 165,
-      },
-      {
-        memcmp: {
-          offset: 32,
-          bytes: address.toBase58(),
-        },
-      },
-    ],
-  })
+  const allResults = await Promise.all(
+    addresses.map((address) =>
+      useRPCStore().connection.getParsedProgramAccounts(TOKEN_PROGRAM_ID, {
+        filters: [
+          {
+            dataSize: 165,
+          },
+          {
+            memcmp: {
+              offset: 32,
+              bytes: address.toBase58(),
+            },
+          },
+        ],
+      }),
+    ),
+  )
+
+  // Flatten array-of-arrays into a single array
+  return allResults.flat()
 }
 
 function toTokenAccount(

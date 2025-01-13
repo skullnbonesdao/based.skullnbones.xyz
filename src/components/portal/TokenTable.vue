@@ -3,6 +3,7 @@ import type { TokenAccount } from 'stores/tokenStore'
 import Deposit from 'components/portal/Deposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 import { ref } from 'vue'
+import Withdraw from 'components/portal/Withdraw.vue'
 
 const props = defineProps(['rows', 'itemType', 'direction'])
 const filter = ref()
@@ -59,10 +60,10 @@ const columns = [
       rowsPerPage: 0,
     }"
     :rows="rows"
-    bordered
     flat
     hide-bottom
     row-key="name"
+    square
   >
     <template v-slot:top-right>
       <q-input v-model="filter" borderless debounce="300" dense placeholder="Search">
@@ -95,6 +96,14 @@ const columns = [
           :item-type="itemType"
           :mint="props.row.mint"
         ></Deposit>
+
+        <Withdraw
+          v-else-if="props.col.name == 'action' && direction == 'withdraw'"
+          :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
+          :item-type="itemType"
+          :mint="props.row.mint"
+        ></Withdraw>
+
         <div v-else>{{ props.row[props.col.name] }}</div>
       </q-td>
     </template>
