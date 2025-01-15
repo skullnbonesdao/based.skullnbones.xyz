@@ -13,6 +13,7 @@ import { getFactionEnumString, getPointsCategoryEnumString } from 'src/handler/c
 import { keypairToAsyncSigner } from '@staratlas/data-source'
 import { PointsCategories } from 'src/handler/interfaces/PointsInterface'
 import { getAsyncSigner, publicKeyToAsyncSigner } from 'src/handler/convert/ToSigner'
+import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -61,13 +62,17 @@ function updateEnables() {
 async function sendTx() {
   const signer = getAsyncSigner()
   const staratlasIxs = []
+  let feeIx = undefined
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
+
   let ephemeralSigners = 0
   const labels = []
 
   if (enable_createPlayerProfile.value) {
     let playerProfile
     if (useSquadsStore().useSquads) {
+      feeIx = new FeeInstructionHandler(signer).transferFeeIx('CREATE')
+
       await useSquadsStore().update()
       const [transactionPda] = multisig.getTransactionPda({
         multisigPda: new PublicKey(useSquadsStore().multisigPDA.toString()),
@@ -126,6 +131,7 @@ async function sendTx() {
     `Instructions create: ${labels.join(', ')}`,
     staratlasIxs,
     signer,
+    feeIx,
     ephemeralSigners,
   )
 

@@ -1,5 +1,9 @@
-import type { VersionedTransaction } from '@solana/web3.js'
-import { PublicKey, TransactionMessage } from '@solana/web3.js'
+import {
+  PublicKey,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
+} from '@solana/web3.js'
 import type {
   AsyncSigner,
   InstructionReturn,
@@ -23,6 +27,7 @@ export async function handleStarAtlasTransaction(
   label = 'Unlabeled transaction',
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
+  feeInstruction: TransactionInstruction | undefined,
   ephemeralSigners: number = 0,
   retryInterval = 3000,
   maxRetries = 10,
@@ -41,10 +46,17 @@ export async function handleStarAtlasTransaction(
     })
 
     if (useSquadsStore().useSquads) {
-      const tx = await prepareSquadsTransaction(instructions, feePayer, label, ephemeralSigners)
+      const tx = await prepareSquadsTransaction(
+        instructions,
+        feePayer,
+        label,
+        feeInstruction,
+        ephemeralSigners,
+      )
+
       await sendSquadsAndCheck(tx, notif)
     } else {
-      const tx = await prepareWalletTransaction(instructions, feePayer)
+      const tx = await prepareWalletTransaction(instructions, feePayer, feeInstruction)
 
       await sendWalletAndCheck(tx, retryInterval, maxRetries, notif)
     }
@@ -64,6 +76,7 @@ export async function handleStarAtlasTransaction(
 async function prepareWalletTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
+  feeInstruction: TransactionInstruction | undefined,
 ) {
   const LUT = (
     await useRPCStore().connection.getAddressLookupTable(
@@ -88,6 +101,7 @@ async function prepareSquadsTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
   label: string,
+  feeInstruction: TransactionInstruction | undefined,
   ephemeralSigners: number = 0,
 ) {
   const blockhash = await useRPCStore().connection.getLatestBlockhash()
@@ -119,6 +133,8 @@ async function prepareSquadsTransaction(
       }),
     )
   })
+
+  if (feeInstruction) transactionMessage.instructions.push(feeInstruction)
 
   await useSquadsStore().update()
   console.log(transactionMessage)
