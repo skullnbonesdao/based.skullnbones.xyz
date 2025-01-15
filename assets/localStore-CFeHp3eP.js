@@ -1,1 +1,0 @@
-import{b as o}from"./index-tRhunsEz.js";import{c as r}from"./index-CDVY82dh.js";function s({store:e}){e.$id==="gameStore"&&(localStorage.getItem("gameStore_starbase"),e.$subscribe((t,a)=>{localStorage.setItem("gameStore_starbase",JSON.stringify(a.starbase))}))}const c=o(({app:e})=>{const t=r();t.use(s),e.use(t),console.log("[added] Plugin: localStore")});export{c as default};
