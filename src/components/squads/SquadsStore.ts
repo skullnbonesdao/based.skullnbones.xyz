@@ -43,7 +43,8 @@ export const useSquadsStore = defineStore('squadsStore', {
       }
     },
     getNewTransactionIndex(state) {
-      return BigInt(state.multisigInfo.transactionIndex + 1)
+      const currentTransactionIndex = Number(state.multisigInfo.transactionIndex)
+      return BigInt(currentTransactionIndex + 1)
     },
   },
   actions: {

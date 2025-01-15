@@ -68,6 +68,7 @@ async function sendTx() {
   if (enable_createPlayerProfile.value) {
     let playerProfile
     if (useSquadsStore().useSquads) {
+      await useSquadsStore().update()
       const [transactionPda] = multisig.getTransactionPda({
         multisigPda: new PublicKey(useSquadsStore().multisigPDA.toString()),
         index: useSquadsStore().getNewTransactionIndex,
