@@ -26,6 +26,8 @@ watch(
     v-model="useRPCStore().rpc_stored_name"
     :options="RPC_NETWORKS.map((rpc) => rpc.name)"
     class="col"
+    dense
+    filled
     label="RPC"
     square
   />

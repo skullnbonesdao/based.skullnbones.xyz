@@ -28,10 +28,11 @@
 
       <q-scroll-area style="height: calc(100% - 300px); margin-top: 0px">
         <q-list>
-          <NavigationLinks v-for="link in navigationLinks" :key="link.title" v-bind="link" />
+          <NavigationLinks v-for="link in navigationLinksBase" :key="link.title" v-bind="link" />
         </q-list>
       </q-scroll-area>
-      <div class="absolute-bottom q-ma-md">
+      <div class="absolute-bottom">
+        <NavigationLinks v-for="link in navigationLinksSquads" :key="link.title" v-bind="link" />
         <RPCSelect />
       </div>
     </q-drawer>
@@ -46,31 +47,31 @@
 import { ref } from 'vue'
 import { WalletMultiButton } from 'solana-wallets-vue'
 import NavigationLinks, { NavigationLinkProps } from 'components/NavigationLinks.vue'
-import RPCSelect from 'components/rpc/RPCSelect.vue'
 import SquadsButton from 'components/squads/SquadsButton.vue'
 import { useSquadsStore } from 'components/squads/SquadsStore'
+import RPCSelect from 'components/rpc/RPCSelect.vue'
 
-const navigationLinks: NavigationLinkProps[] = [
+const navigationLinksBase: NavigationLinkProps[] = [
   {
     title: 'Home',
     icon: 'home',
     to: '/',
   },
-
   {
     title: 'PlayerProfile',
     caption: 'Manage and view',
     icon: 'person',
     to: '/playerProfile',
   },
-
   {
     title: 'Portal',
     caption: 'Deposit and Withdraw',
     icon: 'door_front',
     to: '/portal',
   },
+]
 
+const navigationLinksSquads: NavigationLinkProps[] = [
   {
     title: 'Squads',
     caption: 'use squads multisig',
