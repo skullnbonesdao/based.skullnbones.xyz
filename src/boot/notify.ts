@@ -6,4 +6,4 @@ Notify.setDefaults({
   textColor: 'white',
   actions: [{ icon: 'close', color: 'white' }],
 })
-console.log('[booted] Notofy')
+console.log('[added] Plugin: Notify')

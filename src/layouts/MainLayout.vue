@@ -4,9 +4,9 @@
       <q-toolbar>
         <q-btn aria-label="Menu" dense flat icon="menu" round @click="toggleLeftDrawer" />
 
-        <q-avatar size="100px">
-          <q-img class="" fit="scale-down" src="icon_cut.png"></q-img>
-        </q-avatar>
+        <q-img fit="scale-down" src="icon_cut.png" style="max-width: 100px" />
+        <q-space />
+        <WalletMultiButton dark />
       </q-toolbar>
     </q-header>
 
