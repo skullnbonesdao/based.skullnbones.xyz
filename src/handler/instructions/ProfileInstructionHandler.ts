@@ -1,9 +1,5 @@
 import { PlayerProfile, ProfilePermissions } from '@staratlas/player-profile'
-import {
-  PLAYER_PROFILE_PROGRAM_ID,
-  SAGE_PROGRAM_ID,
-  useWorkspaceAdapter,
-} from 'src/handler/connector'
+import { useWorkspaceAdapter } from 'src/handler/connector'
 import type { PublicKey } from '@solana/web3.js'
 import type { Faction } from '@staratlas/profile-faction'
 import { ProfileFactionAccount } from '@staratlas/profile-faction'
@@ -11,9 +7,11 @@ import { SagePermissions, SagePlayerProfile } from '@staratlas/sage'
 import { useProfileStore } from 'stores/profileStore'
 import type { AsyncSigner } from '@staratlas/data-source'
 
-import { UserPoints } from '@staratlas/points'
+import { PointsPermissions, UserPoints } from '@staratlas/points'
 import { useGameStore } from 'stores/gameStore'
 import { BN } from '@staratlas/anchor'
+import { POINTS_PROGRAM_ID, POINTS_STORE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'src/handler/constants'
+import { PointsStorePermissions } from '@staratlas/points-store'
 
 export class ProfileInstructionHandler {
   signer: AsyncSigner
@@ -83,13 +81,59 @@ export class ProfileInstructionHandler {
     return instructions
   }
 
-  addSageKeyToProfileIx(key: PublicKey, permissions: never, expireTime: BN | null = null) {
+  addSageKeyPermissionToProfileIx(
+    key: PublicKey,
+    permissions: SagePermissions,
+    expireTime: BN | null = null,
+  ) {
     return PlayerProfile.addKeys(
       useWorkspaceAdapter()!.playerProfileProgram.value,
       this.signer,
       useProfileStore()!.playerProfile as PlayerProfile,
-      SagePermissions as unknown as never,
+      SagePermissions,
       SAGE_PROGRAM_ID,
+      [
+        {
+          key: key,
+          permissions: permissions,
+          expireTime: expireTime,
+        },
+      ],
+    )
+  }
+
+  addPointsKeyPermissionToProfileIx(
+    key: PublicKey,
+    permissions: PointsPermissions,
+    expireTime: BN | null = null,
+  ) {
+    return PlayerProfile.addKeys(
+      useWorkspaceAdapter()!.playerProfileProgram.value,
+      this.signer,
+      useProfileStore()!.playerProfile as PlayerProfile,
+      PointsPermissions,
+      POINTS_PROGRAM_ID,
+      [
+        {
+          key: key,
+          permissions: permissions,
+          expireTime: expireTime,
+        },
+      ],
+    )
+  }
+
+  addPointsStoreKeyPermissionToProfileIx(
+    key: PublicKey,
+    permissions: PointsStorePermissions,
+    expireTime: BN | null = null,
+  ) {
+    return PlayerProfile.addKeys(
+      useWorkspaceAdapter()!.playerProfileProgram.value,
+      this.signer,
+      useProfileStore()!.playerProfile as PlayerProfile,
+      PointsStorePermissions,
+      POINTS_STORE_PROGRAM_ID,
       [
         {
           key: key,

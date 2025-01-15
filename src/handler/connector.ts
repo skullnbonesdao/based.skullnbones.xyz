@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import type { AnchorWallet } from 'solana-wallets-vue'
 import { useAnchorWallet } from 'solana-wallets-vue'
 import type { Connection } from '@solana/web3.js'
-import { PublicKey } from '@solana/web3.js'
 import { AnchorProvider, Program } from '@staratlas/anchor'
 import { useRPCStore } from 'stores/rpcStore'
 import type { PlayerProfileIDLProgram } from '@staratlas/player-profile'
@@ -13,24 +12,16 @@ import { PROFILE_FACTION_IDL } from '@staratlas/profile-faction'
 import { SAGE_IDL, SageIDLProgram } from '@staratlas/sage'
 import { POINTS_IDL, PointsIDLProgram } from '@staratlas/points'
 import { CARGO_IDL, CargoIDLProgram } from '@staratlas/cargo'
+import {
+  CARGO_PROGRAM_ID,
+  PLAYER_PROFILE_PROGRAM_ID,
+  POINTS_PROGRAM_ID,
+  PROFILE_FACTION_PROGRAM_ID,
+  SAGE_PROGRAM_ID,
+} from 'src/handler/constants'
 
 const preflightCommitment = 'processed'
 const commitment = 'confirmed'
-
-export const PLAYER_PROFILE_PROGRAM_ID = new PublicKey(
-  'pprofELXjL5Kck7Jn5hCpwAL82DpTkSYBENzahVtbc9',
-)
-export const PROFILE_FACTION_PROGRAM_ID = new PublicKey(
-  'pFACSRuobDmvfMKq1bAzwj27t6d2GJhSCHb1VcfnRmq',
-)
-
-export const SAGE_PROGRAM_ID = new PublicKey('SAGE2HAwep459SNq61LHvjxPk4pLPEJLoMETef7f7EE')
-
-export const GAME_PROGRAM_ID = new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr')
-
-//export const CREW_PROGRAM_ID = new PublicKey('')
-export const CARGO_PROGRAM_ID = new PublicKey('Cargo2VNTPPTi9c1vq1Jw5d3BWUNr18MjRtSupAghKEk')
-export const POINTS_PROGRAM_ID = new PublicKey('Point2iBvz7j5TMVef8nEgpmz4pDr7tU7v3RjAfkQbM')
 
 interface Workspace {
   wallet: Ref<AnchorWallet | undefined>

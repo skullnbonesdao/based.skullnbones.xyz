@@ -20,23 +20,27 @@ import { useProfileStore } from 'stores/profileStore'
         flat
       >
         <q-card-section>
-          <div class="row">
-            <div class="col">Key</div>
+          <div class="row items-center q-gutter-md">
+            <div>Key</div>
+            <q-separator class="col" />
             <div>{{ k.key }}</div>
           </div>
-          <div class="row">
-            <div class="col">Scope</div>
+          <div class="row items-center q-gutter-md">
+            <div>Scope</div>
+            <q-separator class="col" />
             <div>{{ k.scope }}</div>
           </div>
-          <div class="row">
-            <div class="col">ExpireTime</div>
-            <div>{{ k.expireTime }}</div>
+          <div class="row items-center q-gutter-md">
+            <div>ExpireTime</div>
+            <q-separator class="col" />
+            <div>{{ k.expireTime.toString() == '-1' ? 'never' : k.expireTime }}</div>
           </div>
         </q-card-section>
 
         <q-card-section>
           <PermissionEditable
             :expire-time="k.expireTime"
+            :index="idx"
             :input-permissions="k.permissions"
             :publicKey="k.key"
             :scope="k.scope"
