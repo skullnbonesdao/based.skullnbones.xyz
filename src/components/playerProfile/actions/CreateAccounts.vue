@@ -76,7 +76,7 @@ async function sendTx() {
       playerProfile = publicKeyToAsyncSigner(
         getEphemeralSignerPda({
           transactionPda,
-          ephemeralSignerIndex: 2,
+          ephemeralSignerIndex: 0,
         })[0],
       )
 
