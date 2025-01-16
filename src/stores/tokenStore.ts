@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { AccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js'
+import type { AccountInfo, ParsedAccountData } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { useRPCStore } from 'stores/rpcStore'
 import tokenList from 'stores/tokenlist/TokenList.json'
 import { findCargoPodAddress } from 'src/handler/interfaces/CargoInterface'
@@ -23,6 +24,7 @@ export const useTokenStore = defineStore('tokenStore', {
   state: () => ({
     staratlasNFTs: undefined as PublicKey | undefined,
     walletTokenAccounts: undefined as TokenAccount[] | undefined,
+    walletCrewAccounts: undefined,
     gameTokenAccounts: undefined as TokenAccount[] | undefined,
   }),
 
@@ -30,6 +32,8 @@ export const useTokenStore = defineStore('tokenStore', {
     async updateStore(wallet: PublicKey) {
       try {
         this.walletTokenAccounts = toTokenAccount(await getAccounts([wallet]))
+        //this.walletCrewAccounts = await getCrew()
+
         this.gameTokenAccounts = toTokenAccount(
           await getAccounts([await findCargoPodAddress(), useProfileStore().sageProfileAddress!]),
         )
@@ -74,12 +78,25 @@ async function getAccounts(addresses: PublicKey[]): Promise<
   return allResults.flat()
 }
 
+/*async function getCrew() {
+  let crew: never[] = []
+  //  const url = 'https://aura-mainnet.metaplex.com'
+
+  const umi = createUmi().use(dasApi())
+
+  crew = await umi.rpc.getAsset('EbBd3Bp6wnQhefv5Dud44SscEpqjsMfqHqdvVYCV6Jpp')
+  console.log(crew)
+  return crew
+}*/
+
 function toTokenAccount(
   data: { pubkey: PublicKey; account: AccountInfo<Buffer | ParsedAccountData> }[],
 ): TokenAccount[] {
   return data
     .flatMap((account) => {
-      const mint = account.account.data?.parsed.info.mint.toString()
+      const parsedData = account.account.data as ParsedAccountData
+
+      const mint = parsedData.parsed.info.mint.toString()
 
       return {
         name: tokenList.find((tl) => tl.mint == mint)?.name,
@@ -87,10 +104,10 @@ function toTokenAccount(
         itemType: tokenList.find((tl) => tl.mint == mint)?.itemType,
         key: new PublicKey(account.pubkey.toString()),
         mint: new PublicKey(mint),
-        amount: account.account.data?.parsed.info.tokenAmount.amount,
-        decimals: account.account.data?.parsed.info.tokenAmount.decimals,
-        uiAmount: account.account.data?.parsed.info.tokenAmount.uiAmount,
-        uiAmountSelected: account.account.data?.parsed.info.tokenAmount.uiAmount,
+        amount: parsedData.parsed.info.tokenAmount.amount,
+        decimals: parsedData.parsed.info.tokenAmount.decimals,
+        uiAmount: parsedData.parsed.info.tokenAmount.uiAmount,
+        uiAmountSelected: parsedData.parsed.info.tokenAmount.uiAmount,
       } as TokenAccount
     })
     .filter((account) => account.amount > 0)

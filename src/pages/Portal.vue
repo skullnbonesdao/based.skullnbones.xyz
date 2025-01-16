@@ -63,14 +63,22 @@ watch(
     <q-separator />
 
     <TokenTable
-      v-if="tabDirection === 'deposit' && useTokenStore().walletTokenAccounts"
+      v-if="
+        tabDirection === 'deposit' &&
+        tabItemType === ('ship' || 'resource') &&
+        useTokenStore().walletTokenAccounts
+      "
       :direction="tabDirection"
       :item-type="tabItemType"
       :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
     />
 
     <TokenTable
-      v-if="tabDirection === 'withdraw' && useTokenStore().gameTokenAccounts"
+      v-if="
+        tabDirection === 'withdraw' &&
+        tabItemType === ('ship' || 'resource') &&
+        useTokenStore().gameTokenAccounts
+      "
       :direction="tabDirection"
       :item-type="tabItemType"
       :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
