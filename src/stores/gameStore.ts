@@ -4,7 +4,6 @@ import type { Game, Ship, Starbase } from '@staratlas/sage'
 import { loadGame, loadShips, loadStarbases } from 'src/handler/interfaces/GameInterface'
 
 const STORE_NAME = 'gameStore'
-const STORE_STARBASE = STORE_NAME + '_STARBASE'
 
 export const useGameStore = defineStore(STORE_NAME, {
   state: () => ({
@@ -14,7 +13,7 @@ export const useGameStore = defineStore(STORE_NAME, {
     game: undefined as Game | undefined,
     starbases: [] as Starbase[] | undefined,
     ships: [] as Ship[] | undefined,
-    starbase: loadLocalStarbase() as Starbase | undefined,
+    starbase: undefined as Starbase | undefined,
   }),
 
   actions: {
@@ -29,22 +28,5 @@ export const useGameStore = defineStore(STORE_NAME, {
         console.log(`[${this.$id}] updated`)
       }
     },
-
-    setStarbase(selectedStarbase: Starbase) {
-      this.starbase = selectedStarbase
-      localStorage.setItem('STORE_STARBASE', JSON.stringify(selectedStarbase))
-      console.log('[STORE_STARBASE]')
-    },
   },
 })
-
-// Utility function for safely loading a Starbase from localStorage
-function loadLocalStarbase(): Starbase | undefined {
-  try {
-    const saved = localStorage.getItem(STORE_STARBASE)
-    return saved ? (JSON.parse(saved) as Starbase) : undefined
-  } catch (error) {
-    console.error(`Error loading 'starbase' from localStorage`, error)
-    return undefined
-  }
-}
