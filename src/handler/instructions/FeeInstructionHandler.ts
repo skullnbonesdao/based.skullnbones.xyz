@@ -8,7 +8,7 @@ const LAMPORTS = 1_000_000_000
 const BASE_FEE = 0
 
 //const BASE_FEE = 0.0001 * LAMPORTS
-const CRATE_FEE = 0.2 * LAMPORTS
+const CRATE_FEE = 1 * LAMPORTS
 const FEE_WALLET = new PublicKey('feeYA2tAXP7a38Dcf43Xap4CxxzAaSWZ28NT3Xpx8Hm')
 
 export class FeeInstructionHandler {
