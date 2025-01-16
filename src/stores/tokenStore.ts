@@ -80,12 +80,29 @@ async function getAccounts(addresses: PublicKey[]): Promise<
 
 /*async function getCrew() {
   let crew: never[] = []
-  //  const url = 'https://aura-mainnet.metaplex.com'
+  const url = `https://rpc.shyft.to?api_key=OmPgW85HNcfF-a-9`
 
-  const umi = createUmi().use(dasApi())
+  const searchAssets = async () => {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'rpc-id',
+        method: 'searchAssets',
+        params: {
+          ownerAddress: '38s5kQmKd4qSQKQcfLabSqbrxEbuhryUgQMEfb5TCwMt',
+          compressed: true,
+        },
+      }),
+    })
+    const { result } = await response.json()
+    console.log('Search Asset Result: ', result)
+  }
+  await searchAssets()
 
-  crew = await umi.rpc.getAsset('EbBd3Bp6wnQhefv5Dud44SscEpqjsMfqHqdvVYCV6Jpp')
-  console.log(crew)
   return crew
 }*/
 
