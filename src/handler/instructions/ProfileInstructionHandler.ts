@@ -9,8 +9,13 @@ import type { AsyncSigner } from '@staratlas/data-source'
 
 import { PointsPermissions, UserPoints } from '@staratlas/points'
 import { useGameStore } from 'stores/gameStore'
-import { BN } from '@staratlas/anchor'
-import { POINTS_PROGRAM_ID, POINTS_STORE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'src/handler/constants'
+import type { BN } from '@staratlas/anchor'
+import {
+  PLAYER_PROFILE_PROGRAM_ID,
+  POINTS_PROGRAM_ID,
+  POINTS_STORE_PROGRAM_ID,
+  SAGE_PROGRAM_ID,
+} from 'src/handler/constants'
 import { PointsStorePermissions } from '@staratlas/points-store'
 
 export class ProfileInstructionHandler {
