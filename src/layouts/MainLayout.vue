@@ -65,7 +65,7 @@ const navigationLinksBase: NavigationLinkProps[] = [
   },
   {
     title: 'Portal',
-    caption: 'Deposit and Withdraw',
+    caption: 'TokenDeposit and TokenWithdraw',
     icon: 'door_front',
     to: '/portal',
   },

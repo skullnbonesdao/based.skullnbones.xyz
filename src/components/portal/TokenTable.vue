@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import type { TokenAccount } from 'stores/tokenStore'
-import Deposit from 'components/portal/Deposit.vue'
+import TokenDeposit from 'components/portal/TokenDeposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 import { ref } from 'vue'
-import Withdraw from 'components/portal/Withdraw.vue'
+import TokenWithdraw from 'components/portal/TokenWithdraw.vue'
 
 const props = defineProps(['rows', 'itemType', 'direction'])
 const filter = ref()
@@ -65,6 +65,9 @@ const columns = [
     row-key="name"
     square
   >
+    <template v-slot:top-left>
+      <div class="text-grey-5">Found {{ rows.length }} Items</div>
+    </template>
     <template v-slot:top-right>
       <q-input v-model="filter" borderless debounce="300" dense placeholder="Search">
         <template v-slot:append>
@@ -90,19 +93,19 @@ const columns = [
           pad-start="10"
         />
 
-        <Deposit
+        <TokenDeposit
           v-else-if="props.col.name == 'action' && direction == 'deposit'"
           :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
           :item-type="itemType"
           :mint="props.row.mint"
-        ></Deposit>
+        ></TokenDeposit>
 
-        <Withdraw
+        <TokenWithdraw
           v-else-if="props.col.name == 'action' && direction == 'withdraw'"
           :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
           :item-type="itemType"
           :mint="props.row.mint"
-        ></Withdraw>
+        ></TokenWithdraw>
 
         <div v-else>{{ props.row[props.col.name] }}</div>
       </q-td>

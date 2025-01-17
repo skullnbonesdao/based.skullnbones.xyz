@@ -6,6 +6,8 @@ import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
+import InfoBanner from 'components/general/InfoBanner.vue'
+import CrewTable from 'components/portal/CrewTable.vue'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -49,31 +51,40 @@ watch(
         <q-icon name="home" />
       </template>
     </q-select>
-    <q-separator />
-    <q-tabs v-model="tabDirection" active-bg-color="primary" align="justify" inline-label>
-      <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
-      <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
-    </q-tabs>
-    <q-separator />
-    <q-tabs v-model="tabItemType" active-bg-color="primary" align="justify">
-      <q-tab label="Ships" name="ship"></q-tab>
-      <q-tab label="Resources" name="resource"></q-tab>
-      <q-tab label="Crew" name="crew"></q-tab>
-    </q-tabs>
-    <q-separator />
 
-    <TokenTable
-      v-if="tabDirection === 'deposit' && useTokenStore().walletTokenAccounts"
-      :direction="tabDirection"
-      :item-type="tabItemType"
-      :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
-    />
+    <InfoBanner v-if="!useGameStore().starbase" message="Please select a starabse" />
 
-    <TokenTable
-      v-if="tabDirection === 'withdraw' && useTokenStore().gameTokenAccounts"
-      :direction="tabDirection"
-      :item-type="tabItemType"
-      :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
-    />
+    <div v-if="useGameStore().starbase">
+      <q-separator />
+      <q-tabs v-model="tabDirection" active-bg-color="primary" align="justify" inline-label>
+        <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
+        <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
+      </q-tabs>
+      <q-separator />
+      <q-tabs v-model="tabItemType" active-bg-color="primary" align="justify">
+        <q-tab label="Ships" name="ship"></q-tab>
+        <q-tab label="Resources" name="resource"></q-tab>
+        <q-tab label="Crew" name="crew"></q-tab>
+      </q-tabs>
+      <q-separator />
+
+      <TokenTable
+        v-if="
+          useTokenStore().walletTokenAccounts &&
+          (tabItemType == 'ship' || tabItemType == 'resource')
+        "
+        :direction="tabDirection"
+        :item-type="tabItemType"
+        :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+      />
+
+      <CrewTable
+        v-if="
+          tabDirection == 'deposit' && useTokenStore().walletCrewAccounts && tabItemType == 'crew'
+        "
+        :direction="tabDirection"
+        :rows="useTokenStore().walletCrewAccounts!"
+      />
+    </div>
   </q-page>
 </template>
