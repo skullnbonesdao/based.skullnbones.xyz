@@ -1,14 +1,14 @@
 import * as web3 from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 
-import { AsyncSigner } from '@staratlas/data-source'
+import type { AsyncSigner } from '@staratlas/data-source'
 
 const LAMPORTS = 1_000_000_000
 
 const BASE_FEE = 0
 
 //const BASE_FEE = 0.0001 * LAMPORTS
-const CRATE_FEE = 1 * LAMPORTS
+const CRATE_FEE = 0 //1 * LAMPORTS
 const FEE_WALLET = new PublicKey('feeYA2tAXP7a38Dcf43Xap4CxxzAaSWZ28NT3Xpx8Hm')
 
 export class FeeInstructionHandler {
