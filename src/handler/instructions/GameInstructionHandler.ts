@@ -244,4 +244,16 @@ export class GameInstructionHandler {
 
     return ixs
   }
+
+  async depositCrewToGameIx() {
+    const ixs = []
+
+    //TODO: This needs to be implemented
+
+    /*ixs.push(
+      SagePlayerProfile.addCrewToGame(
+
+      )
+    )*/
+  }
 }

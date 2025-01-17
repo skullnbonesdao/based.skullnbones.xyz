@@ -68,6 +68,19 @@ watch(
       </q-tabs>
       <q-separator />
 
+      <InfoBanner
+        v-if="
+          !useTokenStore().walletTokenAccounts &&
+          (tabItemType == 'ship' || tabItemType == 'resource')
+        "
+        :message="`No ${tabItemType}s found to ${tabDirection}`"
+      />
+
+      <InfoBanner
+        v-if="!useTokenStore().walletCrewAccounts && tabItemType == 'crew'"
+        :message="`No ${tabItemType} found to ${tabDirection}`"
+      />
+
       <TokenTable
         v-if="
           useTokenStore().walletTokenAccounts &&

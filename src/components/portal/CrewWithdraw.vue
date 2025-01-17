@@ -14,7 +14,7 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    if (staratlasIxs.length > 0) throw new Error('not implemented')
+    throw new Error('not implemented')
     await handleStarAtlasTransaction(`Instructions Deposit`, staratlasIxs, signer)
   } catch (error: any) {
     $q.notify({
