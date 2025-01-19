@@ -71,39 +71,43 @@ async function sendUpdate() {
   )
 
   //Add old permission
+
+  const key = new PublicKey(props.publicKey)
+  const expireTime = props.expireTime >= 0 ? null : new BN(props.expireTime)
+
   if (props.scope == permissionOptions[0]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addSageKeyPermissionToProfileIx(
-        new PublicKey(props.publicKey.value),
+        key,
         SagePermissions.empty(),
-        props.expireTime >= 0 ? null : new BN(props.expireTime),
+        expireTime,
       ),
     )
 
   if (props.scope == permissionOptions[1]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsKeyPermissionToProfileIx(
-        new PublicKey(props.publicKey.value),
+        key,
         PointsPermissions.empty(),
-        props.expireTime >= 0 ? null : new BN(props.expireTime),
+        expireTime,
       ),
     )
 
   if (props.scope == permissionOptions[2]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsStoreKeyPermissionToProfileIx(
-        new PublicKey(props.publicKey.value),
+        key,
         PointsStorePermissions.empty(),
-        props.expireTime >= 0 ? null : new BN(props.expireTime),
+        expireTime,
       ),
     )
 
   if (props.scope == permissionOptions[3]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addFeePayerPermissionToProfileIx(
-        new PublicKey(props.publicKey.value),
+        key,
         FeePayerPermissions.empty(),
-        props.expireTime >= 0 ? null : new BN(props.expireTime),
+        expireTime,
       ),
     )
 

@@ -59,13 +59,13 @@ const navigationLinksBase: NavigationLinkProps[] = [
   },
   {
     title: 'PlayerProfile',
-    caption: 'Manage and view',
+    caption: 'View and Manage',
     icon: 'person',
     to: '/playerProfile',
   },
   {
     title: 'Portal',
-    caption: 'TokenDeposit and TokenWithdraw',
+    caption: 'Deposit and Withdraw',
     icon: 'door_front',
     to: '/portal',
   },

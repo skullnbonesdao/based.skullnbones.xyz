@@ -54,8 +54,8 @@ import { permissionOptions } from '../../../handler/instructions/ProfileInstruct
             :expire-time="k.expireTime"
             :index="idx"
             :input-permissions="k.permissions"
-            :publicKey="k.key"
-            :scope="k.scope"
+            :publicKey="k.key.toString()"
+            :scope="k.scope.toString()"
           ></PermissionEditable>
         </q-card-section>
       </q-card>
