@@ -3,17 +3,19 @@ import PermissionsAddAccount from 'components/playerProfile/actions/PermissionsA
 import PermissionEditable from 'components/playerProfile/actions/PermissionEditable.vue'
 import { useProfileStore } from 'stores/profileStore'
 import { useGlobalStore } from 'stores/globalStore'
+import LoadingAnimation from 'components/general/LoadingAnimation.vue'
+import { permissionOptions } from '../../../handler/instructions/ProfileInstructionHandler'
 </script>
 
 <template>
   <q-card v-if="useGlobalStore().loading" class="row justify-center items-center" flat>
-    <q-spinner-hourglass color="secondary" size="250px" />
+    <LoadingAnimation />
   </q-card>
 
   <q-card v-else bordered flat>
     <q-card-section class="row items-center q-gutter-md">
       <q-icon name="vpn_key" size="md"></q-icon>
-      <div class="text-h6">Permissions</div>
+      <div class="text-h5">View and edit permissions</div>
     </q-card-section>
 
     <q-card-section v-if="useProfileStore().playerProfile" class="q-gutter-y-md">
@@ -24,6 +26,11 @@ import { useGlobalStore } from 'stores/globalStore'
         class="col"
         flat
       >
+        <q-card-section>
+          <div class="text-h6">
+            {{ permissionOptions.find((p) => p.address == k.scope.toString())?.label }}
+          </div>
+        </q-card-section>
         <q-card-section>
           <div class="row items-center q-gutter-md">
             <div>Key</div>
@@ -53,6 +60,14 @@ import { useGlobalStore } from 'stores/globalStore'
         </q-card-section>
       </q-card>
     </q-card-section>
+  </q-card>
+
+  <q-card v-if="!useGlobalStore().loading" bordered class="q-mt-xl" flat>
+    <q-card-section class="row items-center q-gutter-md">
+      <q-icon name="add_circle_outline" size="md"></q-icon>
+      <div class="text-h5">Add permission</div>
+    </q-card-section>
+
     <q-card-section>
       <PermissionsAddAccount />
     </q-card-section>

@@ -8,6 +8,7 @@ import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import CrewTable from 'components/portal/CrewTable.vue'
+import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -34,7 +35,7 @@ watch(
 </script>
 <template>
   <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
-    <q-spinner-hourglass color="secondary" size="xl" />
+    <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
     <q-select

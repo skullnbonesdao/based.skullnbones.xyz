@@ -22,6 +22,10 @@ import { FeePayerPermissions } from '@staratlas/atlas-prime'
 
 export const permissionOptions = [
   {
+    label: 'PlayerProfile',
+    address: PLAYER_PROFILE_PROGRAM_ID.toString(),
+  },
+  {
     label: 'SagePermission',
     address: SAGE_PROGRAM_ID.toString(),
   },
