@@ -13,6 +13,7 @@ export const PROFILE_FACTION_PROGRAM_ID = new PublicKey(
 export const CARGO_PROGRAM_ID = new PublicKey('Cargo2VNTPPTi9c1vq1Jw5d3BWUNr18MjRtSupAghKEk')
 export const POINTS_PROGRAM_ID = new PublicKey('Point2iBvz7j5TMVef8nEgpmz4pDr7tU7v3RjAfkQbM')
 export const POINTS_STORE_PROGRAM_ID = new PublicKey('PsToRxhEPScGt1Bxpm7zNDRzaMk31t8Aox7fyewoVse')
+export const PROFILE_VAULT_PROGRAM_ID = new PublicKey('pv1ttom8tbyh83C1AVh6QH2naGRdVQUVt3HY1Yst5sv')
 
 export const SAGE_PROGRAM_ID = new PublicKey('SAGE2HAwep459SNq61LHvjxPk4pLPEJLoMETef7f7EE')
 

@@ -7,30 +7,17 @@ import { PublicKey } from '@solana/web3.js'
 import { useProfileStore } from 'stores/profileStore'
 import { getSigner } from 'components/squads/SignerFinder'
 import { getAsyncSigner } from 'src/handler/convert/ToSigner'
-import { POINTS_PROGRAM_ID, POINTS_STORE_PROGRAM_ID, SAGE_PROGRAM_ID } from 'src/handler/constants'
-import { ProfileInstructionHandler } from 'src/handler/instructions/ProfileInstructionHandler'
+import {
+  permissionOptions,
+  ProfileInstructionHandler,
+} from 'src/handler/instructions/ProfileInstructionHandler'
 import { PointsPermissions } from '@staratlas/points'
 import { PointsStorePermissions } from '@staratlas/points-store'
 import { BN } from '@staratlas/anchor'
 import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
 
-const optionsScope = [
-  {
-    label: 'SagePermission',
-    address: SAGE_PROGRAM_ID.toString(),
-  },
-  {
-    label: 'PointsPermission',
-    address: POINTS_PROGRAM_ID.toString(),
-  },
-  {
-    label: 'PointsStorePermission',
-    address: POINTS_STORE_PROGRAM_ID.toString(),
-  },
-]
-
 const inputKey = ref('')
-const inputScope = ref(optionsScope[0])
+const inputScope = ref(permissionOptions[0])
 const inputExpireTime = ref(0)
 const permissions = ref()
 
@@ -39,7 +26,7 @@ async function sendTX() {
   const staratlasIxs = []
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
 
-  if (inputScope.value?.address == optionsScope[0]?.address)
+  if (inputScope.value?.address == permissionOptions[0]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addSageKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),
@@ -48,7 +35,7 @@ async function sendTX() {
       ),
     )
 
-  if (inputScope.value?.address == optionsScope[1]?.address)
+  if (inputScope.value?.address == permissionOptions[1]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),
@@ -57,7 +44,7 @@ async function sendTX() {
       ),
     )
 
-  if (inputScope.value?.address == optionsScope[2]?.address)
+  if (inputScope.value?.address == permissionOptions[2]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsStoreKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),

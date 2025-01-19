@@ -5,7 +5,10 @@ import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 
 import { SagePermissions } from '@staratlas/sage'
 import { PublicKey } from '@solana/web3.js'
-import { ProfileInstructionHandler } from 'src/handler/instructions/ProfileInstructionHandler'
+import {
+  permissionOptions,
+  ProfileInstructionHandler,
+} from 'src/handler/instructions/ProfileInstructionHandler'
 import { useProfileStore } from 'stores/profileStore'
 import { getSigner } from 'components/squads/SignerFinder'
 import { BN } from '@staratlas/anchor'
@@ -14,11 +17,13 @@ import {
   PLAYER_PROFILE_PROGRAM_ID,
   POINTS_PROGRAM_ID,
   POINTS_STORE_PROGRAM_ID,
+  PROFILE_VAULT_PROGRAM_ID,
   SAGE_PROGRAM_ID,
 } from 'src/handler/constants'
 import { PointsPermissions } from '@staratlas/points'
 import { PointsStorePermissions } from '@staratlas/points-store'
 import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
+import { FeePayerPermissions } from '@staratlas/atlas-prime'
 
 const props = defineProps(['index', 'publicKey', 'scope', 'inputPermissions', 'expireTime'])
 
@@ -32,6 +37,8 @@ if (props.scope.toString() == POINTS_PROGRAM_ID.toString())
   permissions.value = PointsPermissions.fromPermissions(props.inputPermissions)
 if (props.scope.toString() == POINTS_STORE_PROGRAM_ID.toString())
   permissions.value = PointsStorePermissions.fromPermissions(props.inputPermissions)
+if (props.scope.toString() == PROFILE_VAULT_PROGRAM_ID.toString())
+  permissions.value = FeePayerPermissions.fromPermissions(props.inputPermissions)
 
 async function sendDelete() {
   const signer = getAsyncSigner()
@@ -58,17 +65,47 @@ async function sendUpdate() {
 
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
 
+  //Remove old permission
   staratlasIxs.push(
     profileInstructionHandler.removeKeyFromProfileIx([props.index, props.index + 1]),
   )
 
-  staratlasIxs.push(
-    profileInstructionHandler.addSageKeyPermissionToProfileIx(
-      new PublicKey(props.publicKey.toString()),
-      permissions.value as never,
-      props.expireTime >= 0 ? null : new BN(props.expireTime),
-    ),
-  )
+  //Add old permission
+  if (props.scope == permissionOptions[0]?.address)
+    staratlasIxs.push(
+      profileInstructionHandler.addSageKeyPermissionToProfileIx(
+        new PublicKey(props.publicKey.value),
+        SagePermissions.empty(),
+        props.expireTime >= 0 ? null : new BN(props.expireTime),
+      ),
+    )
+
+  if (props.scope == permissionOptions[1]?.address)
+    staratlasIxs.push(
+      profileInstructionHandler.addPointsKeyPermissionToProfileIx(
+        new PublicKey(props.publicKey.value),
+        PointsPermissions.empty(),
+        props.expireTime >= 0 ? null : new BN(props.expireTime),
+      ),
+    )
+
+  if (props.scope == permissionOptions[2]?.address)
+    staratlasIxs.push(
+      profileInstructionHandler.addPointsStoreKeyPermissionToProfileIx(
+        new PublicKey(props.publicKey.value),
+        PointsStorePermissions.empty(),
+        props.expireTime >= 0 ? null : new BN(props.expireTime),
+      ),
+    )
+
+  if (props.scope == permissionOptions[3]?.address)
+    staratlasIxs.push(
+      profileInstructionHandler.addFeePayerPermissionToProfileIx(
+        new PublicKey(props.publicKey.value),
+        FeePayerPermissions.empty(),
+        props.expireTime >= 0 ? null : new BN(props.expireTime),
+      ),
+    )
 
   await handleStarAtlasTransaction(
     `Update profile permissions`,

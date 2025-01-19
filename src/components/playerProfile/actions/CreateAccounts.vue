@@ -23,7 +23,7 @@ const enable_createPoints = ref<boolean[]>([])
 
 const factionOptions = [Faction.MUD, Faction.ONI, Faction.Ustur]
 
-const inputName = ref('test')
+const inputName = ref(' ')
 const inputFaction = ref(factionOptions[0])
 
 updateEnables()

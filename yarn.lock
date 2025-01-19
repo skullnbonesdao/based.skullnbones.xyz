@@ -3147,7 +3147,7 @@
     "@wallet-standard/features" "^1.0.3"
     "@wallet-standard/wallet" "^1.0.1"
 
-"@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.56.2", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.70.3", "@solana/web3.js@^1.74.0", "@solana/web3.js@^1.78.5", "@solana/web3.js@^1.95.3", "@solana/web3.js@^1.98.0":
+"@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.56.2", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.70.3", "@solana/web3.js@^1.73.2", "@solana/web3.js@^1.74.0", "@solana/web3.js@^1.78.5", "@solana/web3.js@^1.95.3", "@solana/web3.js@^1.98.0":
   version "1.98.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.98.0.tgz#21ecfe8198c10831df6f0cfde7f68370d0405917"
   integrity sha512-nz3Q5OeyGFpFCR+erX2f6JPt3sKhzhYcSycBCSPkWjzSVDh/Rr1FqTVMRe58FKO16/ivTUcuJjeS5MyBvpkbzA==
@@ -3383,6 +3383,22 @@
     superstruct "^0.15.4"
     toml "^3.0.0"
 
+"@staratlas/atlas-prime@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@staratlas/atlas-prime/-/atlas-prime-0.13.1.tgz#48854a180a265e22d6201eac71ab80a7207cf8e2"
+  integrity sha512-fFMjy0dFUgB+b9m+SZIIMSrrvB+8SVq/wJTFNVzDenr0YrXehbgtkfZWaxpffEAXdp433hbkP9yAArlf+weMPg==
+  dependencies:
+    "@solana/spl-token" "^0.3.7"
+    "@solana/web3.js" "^1.73.2"
+    "@staratlas/anchor" "^0.25.0"
+    "@staratlas/data-source" "^0.7.4"
+    "@staratlas/player-profile" "^0.9.1"
+    "@staratlas/profile-vault" "^0.9.1"
+    "@types/node" "^20.4.5"
+    axios "^1.4.0"
+    bs58 "^5.0.0"
+    neverthrow "^6.0.0"
+
 "@staratlas/cargo@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@staratlas/cargo/-/cargo-1.1.0.tgz#3ded910d1d0330784bdad3c6b8c378cb43cdf80f"
@@ -3458,6 +3474,20 @@
     "@staratlas/player-profile" "^0.11.0"
     "@staratlas/profile-faction" "^0.6.0"
 
+"@staratlas/data-source@^0.7.4":
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/@staratlas/data-source/-/data-source-0.7.7.tgz#3dfcfd30d257068b17648f83abedf35c9bb9863b"
+  integrity sha512-DQfR/a9MXr1Gds/YTR9RylQZlx5gbCe4NjynQ/45je3rnnblNfhma0WoHrSHz/r/lWwJwN7yRwSJkfaDW8QhuQ==
+  dependencies:
+    "@noble/curves" "^1.3.0"
+    "@solana/spl-token" "^0.3.7"
+    "@solana/web3.js" "^1.74.0"
+    "@staratlas/anchor" "^0.25.0"
+    bs58 "^5.0.0"
+    camelcase "^7.0.0"
+    lodash "^4.17.21"
+    neverthrow "^6.0.0"
+
 "@staratlas/data-source@^0.8.0", "@staratlas/data-source@^0.8.3":
   version "0.8.3"
   resolved "https://registry.yarnpkg.com/@staratlas/data-source/-/data-source-0.8.3.tgz#55f91a017e4881f4128d462d18e1f6f0ce0f8626"
@@ -3489,6 +3519,15 @@
     "@solana/web3.js" "^1.74.0"
     "@staratlas/anchor" "^0.25.0"
     "@staratlas/data-source" "^0.8.0"
+
+"@staratlas/player-profile@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@staratlas/player-profile/-/player-profile-0.9.1.tgz#d9e2cc80281a60e7905fed5557a0fbe5ca97b934"
+  integrity sha512-bqPXn6fGl+gg5zZBEK4+/Cv9oriVzrNOTW1Z+6TMFSB/vMsE51DsdyN7BWMkvwfBg2XdHfL9VntlU8j8OYD8jQ==
+  dependencies:
+    "@solana/web3.js" "^1.74.0"
+    "@staratlas/anchor" "^0.25.0"
+    "@staratlas/data-source" "^0.7.4"
 
 "@staratlas/points-store@^1.1.0":
   version "1.1.0"
@@ -3535,6 +3574,17 @@
     "@staratlas/anchor" "^0.25.0"
     "@staratlas/data-source" "^0.8.0"
     "@staratlas/player-profile" "^0.11.0"
+
+"@staratlas/profile-vault@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@staratlas/profile-vault/-/profile-vault-0.9.1.tgz#a8d16bf915ab119fb5f977651b11c2c19e07c306"
+  integrity sha512-nY6t1VTI/kRd/bQLSEeRTqwJ6QWRAC1du6vFN6zufJQyumuuZpmevKNZF1DkrSjZqhe3/2HgyR/ud7d62KGFxg==
+  dependencies:
+    "@solana/spl-token" "^0.3.7"
+    "@solana/web3.js" "^1.74.0"
+    "@staratlas/anchor" "^0.25.0"
+    "@staratlas/data-source" "^0.7.4"
+    "@staratlas/player-profile" "^0.9.1"
 
 "@staratlas/sage@^1.7.1", "@staratlas/sage@^1.8.5":
   version "1.8.5"
@@ -4048,6 +4098,13 @@
   version "12.20.55"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
   integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
+
+"@types/node@^20.4.5":
+  version "20.17.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.17.14.tgz#579e7d75eeb5d46b75c73c98821639e64b689608"
+  integrity sha512-w6qdYetNL5KRBiSClK/KWai+2IMEJuAj+EujKCumalFOwXtvOXaEan9AuwcRID2IcOIAWSIfR495hBtgKlx2zg==
+  dependencies:
+    undici-types "~6.19.2"
 
 "@types/node@^20.5.9":
   version "20.17.10"
@@ -4921,7 +4978,7 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.2.1:
+axios@^1.2.1, axios@^1.4.0:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
@@ -5513,6 +5570,11 @@ camelcase@^5.0.0, camelcase@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
+
+camelcase@^7.0.0:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-7.0.1.tgz#f02e50af9fd7782bc8b88a3558c32fd3a388f048"
+  integrity sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==
 
 camelcase@^8.0.0:
   version "8.0.0"
@@ -8879,6 +8941,11 @@ negotiator@~0.6.4:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.4.tgz#777948e2452651c570b712dd01c23e262713fff7"
   integrity sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w==
+
+neverthrow@^6.0.0:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/neverthrow/-/neverthrow-6.2.2.tgz#1d905abe20ef8882e4b195c7851787aa4553cf0e"
+  integrity sha512-POR1FACqdK9jH0S2kRPzaZEvzT11wsOxLW520PQV/+vKi9dQe+hXq19EiOvYx7lSRaF5VB9lYGsPInynrnN05w==
 
 neverthrow@^8.0.0:
   version "8.1.1"

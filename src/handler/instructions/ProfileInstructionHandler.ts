@@ -14,9 +14,34 @@ import {
   PLAYER_PROFILE_PROGRAM_ID,
   POINTS_PROGRAM_ID,
   POINTS_STORE_PROGRAM_ID,
+  PROFILE_VAULT_PROGRAM_ID,
   SAGE_PROGRAM_ID,
 } from 'src/handler/constants'
 import { PointsStorePermissions } from '@staratlas/points-store'
+import { FeePayerPermissions } from '@staratlas/atlas-prime'
+
+export const permissionOptions = [
+  {
+    label: 'SagePermission',
+    address: SAGE_PROGRAM_ID.toString(),
+  },
+  {
+    label: 'PointsPermission',
+    address: POINTS_PROGRAM_ID.toString(),
+  },
+  {
+    label: 'PointsStorePermission',
+    address: POINTS_STORE_PROGRAM_ID.toString(),
+  },
+  {
+    label: 'PointsStorePermission',
+    address: POINTS_STORE_PROGRAM_ID.toString(),
+  },
+  {
+    label: 'FeePayerPermission',
+    address: PROFILE_VAULT_PROGRAM_ID.toString(),
+  },
+]
 
 export class ProfileInstructionHandler {
   signer: AsyncSigner
@@ -138,6 +163,27 @@ export class ProfileInstructionHandler {
       this.signer,
       useProfileStore()!.playerProfile as PlayerProfile,
       PointsStorePermissions,
+      POINTS_STORE_PROGRAM_ID,
+      [
+        {
+          key: key,
+          permissions: permissions,
+          expireTime: expireTime,
+        },
+      ],
+    )
+  }
+
+  addFeePayerPermissionToProfileIx(
+    key: PublicKey,
+    permissions: FeePayerPermissions,
+    expireTime: BN | null = null,
+  ) {
+    return PlayerProfile.addKeys(
+      useWorkspaceAdapter()!.playerProfileProgram.value,
+      this.signer,
+      useProfileStore()!.playerProfile as PlayerProfile,
+      FeePayerPermissions,
       POINTS_STORE_PROGRAM_ID,
       [
         {
