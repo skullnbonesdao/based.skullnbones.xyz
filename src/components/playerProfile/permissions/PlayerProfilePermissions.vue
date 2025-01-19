@@ -2,10 +2,15 @@
 import PermissionsAddAccount from 'components/playerProfile/actions/PermissionsAddAccount.vue'
 import PermissionEditable from 'components/playerProfile/actions/PermissionEditable.vue'
 import { useProfileStore } from 'stores/profileStore'
+import { useGlobalStore } from 'stores/globalStore'
 </script>
 
 <template>
-  <q-card bordered flat>
+  <q-card v-if="useGlobalStore().loading" class="row justify-center items-center" flat>
+    <q-spinner-hourglass color="secondary" size="250px" />
+  </q-card>
+
+  <q-card v-else bordered flat>
     <q-card-section class="row items-center q-gutter-md">
       <q-icon name="vpn_key" size="md"></q-icon>
       <div class="text-h6">Permissions</div>

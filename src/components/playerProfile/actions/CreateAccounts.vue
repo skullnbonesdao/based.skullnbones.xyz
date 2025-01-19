@@ -175,7 +175,7 @@ async function sendTx() {
                 <q-item-label caption>Create player name</q-item-label>
               </div>
             </div>
-            <q-input v-model="inputName" class="col" dense label="Player name" />
+            <q-input v-model="inputName" class="col" dense label="Player name" standout />
           </div>
         </q-item>
 
@@ -200,6 +200,8 @@ async function sendTx() {
               :options="factionOptions"
               class="col"
               dense
+              label="Faction"
+              standout
             ></q-select>
           </div>
         </q-item>

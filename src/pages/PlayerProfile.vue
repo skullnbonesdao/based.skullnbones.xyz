@@ -6,6 +6,7 @@ import PlayerProfilePermissions from 'components/playerProfile/permissions/Playe
 import CreatePlayerProfile from 'components/playerProfile/actions/CreateAccounts.vue'
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
+import { useGlobalStore } from 'stores/globalStore'
 
 onMounted(async () => {
   await update()
@@ -19,8 +20,10 @@ watch(
 )
 
 async function update() {
+  useGlobalStore().loading_on()
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
+  useGlobalStore().loading_off()
 }
 
 const tab = ref('overview')
