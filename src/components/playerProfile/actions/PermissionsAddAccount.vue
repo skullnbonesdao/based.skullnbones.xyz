@@ -15,6 +15,7 @@ import { PointsPermissions } from '@staratlas/points'
 import { PointsStorePermissions } from '@staratlas/points-store'
 import { BN } from '@staratlas/anchor'
 import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
+import { FeePayerPermissions } from '@staratlas/atlas-prime'
 
 const inputKey = ref('')
 const inputScope = ref(permissionOptions[0])
@@ -26,7 +27,7 @@ async function sendTX() {
   const staratlasIxs = []
   const profileInstructionHandler = new ProfileInstructionHandler(signer)
 
-  if (inputScope.value?.address == permissionOptions[0]?.address)
+  if (inputScope.value?.address == permissionOptions[1]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addSageKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),
@@ -35,7 +36,7 @@ async function sendTX() {
       ),
     )
 
-  if (inputScope.value?.address == permissionOptions[1]?.address)
+  if (inputScope.value?.address == permissionOptions[2]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),
@@ -44,11 +45,20 @@ async function sendTX() {
       ),
     )
 
-  if (inputScope.value?.address == permissionOptions[2]?.address)
+  if (inputScope.value?.address == permissionOptions[3]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsStoreKeyPermissionToProfileIx(
         new PublicKey(inputKey.value),
         PointsStorePermissions.empty(),
+        inputExpireTime.value == 0 ? null : new BN(inputExpireTime.value),
+      ),
+    )
+
+  if (inputScope.value?.address == permissionOptions[4]?.address)
+    staratlasIxs.push(
+      profileInstructionHandler.addFeePayerPermissionToProfileIx(
+        new PublicKey(inputKey.value),
+        FeePayerPermissions.empty(),
         inputExpireTime.value == 0 ? null : new BN(inputExpireTime.value),
       ),
     )

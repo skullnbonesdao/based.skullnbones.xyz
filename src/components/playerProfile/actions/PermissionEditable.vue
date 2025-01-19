@@ -74,12 +74,12 @@ async function sendUpdate() {
   const key = new PublicKey(props.publicKey)
   const expireTime = props.expireTime >= 0 ? null : new BN(props.expireTime)
 
-  if (props.scope == permissionOptions[0]?.address)
+  if (props.scope == permissionOptions[1]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addSageKeyPermissionToProfileIx(key, permissions.value, expireTime),
     )
 
-  if (props.scope == permissionOptions[1]?.address)
+  if (props.scope == permissionOptions[2]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsKeyPermissionToProfileIx(
         key,
@@ -88,7 +88,7 @@ async function sendUpdate() {
       ),
     )
 
-  if (props.scope == permissionOptions[2]?.address)
+  if (props.scope == permissionOptions[3]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addPointsStoreKeyPermissionToProfileIx(
         key,
@@ -97,7 +97,7 @@ async function sendUpdate() {
       ),
     )
 
-  if (props.scope == permissionOptions[3]?.address)
+  if (props.scope == permissionOptions[4]?.address)
     staratlasIxs.push(
       profileInstructionHandler.addFeePayerPermissionToProfileIx(
         key,
