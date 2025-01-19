@@ -5,6 +5,7 @@
         <q-btn aria-label="Menu" dense flat icon="menu" round @click="toggleLeftDrawer" />
 
         <q-img fit="scale-down" src="icon_cut.png" style="max-width: 100px" />
+        <div class="q-mx-xs q-mt-sm">v{{ display_version }}</div>
         <q-space />
         <WalletMultiButton dark />
       </q-toolbar>
@@ -46,10 +47,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { WalletMultiButton } from 'solana-wallets-vue'
-import NavigationLinks, { NavigationLinkProps } from 'components/NavigationLinks.vue'
+import type { NavigationLinkProps } from 'components/NavigationLinks.vue'
+import NavigationLinks from 'components/NavigationLinks.vue'
 import SquadsButton from 'components/squads/SquadsButton.vue'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import RPCSelect from 'components/rpc/RPCSelect.vue'
+import { version } from 'src/../package.json'
+
+const display_version = ref(version)
 
 const navigationLinksBase: NavigationLinkProps[] = [
   {
