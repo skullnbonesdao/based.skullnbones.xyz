@@ -1,4 +1,5 @@
-import { AsyncSigner, createAssociatedTokenAccountIdempotent } from '@staratlas/data-source'
+import type { AsyncSigner } from '@staratlas/data-source'
+import { createAssociatedTokenAccountIdempotent, readAllFromRPC } from '@staratlas/data-source'
 import { SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
 import { BN } from '@staratlas/anchor'
 import { useWorkspaceAdapter } from 'src/handler/connector'
@@ -6,13 +7,19 @@ import { findShipByMint, findStarbasePlayerAddress } from 'src/handler/interface
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { PublicKey } from '@solana/web3.js'
-import {
+import type {
+  AddCrewToGameInput,
   AddShipEscrowInput,
+  CrewTransferInput,
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
 } from '@staratlas/sage'
+import { SageCrewConfig } from '@staratlas/sage'
 import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
+import { useTokenStore } from 'stores/tokenStore'
+import { getCrewProof } from 'stores/interfaces/cNFTInterface'
+import { useRPCStore } from 'stores/rpcStore'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -60,7 +67,7 @@ export class GameInstructionHandler {
         sagePlayerProfile,
         signerShipOrigin,
         originTokenAccount,
-        ship,
+        ship!,
         shipEscrowTokenAccount,
         starbasePlayer,
         starbase,
@@ -111,7 +118,7 @@ export class GameInstructionHandler {
         profileFaction,
         sagePlayerProfile,
         destinationTokenAccount,
-        ship,
+        ship!,
         shipEscrowTokenAccount,
         starbasePlayer,
         starbase,
@@ -130,8 +137,6 @@ export class GameInstructionHandler {
     const ixs = []
 
     const cargoPod = await findCargoPodAddress()
-
-    //  const cargoPod = new PublicKey('6uJuzcGKXiFfCXPkrAx9xzgfUAn8LoAD9ieTs43Um3H9')
 
     const tokenFROM = createAssociatedTokenAccountIdempotent(mint, this.signer.publicKey(), true)
     const tokenTO = createAssociatedTokenAccountIdempotent(mint, cargoPod, true)
@@ -190,8 +195,6 @@ export class GameInstructionHandler {
 
     const cargoPod = await findCargoPodAddress()
 
-    //  const cargoPod = new PublicKey('6uJuzcGKXiFfCXPkrAx9xzgfUAn8LoAD9ieTs43Um3H9')
-
     const tokenFROM = createAssociatedTokenAccountIdempotent(mint, cargoPod, true)
     const tokenTO = createAssociatedTokenAccountIdempotent(mint, this.signer.publicKey(), true)
 
@@ -245,15 +248,66 @@ export class GameInstructionHandler {
     return ixs
   }
 
-  async depositCrewToGameIx() {
+  async depositCrewToGameIx(id: string) {
     const ixs = []
 
-    //TODO: This needs to be implemented
+    const crew = useTokenStore().walletCrewAccounts?.find((c) => c.id.toString() == id)
+    const proof = await getCrewProof(new PublicKey(id))
 
-    /*ixs.push(
+    console.log('crew', crew)
+    console.log('proof', proof)
+
+    const items = [
+      {
+        merkleTree: new PublicKey(proof.tree_id),
+        creatorHash: new PublicKey(crew!.compression.creator_hash),
+        root: new PublicKey(proof.root),
+        dataHash: new PublicKey(id),
+        leafIndex: proof.node_index,
+        proof: proof.proof.flatMap((p) => new PublicKey(p)),
+      },
+    ] as CrewTransferInput[]
+
+    console.log('items', items)
+
+    const crewConfig = await readAllFromRPC(
+      useRPCStore().connection,
+      useWorkspaceAdapter()?.sageProgram.value!,
+      SageCrewConfig,
+      'confirmed',
+    )
+
+    console.log('crewConfig', crewConfig)
+
+    const program = useWorkspaceAdapter()!.sageProgram.value!
+    const playerProfile = useProfileStore().playerProfileAddress!
+    const profileFaction = useProfileStore().factionProfileAddress!
+    const crewOwner = this.signer
+    const starbasePlayer = findStarbasePlayerAddress()
+    const starbase = useGameStore().starbase!.key
+    const crewProgramConfig = new PublicKey('4ZaW8ecxSP13NTC9SyTTJ2s2s2jexp9cDwGuuZrphQcd')
+    const gameId = useGameStore().gameID
+
+    const input = {
+      items: items,
+    } as AddCrewToGameInput
+
+    //const crewDelegate = getSigner()
+
+    ixs.push(
       SagePlayerProfile.addCrewToGame(
+        program,
+        playerProfile,
+        profileFaction,
+        crewOwner,
+        starbasePlayer,
+        starbase,
+        crewProgramConfig,
+        gameId,
+        input,
+      ),
+    )
 
-      )
-    )*/
+    return ixs
   }
 }

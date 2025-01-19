@@ -1,6 +1,16 @@
+import { PublicKey } from '@solana/web3.js'
+
+export interface cNFTProof {
+  root: PublicKey
+  proof: PublicKey[]
+  node_index: number
+  leaf: PublicKey
+  tree_id: PublicKey
+}
+
 export interface cNFT {
   interface: string
-  id: string
+  id: PublicKey
   content: Content
   authorities: Authority[]
   compression: Compression
@@ -21,10 +31,10 @@ export interface Authority {
 export interface Compression {
   eligible: boolean
   compressed: boolean
-  data_hash: string
-  creator_hash: string
-  asset_hash: string
-  tree: string
+  data_hash: PublicKey
+  creator_hash: PublicKey
+  asset_hash: PublicKey
+  tree: PublicKey
   seq: number
   leaf_id: number
 }

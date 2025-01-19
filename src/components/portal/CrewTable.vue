@@ -98,6 +98,7 @@ const columns = [
 </script>
 
 <template>
+  {{ rows[0] }}
   <q-table
     :columns="columns"
     :filter="filter"
@@ -163,12 +164,12 @@ const columns = [
 
         <CrewDeposit
           v-if="props.col.name == 'action' && direction == 'deposit'"
-          :mint="props.row.mint"
+          :id="props.row.id"
         ></CrewDeposit>
 
         <CrewWithdraw
           v-if="props.col.name == 'action' && direction == 'withdraw'"
-          :mint="props.row.mint"
+          :id="props.row.id"
         ></CrewWithdraw>
       </q-td>
     </template>

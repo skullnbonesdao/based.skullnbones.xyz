@@ -33,7 +33,10 @@ watch(
 )
 </script>
 <template>
-  <q-page class="">
+  <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
+    <q-spinner-hourglass color="secondary" size="xl" />
+  </q-page>
+  <q-page v-else class="">
     <q-select
       v-model="useGameStore().starbase"
       :option-label="(value) => byteArrayToString(value.data.name)"
