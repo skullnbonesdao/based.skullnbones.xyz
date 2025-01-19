@@ -9,6 +9,7 @@
         <q-space />
         <WalletMultiButton dark />
       </q-toolbar>
+      <q-separator />
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" bordered class="bg-primary" show-if-above>

@@ -38,10 +38,6 @@ export const permissionOptions = [
     address: POINTS_STORE_PROGRAM_ID.toString(),
   },
   {
-    label: 'PointsStorePermission',
-    address: POINTS_STORE_PROGRAM_ID.toString(),
-  },
-  {
     label: 'FeePayerPermission',
     address: PROFILE_VAULT_PROGRAM_ID.toString(),
   },
@@ -188,7 +184,7 @@ export class ProfileInstructionHandler {
       this.signer,
       useProfileStore()!.playerProfile as PlayerProfile,
       FeePayerPermissions,
-      POINTS_STORE_PROGRAM_ID,
+      PROFILE_VAULT_PROGRAM_ID,
       [
         {
           key: key,
