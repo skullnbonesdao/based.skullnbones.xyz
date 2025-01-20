@@ -25,6 +25,12 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/Portal.vue') }],
   },
 
+  {
+    path: '/fleet',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/FleetBuilder.vue') }],
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
