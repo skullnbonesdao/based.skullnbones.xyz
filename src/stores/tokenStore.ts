@@ -27,8 +27,10 @@ export const useTokenStore = defineStore('tokenStore', {
   state: () => ({
     staratlasNFTs: undefined as PublicKey | undefined,
     walletTokenAccounts: undefined as TokenAccount[] | undefined,
-    walletCrewAccounts: undefined as cNFT[] | undefined,
     gameTokenAccounts: undefined as TokenAccount[] | undefined,
+
+    walletCrewAccounts: undefined as cNFT[] | undefined,
+    gameCrewAccounts: undefined as cNFT[] | undefined,
   }),
 
   actions: {
@@ -41,6 +43,7 @@ export const useTokenStore = defineStore('tokenStore', {
         )
 
         this.walletCrewAccounts = await searchCrewByOwner(getSigner())
+        this.gameCrewAccounts = await searchCrewByOwner(useProfileStore().sageProfileAddress!)
       } catch (err) {
         console.error(`[${this.$id}]`, err)
       } finally {

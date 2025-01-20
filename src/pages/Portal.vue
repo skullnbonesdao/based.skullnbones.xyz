@@ -88,19 +88,39 @@ watch(
       <TokenTable
         v-if="
           useTokenStore().walletTokenAccounts &&
-          (tabItemType == 'ship' || tabItemType == 'resource')
+          (tabItemType == 'ship' || tabItemType == 'resource') &&
+          tabDirection == 'deposit'
         "
         :direction="tabDirection"
         :item-type="tabItemType"
         :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
       />
 
+      <TokenTable
+        v-if="
+          useTokenStore().gameTokenAccounts &&
+          (tabItemType == 'ship' || tabItemType == 'resource') &&
+          tabDirection == 'withdraw'
+        "
+        :direction="tabDirection"
+        :item-type="tabItemType"
+        :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+      />
+
       <CrewTable
         v-if="
-          tabDirection == 'deposit' && useTokenStore().walletCrewAccounts && tabItemType == 'crew'
+          useTokenStore().walletCrewAccounts && tabItemType == 'crew' && tabDirection == 'deposit'
         "
         :direction="tabDirection"
         :rows="useTokenStore().walletCrewAccounts!"
+      />
+
+      <CrewTable
+        v-if="
+          useTokenStore().gameCrewAccounts && tabItemType == 'crew' && tabDirection == 'withdraw'
+        "
+        :direction="tabDirection"
+        :rows="useTokenStore().gameCrewAccounts!"
       />
     </div>
   </q-page>

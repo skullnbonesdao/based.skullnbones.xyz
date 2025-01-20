@@ -1,11 +1,11 @@
-import { PublicKey } from '@solana/web3.js'
+import type { PublicKey } from '@solana/web3.js'
 
 export interface cNFTProof {
-  root: PublicKey
+  nodeIndex: number
+  leafId: PublicKey
   proof: PublicKey[]
-  node_index: number
-  leaf: PublicKey
-  tree_id: PublicKey
+  root: PublicKey
+  merkleTree: PublicKey
 }
 
 export interface cNFT {

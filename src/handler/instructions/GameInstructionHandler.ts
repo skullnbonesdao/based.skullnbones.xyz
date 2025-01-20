@@ -18,8 +18,8 @@ import { SageCrewConfig } from '@staratlas/sage'
 import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
 import { useTokenStore } from 'stores/tokenStore'
-import { getCrewProof } from 'stores/interfaces/cNFTInterface'
 import { useRPCStore } from 'stores/rpcStore'
+import { getCrewProof } from 'stores/interfaces/cNFTInterface'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -253,18 +253,21 @@ export class GameInstructionHandler {
 
     const crew = useTokenStore().walletCrewAccounts?.find((c) => c.id.toString() == id)
     const proof = await getCrewProof(new PublicKey(id))
+    //const url = 'https://mainnet.helius-rpc.com/?api-key=63494a33-7e60-487d-97d5-b1cc16f899a7'
 
+    //const proofs = await getAssetProofs(url, [new PublicKey(id)], false)
+    //const proof = proofs[0]!
     console.log('crew', crew)
     console.log('proof', proof)
 
     const items = [
       {
-        merkleTree: new PublicKey(proof.tree_id),
         creatorHash: new PublicKey(crew!.compression.creator_hash),
-        root: new PublicKey(proof.root),
-        dataHash: new PublicKey(id),
-        leafIndex: proof.node_index,
-        proof: proof.proof.flatMap((p) => new PublicKey(p)),
+        dataHash: new PublicKey(crew!.compression.data_hash),
+        leafIndex: crew!.compression.leaf_id,
+        merkleTree: proof.merkleTree,
+        root: proof.root,
+        proof: proof.proof.slice(0, 5),
       },
     ] as CrewTransferInput[]
 

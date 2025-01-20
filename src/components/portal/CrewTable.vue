@@ -98,7 +98,6 @@ const columns = [
 </script>
 
 <template>
-  {{ rows[0] }}
   <q-table
     :columns="columns"
     :filter="filter"

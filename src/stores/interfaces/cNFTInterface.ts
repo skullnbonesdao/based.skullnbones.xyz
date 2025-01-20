@@ -1,5 +1,5 @@
 import type { cNFT, cNFTProof } from 'stores/interfaces/cNFT'
-import type { PublicKey } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 
 export async function getCrewProof(crew: PublicKey) {
   //const url = 'https://rpc.shyft.to?api_key=OmPgW85HNcfF-a-9'
@@ -15,12 +15,21 @@ export async function getCrewProof(crew: PublicKey) {
       id: 'my-id',
       method: 'getAssetProof',
       params: {
-        id: crew.toString(),
+        id: crew.toBase58(),
       },
     }),
   })
-  const data = await response.json()
-  return data.result as cNFTProof
+  const result = (await response.json()).result
+
+  const proofs: cNFTProof = {
+    nodeIndex: result.node_index,
+    leafId: new PublicKey(result.leaf),
+    proof: result.proof.map((p: never) => new PublicKey(p)),
+    root: new PublicKey(result.root),
+    merkleTree: new PublicKey(result.tree_id),
+  }
+
+  return proofs
 }
 
 export async function searchCrewByOwner(owner: PublicKey) {

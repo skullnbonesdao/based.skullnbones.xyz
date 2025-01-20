@@ -16,9 +16,11 @@ async function sendTx() {
   const feeInstructionHandler = new FeeInstructionHandler(signer)
 
   try {
+    /* staratlasIxs.push(
+       ixToIxReturn(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 426 })),
+     )
+     staratlasIxs.push(ixToIxReturn(ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })))*/
     staratlasIxs.push(...(await gameInstructionHandler.depositCrewToGameIx(props.id.toString())))
-
-    console.log('staratlasIxs', staratlasIxs)
 
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
@@ -27,11 +29,11 @@ async function sendTx() {
         signer,
         feeInstructionHandler.transferFeeIx('DEFAULT'),
       )
-  } catch (error: any) {
+  } catch (error: unknown) {
     $q.notify({
       type: 'warning',
       message: 'warning',
-      caption: error.toString(),
+      caption: error!.toString(),
       position: 'bottom-right',
     })
   }

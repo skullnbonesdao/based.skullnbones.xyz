@@ -3,6 +3,7 @@ import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { useQuasar } from 'quasar'
+import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
 
 const props = defineProps(['id'])
 
@@ -11,16 +12,28 @@ const $q = useQuasar()
 async function sendTx() {
   const signer = getAsyncSigner()
   const staratlasIxs = []
-  const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
+  const gameInstructionHandler = new GameInstructionHandler(signer)
+  const feeInstructionHandler = new FeeInstructionHandler(signer)
 
   try {
-    throw new Error('not implemented')
-    await handleStarAtlasTransaction(`Instructions Deposit`, staratlasIxs, signer)
-  } catch (error: any) {
+    /* staratlasIxs.push(
+       ixToIxReturn(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 426 })),
+     )
+     staratlasIxs.push(ixToIxReturn(ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })))*/
+    staratlasIxs.push(...(await gameInstructionHandler.depositCrewToGameIx(props.id.toString())))
+
+    if (staratlasIxs.length > 0)
+      await handleStarAtlasTransaction(
+        `Instructions Withdraw`,
+        staratlasIxs,
+        signer,
+        feeInstructionHandler.transferFeeIx('DEFAULT'),
+      )
+  } catch (error: unknown) {
     $q.notify({
       type: 'warning',
       message: 'warning',
-      caption: error.toString(),
+      caption: error!.toString(),
       position: 'bottom-right',
     })
   }
@@ -28,7 +41,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn color="primary" icon-right="call_made" label="Deposit" @click="sendTx"></q-btn>
+  <q-btn color="primary" icon-right="call_received" label="Withdraw" @click="sendTx"></q-btn>
 </template>
 
 <style scoped></style>

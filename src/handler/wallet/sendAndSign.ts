@@ -53,11 +53,9 @@ export async function handleStarAtlasTransaction(
         feeInstruction,
         ephemeralSigners,
       )
-
       await sendSquadsAndCheck(tx, notif)
     } else {
       const tx = await prepareWalletTransaction(instructions, feePayer, feeInstruction)
-
       await sendWalletAndCheck(tx, retryInterval, maxRetries, notif)
     }
   } catch (error) {
@@ -78,6 +76,23 @@ async function prepareWalletTransaction(
   feePayer: AsyncSigner,
   feeInstruction: TransactionInstruction | undefined,
 ) {
+  /*
+    const inst = []
+    const d = await buildDynamicTransactionsNoSigning(instructions, feePayer)
+
+    d.map((instructionsWithSignersAndLUTs: InstructionsWithSignersAndLUTs[]) => {
+      instructionsWithSignersAndLUTs.forEach((inner) =>
+        inner.instructions.forEach((instruction) => {
+          inst.push(instruction.instruction)
+        }),
+      )
+    })
+
+    console.log('instructions', instructions)
+    console.log('d', d)
+    console.log('inst', inst)
+  */
+
   const LUT = (
     await useRPCStore().connection.getAddressLookupTable(
       new PublicKey('5NrYTRkLRsSSJGgfX2vNRbSXiEFi9yUHV5n7bs7VM9P2'),
@@ -91,8 +106,10 @@ async function prepareWalletTransaction(
       connection: useRPCStore().connection,
       commitment: 'confirmed',
     },
-    [LUT!],
+    //[LUT!],
   )
+
+  console.log('TX', tx)
 
   return tx
 }
