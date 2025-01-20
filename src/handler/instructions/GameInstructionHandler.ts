@@ -1,5 +1,5 @@
 import type { AsyncSigner } from '@staratlas/data-source'
-import { createAssociatedTokenAccountIdempotent, readAllFromRPC } from '@staratlas/data-source'
+import { createAssociatedTokenAccountIdempotent } from '@staratlas/data-source'
 import { SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
 import { BN } from '@staratlas/anchor'
 import { useWorkspaceAdapter } from 'src/handler/connector'
@@ -15,11 +15,9 @@ import type {
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
 } from '@staratlas/sage'
-import { SageCrewConfig } from '@staratlas/sage'
 import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
 import { useTokenStore } from 'stores/tokenStore'
-import { useRPCStore } from 'stores/rpcStore'
 import { getCrewProof } from 'stores/interfaces/cNFTInterface'
 
 export class GameInstructionHandler {
@@ -254,12 +252,6 @@ export class GameInstructionHandler {
 
     const crew = useTokenStore().walletCrewAccounts?.find((c) => c.id.toString() == id)
     const proof = await getCrewProof(new PublicKey(id))
-    //const url = 'https://mainnet.helius-rpc.com/?api-key=63494a33-7e60-487d-97d5-b1cc16f899a7'
-
-    //const proofs = await getAssetProofs(url, [new PublicKey(id)], false)
-    //const proof = proofs[0]!
-    console.log('crew', crew)
-    console.log('proof', proof)
 
     const items = [
       {
@@ -271,17 +263,6 @@ export class GameInstructionHandler {
         proof: proof.proof.slice(0, 5),
       },
     ] as CrewTransferInput[]
-
-    console.log('items', items)
-
-    const crewConfig = await readAllFromRPC(
-      useRPCStore().connection,
-      useWorkspaceAdapter()!.sageProgram.value!,
-      SageCrewConfig,
-      'confirmed',
-    )
-
-    console.log('crewConfig', crewConfig)
 
     const program = useWorkspaceAdapter()!.sageProgram.value!
     const playerProfile = useProfileStore().playerProfileAddress!
@@ -296,7 +277,7 @@ export class GameInstructionHandler {
       items: items,
     } as AddCrewToGameInput
 
-    //const crewDelegate = getSigner()
+    const crewDelegate = undefined
 
     ixs.push(
       SagePlayerProfile.addCrewToGame(
@@ -309,6 +290,7 @@ export class GameInstructionHandler {
         crewProgramConfig,
         gameId,
         input,
+        crewDelegate,
       ),
     )
 
@@ -331,17 +313,6 @@ export class GameInstructionHandler {
         proof: proof.proof.slice(0, 5),
       },
     ] as CrewTransferInput[]
-
-    console.log('items', items)
-
-    const crewConfig = await readAllFromRPC(
-      useRPCStore().connection,
-      useWorkspaceAdapter()!.sageProgram.value!,
-      SageCrewConfig,
-      'confirmed',
-    )
-
-    console.log('crewConfig', crewConfig)
 
     const program = useWorkspaceAdapter()!.sageProgram.value!
     const key = this.signer

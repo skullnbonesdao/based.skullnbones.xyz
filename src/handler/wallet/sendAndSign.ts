@@ -1,16 +1,13 @@
+import { PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import {
-  PublicKey,
-  TransactionInstruction,
-  TransactionMessage,
-  VersionedTransaction,
-} from '@solana/web3.js'
-import type {
   AsyncSigner,
+  buildAndSignTransaction,
+  buildDynamicTransactionsNoSigning,
   InstructionReturn,
   InstructionsWithSignersAndLUTs,
+  ixToIxReturn,
   TransactionReturn,
 } from '@staratlas/data-source'
-import { buildAndSignTransaction, buildDynamicTransactionsNoSigning } from '@staratlas/data-source'
 import { err, ok } from 'neverthrow'
 import {
   isVersionedTransaction,
@@ -22,12 +19,13 @@ import { useRPCStore } from 'stores/rpcStore'
 import * as multisig from '@sqds/multisig'
 import { useWallet } from 'solana-wallets-vue'
 import { getSigner } from 'components/squads/SignerFinder'
+import { FEE_TYPES, FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
 
 export async function handleStarAtlasTransaction(
   label = 'Unlabeled transaction',
-  instructions: InstructionReturn | InstructionReturn[],
+  saInstructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
-  feeInstruction: TransactionInstruction | undefined,
+  fee: FEE_TYPES,
   ephemeralSigners: number = 0,
   retryInterval = 3000,
   maxRetries = 10,
@@ -45,17 +43,17 @@ export async function handleStarAtlasTransaction(
       caption: `Waiting for user to sign...`,
     })
 
+    const saInstructionsArray = Array.isArray(saInstructions) ? saInstructions : [saInstructions]
+    const instructions = [
+      ...saInstructionsArray,
+      ixToIxReturn(new FeeInstructionHandler(feePayer).transferFeeIx(fee)),
+    ]
+
     if (useSquadsStore().useSquads) {
-      const tx = await prepareSquadsTransaction(
-        instructions,
-        feePayer,
-        label,
-        feeInstruction,
-        ephemeralSigners,
-      )
+      const tx = await prepareSquadsTransaction(instructions, feePayer, label, ephemeralSigners)
       await sendSquadsAndCheck(tx, notif)
     } else {
-      const tx = await prepareWalletTransaction(instructions, feePayer, feeInstruction)
+      const tx = await prepareWalletTransaction(instructions, feePayer)
       await sendWalletAndCheck(tx, retryInterval, maxRetries, notif)
     }
   } catch (error) {
@@ -74,25 +72,7 @@ export async function handleStarAtlasTransaction(
 async function prepareWalletTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
-  feeInstruction: TransactionInstruction | undefined,
 ) {
-  /*
-    const inst = []
-    const d = await buildDynamicTransactionsNoSigning(instructions, feePayer)
-
-    d.map((instructionsWithSignersAndLUTs: InstructionsWithSignersAndLUTs[]) => {
-      instructionsWithSignersAndLUTs.forEach((inner) =>
-        inner.instructions.forEach((instruction) => {
-          inst.push(instruction.instruction)
-        }),
-      )
-    })
-
-    console.log('instructions', instructions)
-    console.log('d', d)
-    console.log('inst', inst)
-  */
-
   const LUT = (
     await useRPCStore().connection.getAddressLookupTable(
       new PublicKey('5NrYTRkLRsSSJGgfX2vNRbSXiEFi9yUHV5n7bs7VM9P2'),
@@ -106,7 +86,7 @@ async function prepareWalletTransaction(
       connection: useRPCStore().connection,
       commitment: 'confirmed',
     },
-    //[LUT!],
+    [LUT!],
   )
 
   console.log('TX', tx)
@@ -118,7 +98,6 @@ async function prepareSquadsTransaction(
   instructions: InstructionReturn | InstructionReturn[],
   feePayer: AsyncSigner,
   label: string,
-  feeInstruction: TransactionInstruction | undefined,
   ephemeralSigners: number = 0,
 ) {
   const blockhash = await useRPCStore().connection.getLatestBlockhash()
@@ -150,8 +129,6 @@ async function prepareSquadsTransaction(
       }),
     )
   })
-
-  if (feeInstruction) transactionMessage.instructions.push(feeInstruction)
 
   await useSquadsStore().update()
   console.log(transactionMessage)

@@ -3,6 +3,7 @@ import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { useQuasar } from 'quasar'
+import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 
 const props = defineProps(['mint', 'amount', 'itemType'])
 
@@ -28,12 +29,17 @@ async function sendTx() {
     }
 
     if (staratlasIxs.length > 0)
-      await handleStarAtlasTransaction(`Instructions Withdraw`, staratlasIxs, signer)
-  } catch (error: any) {
+      await handleStarAtlasTransaction(
+        `Instructions Withdraw`,
+        staratlasIxs,
+        signer,
+        FEE_TYPES.DEFAULT_FEE,
+      )
+  } catch (error: unknown) {
     $q.notify({
       type: 'warning',
       message: 'warning',
-      caption: error.toString(),
+      caption: error!.toString(),
       position: 'bottom-right',
     })
   }

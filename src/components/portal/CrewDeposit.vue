@@ -3,7 +3,7 @@ import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { useQuasar } from 'quasar'
-import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
+import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 
 const props = defineProps(['id'])
 
@@ -13,7 +13,6 @@ async function sendTx() {
   const signer = getAsyncSigner()
   const staratlasIxs = []
   const gameInstructionHandler = new GameInstructionHandler(signer)
-  const feeInstructionHandler = new FeeInstructionHandler(signer)
 
   try {
     /* staratlasIxs.push(
@@ -27,7 +26,7 @@ async function sendTx() {
         `Instructions Deposit`,
         staratlasIxs,
         signer,
-        feeInstructionHandler.transferFeeIx('DEFAULT'),
+        FEE_TYPES.DEFAULT_FEE,
       )
   } catch (error: unknown) {
     $q.notify({

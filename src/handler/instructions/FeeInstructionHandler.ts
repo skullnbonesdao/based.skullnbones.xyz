@@ -11,6 +11,11 @@ const BASE_FEE = 0
 const CRATE_FEE = 0 //1 * LAMPORTS
 const FEE_WALLET = new PublicKey('feeYA2tAXP7a38Dcf43Xap4CxxzAaSWZ28NT3Xpx8Hm')
 
+export enum FEE_TYPES {
+  'DEFAULT_FEE',
+  'CREATE_FEE',
+}
+
 export class FeeInstructionHandler {
   signer: AsyncSigner
 
@@ -18,9 +23,9 @@ export class FeeInstructionHandler {
     this.signer = signer
   }
 
-  transferFeeIx(feeType: 'CREATE' | 'DEFAULT') {
+  transferFeeIx(feeType: FEE_TYPES) {
     let amount = BASE_FEE
-    if (feeType === 'CREATE') {
+    if (feeType === FEE_TYPES.CREATE_FEE) {
       amount = CRATE_FEE
     }
 
