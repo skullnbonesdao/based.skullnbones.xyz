@@ -11,6 +11,7 @@ import type {
   AddCrewToGameInput,
   AddShipEscrowInput,
   CrewTransferInput,
+  RemoveCrewFromGameInput,
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
 } from '@staratlas/sage'
@@ -275,7 +276,7 @@ export class GameInstructionHandler {
 
     const crewConfig = await readAllFromRPC(
       useRPCStore().connection,
-      useWorkspaceAdapter()?.sageProgram.value!,
+      useWorkspaceAdapter()!.sageProgram.value!,
       SageCrewConfig,
       'confirmed',
     )
@@ -308,6 +309,70 @@ export class GameInstructionHandler {
         crewProgramConfig,
         gameId,
         input,
+      ),
+    )
+
+    return ixs
+  }
+
+  async withdrawCrewFromGameIx(id: string) {
+    const ixs = []
+
+    const crew = useTokenStore().gameCrewAccounts?.find((c) => c.id.toString() == id)
+    const proof = await getCrewProof(new PublicKey(id))
+
+    const items = [
+      {
+        creatorHash: new PublicKey(crew!.compression.creator_hash),
+        dataHash: new PublicKey(crew!.compression.data_hash),
+        leafIndex: crew!.compression.leaf_id,
+        merkleTree: proof.merkleTree,
+        root: proof.root,
+        proof: proof.proof.slice(0, 5),
+      },
+    ] as CrewTransferInput[]
+
+    console.log('items', items)
+
+    const crewConfig = await readAllFromRPC(
+      useRPCStore().connection,
+      useWorkspaceAdapter()!.sageProgram.value!,
+      SageCrewConfig,
+      'confirmed',
+    )
+
+    console.log('crewConfig', crewConfig)
+
+    const program = useWorkspaceAdapter()!.sageProgram.value!
+    const key = this.signer
+    const playerProfile = useProfileStore().playerProfileAddress!
+    const profileFaction = useProfileStore().factionProfileAddress!
+    const newCrewOwner = this.signer.publicKey()
+    const starbasePlayer = findStarbasePlayerAddress()
+    const starbase = useGameStore().starbase!.key
+    const crewProgramConfig = new PublicKey('4ZaW8ecxSP13NTC9SyTTJ2s2s2jexp9cDwGuuZrphQcd')
+    const gameId = useGameStore().gameID
+
+    const input = {
+      items: items,
+      keyIndex: 0,
+    } as RemoveCrewFromGameInput
+
+    const crewDelegate = undefined
+
+    ixs.push(
+      SagePlayerProfile.removeCrewFromGame(
+        program,
+        key,
+        playerProfile,
+        profileFaction,
+        newCrewOwner,
+        starbasePlayer,
+        starbase,
+        crewProgramConfig,
+        gameId,
+        input,
+        crewDelegate,
       ),
     )
 

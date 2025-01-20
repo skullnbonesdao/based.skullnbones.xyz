@@ -20,15 +20,14 @@ async function sendTx() {
        ixToIxReturn(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 426 })),
      )
      staratlasIxs.push(ixToIxReturn(ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })))*/
-    staratlasIxs.push(...(await gameInstructionHandler.depositCrewToGameIx(props.id.toString())))
+    staratlasIxs.push(...(await gameInstructionHandler.withdrawCrewFromGameIx(props.id.toString())))
 
-    if (staratlasIxs.length > 0)
-      await handleStarAtlasTransaction(
-        `Instructions Withdraw`,
-        staratlasIxs,
-        signer,
-        feeInstructionHandler.transferFeeIx('DEFAULT'),
-      )
+    await handleStarAtlasTransaction(
+      `Instructions Withdraw`,
+      staratlasIxs,
+      signer,
+      feeInstructionHandler.transferFeeIx('DEFAULT'),
+    )
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',
