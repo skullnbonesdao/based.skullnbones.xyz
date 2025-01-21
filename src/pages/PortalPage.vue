@@ -9,6 +9,7 @@ import TokenTable from 'components/portal/TokenTable.vue'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import CrewTable from 'components/portal/CrewTable.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
+import { Faction } from '@staratlas/profile-faction'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -32,6 +33,21 @@ watch(
     await useTokenStore().updateStore(getSigner())
   },
 )
+
+watch(
+  () => useGameStore().starbases,
+  () => {
+    useGameStore().starbase = useGameStore().starbases!.find(
+      (starbase) =>
+        byteArrayToString(starbase.data.name).toLowerCase().includes('Central'.toLowerCase()) &&
+        byteArrayToString(starbase.data.name)
+          .toLowerCase()
+          .includes(
+            (Faction[useProfileStore().factionProfile?.data.faction ?? 0] ?? 'none').toLowerCase(),
+          ),
+    )
+  },
+)
 </script>
 <template>
   <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
@@ -40,6 +56,7 @@ watch(
   <q-page v-else class="">
     <q-select
       v-model="useGameStore().starbase"
+      :disable="true"
       :option-label="(value) => byteArrayToString(value.data.name)"
       :options="
         useGameStore().starbases?.filter((starbase) =>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import TimestampFormatter from 'components/formatter/TimestampFormatter.vue'
+import { Faction } from '@staratlas/profile-faction'
 
 defineProps(['label', 'account'])
 </script>
@@ -18,6 +19,9 @@ defineProps(['label', 'account'])
             v-if="data[0] == 'createdAt'"
             :unix-timestamp="data[1]"
           ></TimestampFormatter>
+          <div v-else-if="data[0] == 'faction'">
+            {{ Faction[data[1] as number] }}
+          </div>
           <div v-else>{{ data[1] }}</div>
         </div>
       </q-card-section>
