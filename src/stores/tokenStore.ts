@@ -23,6 +23,7 @@ export interface TokenAccount {
   uiAmount: number
   itemType: string
   uiAmountSelected: number
+  thumbnailUrl: string
 }
 
 export interface StarbaseTokenAccount extends TokenAccount {
@@ -125,6 +126,8 @@ function toTokenAccount<T>(
       name: tokenList.find((tl) => tl.mint == mint)?.name,
       symbol: tokenList.find((tl) => tl.mint == mint)?.symbol,
       itemType: tokenList.find((tl) => tl.mint == mint)?.itemType,
+      thumbnailUrl: tokenList.find((tl) => tl.mint == mint)?.thumbnailUrl,
+
       key: new PublicKey(account.pubkey.toString()),
       mint: new PublicKey(mint),
 

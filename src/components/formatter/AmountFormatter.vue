@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { formatNumber } from './formatNumer'
 
-const props = defineProps(['number', 'decimals', 'padStart'])
+const props = defineProps(['number', 'decimals', 'padStart', 'url'])
 
 const styledNumber = computed(() => {
   // Regular expression to separate leading zeros
@@ -29,7 +29,12 @@ const styledNumber = computed(() => {
 </script>
 
 <template>
-  <div v-html="styledNumber"></div>
+  <div class="col row q-gutter-x-sm justify-end">
+    <div v-html="styledNumber"></div>
+    <q-avatar size="xs">
+      <q-img :src="url" />
+    </q-avatar>
+  </div>
 </template>
 
 <style lang="sass" scoped></style>
