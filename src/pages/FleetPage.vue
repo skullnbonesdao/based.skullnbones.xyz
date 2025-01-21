@@ -8,7 +8,7 @@ import { useTokenStore } from 'stores/tokenStore'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 import FleetCreateView from 'components/fleet/FleetCreateView.vue'
-import { findStarbasePlayerAddress } from 'src/handler/interfaces/GameInterface'
+import FleetTable from 'components/fleet/FleetTable.vue'
 
 const tabAction = ref('manage')
 
@@ -63,9 +63,7 @@ watch(
         <q-tab label="Create" name="create"></q-tab>
       </q-tabs>
 
-      {{ useGameStore().fleets }}
-      <div>====</div>
-      {{ findStarbasePlayerAddress() }}
+      <FleetTable v-if="tabAction == 'manage'" :rows="useGameStore().fleets" />
 
       <FleetCreateView v-if="tabAction == 'create'" />
     </div>
