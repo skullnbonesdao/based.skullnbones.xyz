@@ -80,46 +80,65 @@ export class GameInstructionHandler {
   async withdrawShipFromGameIx(mint: PublicKey, amount: number) {
     const ixs = []
 
-    const tokenFROM = createAssociatedTokenAccountIdempotent(
-      mint,
-      useProfileStore().sageProfileAddress!,
-      true,
-    )
-    const tokenTO = createAssociatedTokenAccountIdempotent(mint, this.signer.publicKey(), true)
+    let amountIncluded = 0
+    let amountToTransfer = 0
 
-    if (!(await checkAccountExists(tokenTO.address))) {
-      ixs.push(tokenTO.instructions)
+    while (amountIncluded < amount) {
+      console.log('hello')
+      const wrappedShipEscrow = useTokenStore()
+        .gameTokenAccounts?.filter((gTA) => gTA.itemType == 'ship')
+        ?.find((gTA) => gTA.mint.toString() == mint.toString())
+        ?.wrappedShipEscrows.sort((a, b) => a.amount.toNumber() - b.amount.toNumber())
+        .at(0)
+
+      amountToTransfer =
+        wrappedShipEscrow!.amount.toNumber() > amount
+          ? amount
+          : wrappedShipEscrow!.amount.toNumber()
+
+      const tokenFROM = createAssociatedTokenAccountIdempotent(
+        mint,
+        useProfileStore().sageProfileAddress!,
+        true,
+      )
+      const tokenTO = createAssociatedTokenAccountIdempotent(mint, this.signer.publicKey(), true)
+
+      if (!(await checkAccountExists(tokenTO.address))) {
+        ixs.push(tokenTO.instructions)
+      }
+
+      const destinationTokenAccount = tokenTO.address
+      const ship = findShipByMint(mint)
+      const shipEscrowTokenAccount = tokenFROM.address
+
+      const input = {
+        shipAmount: new BN(amountToTransfer),
+        permissionKeyIndex: 0,
+        shipEscrowIndex: useGameStore().starbasePlayer?.wrappedShipEscrows.findIndex(
+          (wse) =>
+            wse.ship.toString() == ship?.toString() && wse.amount == wrappedShipEscrow?.amount,
+        ),
+      } as RemoveShipEscrowInput
+
+      ixs.push(
+        SagePlayerProfile.removeShipEscrow(
+          this.getSageProgram(),
+          this.signer,
+          this.getPlayerProfileAddress(),
+          this.getProfileFactionAddress(),
+          this.getSageProfileAddress(),
+          destinationTokenAccount,
+          ship!,
+          shipEscrowTokenAccount,
+          this.getStarbasePlayerAddress(),
+          this.getStarbaseAddress(),
+          this.getGameId(),
+          this.getGameState(),
+          input,
+        ),
+      )
+      amountIncluded += amountToTransfer
     }
-
-    const destinationTokenAccount = tokenTO.address
-    const ship = findShipByMint(mint)
-    const shipEscrowTokenAccount = tokenFROM.address
-
-    const input = {
-      shipAmount: new BN(amount),
-      permissionKeyIndex: 0,
-      shipEscrowIndex: useGameStore().starbasePlayer?.wrappedShipEscrows.findIndex(
-        (wse) => wse.ship.toString() == ship?.toString() && wse.amount.toNumber() == amount,
-      ),
-    } as RemoveShipEscrowInput
-
-    ixs.push(
-      SagePlayerProfile.removeShipEscrow(
-        this.getSageProgram(),
-        this.signer,
-        this.getPlayerProfileAddress(),
-        this.getProfileFactionAddress(),
-        this.getSageProfileAddress(),
-        destinationTokenAccount,
-        ship!,
-        shipEscrowTokenAccount,
-        this.getStarbasePlayerAddress(),
-        this.getStarbaseAddress(),
-        this.getGameId(),
-        this.getGameState(),
-        input,
-      ),
-    )
     return ixs
   }
 
