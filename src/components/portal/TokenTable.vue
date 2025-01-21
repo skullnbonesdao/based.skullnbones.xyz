@@ -78,6 +78,8 @@ if (props.action)
     :filter="filter"
     :pagination="{
       rowsPerPage: 0,
+      sortBy: 'name',
+      descending: true,
     }"
     :rows="rows"
     :selection="selection"

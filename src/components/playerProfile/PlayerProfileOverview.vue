@@ -25,7 +25,7 @@ import { getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
 
         <AccountExpansionItem :account="useProfileStore().factionProfile" label="Faction Profile" />
 
-        <AccountExpansionItem :account="useProfileStore().sageProfile" label="Faction Profile" />
+        <AccountExpansionItem :account="useProfileStore().sageProfile" label="Sage Profile" />
 
         <AccountExpansionItem
           v-for="(point, idx) in useProfileStore().points"

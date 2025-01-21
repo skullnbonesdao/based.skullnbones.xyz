@@ -4,6 +4,8 @@ import { GameInstructionHandler } from 'src/handler/instructions/GameInstruction
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { useQuasar } from 'quasar'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
+import { useTokenStore } from 'stores/tokenStore'
+import { useGameStore } from 'stores/gameStore'
 
 const props = defineProps(['mint', 'amount', 'itemType'])
 
@@ -35,6 +37,8 @@ async function sendTx() {
         signer,
         FEE_TYPES.DEFAULT_FEE,
       )
+    await useGameStore().updateStarbasePlayer()
+    await useTokenStore().updateStore(signer.publicKey())
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',

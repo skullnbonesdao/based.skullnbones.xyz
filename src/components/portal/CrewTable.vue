@@ -103,6 +103,8 @@ const columns = [
     :filter="filter"
     :pagination="{
       rowsPerPage: 0,
+      sortBy: 'name',
+      descending: true,
     }"
     :rows="rows"
     flat

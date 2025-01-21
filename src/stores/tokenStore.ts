@@ -43,7 +43,9 @@ export const useTokenStore = defineStore('tokenStore', {
   actions: {
     async updateStore(wallet: PublicKey) {
       try {
-        this.walletTokenAccounts = toTokenAccount<TokenAccount>(await getAccounts([wallet]))
+        this.walletTokenAccounts = toTokenAccount<TokenAccount>(await getAccounts([wallet])).filter(
+          (account) => account.uiAmount > 0,
+        )
 
         this.gameTokenAccounts = toTokenAccount<StarbaseTokenAccount>(
           await getAccounts([await findCargoPodAddress(), useProfileStore().sageProfileAddress!]),
@@ -102,6 +104,7 @@ async function getAccounts(addresses: PublicKey[]): Promise<
             },
           },
         ],
+        commitment: 'confirmed',
       }),
     ),
   )
