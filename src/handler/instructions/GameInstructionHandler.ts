@@ -1,5 +1,8 @@
-import type { AsyncSigner } from '@staratlas/data-source'
-import { createAssociatedTokenAccountIdempotent } from '@staratlas/data-source'
+import {
+  AsyncSigner,
+  createAssociatedTokenAccountIdempotent,
+  stringToByteArray,
+} from '@staratlas/data-source'
 import { SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
 import { BN } from '@staratlas/anchor'
 import { useWorkspaceAdapter } from 'src/handler/connector'
@@ -7,10 +10,12 @@ import { findShipByMint, findStarbasePlayerAddress } from 'src/handler/interface
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { PublicKey } from '@solana/web3.js'
-import type {
+import {
   AddCrewToGameInput,
   AddShipEscrowInput,
   CrewTransferInput,
+  CustomCreateFleetInput,
+  Fleet,
   RemoveCrewFromGameInput,
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
@@ -349,4 +354,59 @@ export class GameInstructionHandler {
 
     return ixs
   }
+
+  createNewFleetIx(shipMint: PublicKey, shipAmount: number, fleetName: string) {
+    if (!fleetName.length) throw Error('Fleet name can not be empty!')
+
+    const ixs = []
+
+    const shipAmountChunks = chunkShipAmounts(shipAmount)
+    const fleetLabel = stringToByteArray(fleetName, 32)
+
+    const program = useWorkspaceAdapter()!.sageProgram.value!
+    const cargoProgram = useWorkspaceAdapter()!.cargoProgram.value!
+    const key = this.signer
+    const playerProfile = useProfileStore().playerProfileAddress!
+    const profileFaction = useProfileStore().factionProfileAddress!
+    const ship = findShipByMint(shipMint)!
+    const starbasePlayer = findStarbasePlayerAddress()
+    const starbase = useGameStore().starbase!.key
+    const gameId = useGameStore().gameID
+    const gameState = useGameStore().game!.data.gameState
+    const cargoStatsDefinition = useGameStore().cargoStatsDefinition
+
+    const input = {
+      shipAmount: shipAmountChunks[0],
+      shipEscrowIndex: 0,
+      fleetLabel: fleetLabel,
+      keyIndex: 0,
+    } as CustomCreateFleetInput
+
+    ixs.push(
+      Fleet.createFleet(
+        program,
+        cargoProgram,
+        key,
+        playerProfile,
+        profileFaction,
+        ship,
+        starbasePlayer,
+        starbase,
+        gameId,
+        gameState,
+        cargoStatsDefinition,
+        input,
+      ),
+    )
+
+    return ixs
+  }
+}
+
+const chunkShipAmounts = (amount: number, max = 254) => {
+  const chunks = [...Array(Math.floor(amount / max)).keys()].map(() => max)
+  if (amount % max > 0) {
+    chunks.push(amount % max)
+  }
+  return chunks
 }

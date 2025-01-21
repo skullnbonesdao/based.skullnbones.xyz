@@ -7,6 +7,7 @@ import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
+import FleetCreate from 'components/fleet/FleetCreate.vue'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -56,6 +57,8 @@ watch(
 
     <InfoBanner v-if="!useGameStore().starbase" message="Please select a starabse" />
 
-    <div v-if="useGameStore().starbase">dad</div>
+    <div v-if="useGameStore().starbase">
+      <FleetCreate />
+    </div>
   </q-page>
 </template>

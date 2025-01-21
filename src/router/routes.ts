@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/playerProfile',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/PlayerProfile.vue') }],
+    children: [{ path: '', component: () => import('pages/PlayerProfilePage.vue') }],
   },
 
   {
@@ -22,13 +22,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/portal',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/Portal.vue') }],
+    children: [{ path: '', component: () => import('pages/PortalPage.vue') }],
   },
 
   {
     path: '/fleet',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/FleetBuilder.vue') }],
+    children: [{ path: '', component: () => import('pages/FleetPage.vue') }],
   },
 
   // Always leave this as last one,
