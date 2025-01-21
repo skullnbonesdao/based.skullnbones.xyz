@@ -17,6 +17,7 @@ import {
   CustomCreateFleetInput,
   Fleet,
   RemoveCrewFromGameInput,
+  RemoveShipEscrowInput,
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
 } from '@staratlas/sage'
@@ -46,18 +47,11 @@ export class GameInstructionHandler {
       ixs.push(tokenTO.instructions)
     }
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
-    const sagePlayerProfile = useProfileStore().sageProfileAddress!
     const signerShipOrigin = this.signer
     const originTokenAccount = tokenFROM.address
     const ship = findShipByMint(mint)
     const shipEscrowTokenAccount = tokenTO.address
-    const starbasePlayer = findStarbasePlayerAddress()
-    const starbase = useGameStore().starbase!.key
-    const gameID = useGameStore().gameID
-    const gameState = useGameStore().game!.data.gameState
+
     const input = {
       shipAmount: new BN(amount),
       index: null,
@@ -65,25 +59,25 @@ export class GameInstructionHandler {
 
     ixs.push(
       SagePlayerProfile.addShipEscrow(
-        program,
-        playerProfile,
-        profileFaction,
-        sagePlayerProfile,
+        this.getSageProgram(),
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        this.getSageProfileAddress(),
         signerShipOrigin,
         originTokenAccount,
         ship!,
         shipEscrowTokenAccount,
-        starbasePlayer,
-        starbase,
-        gameID,
-        gameState,
+        this.getStarbasePlayerAddress(),
+        this.getStarbaseAddress(),
+        this.getGameId(),
+        this.getGameState(),
         input,
       ),
     )
     return ixs
   }
 
-  async withdrawShipToGameIx(mint: PublicKey, amount: number) {
+  async withdrawShipFromGameIx(mint: PublicKey, amount: number) {
     const ixs = []
 
     const tokenFROM = createAssociatedTokenAccountIdempotent(
@@ -97,37 +91,32 @@ export class GameInstructionHandler {
       ixs.push(tokenTO.instructions)
     }
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const key = this.signer
-    const profile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
-    const sagePlayerProfile = useProfileStore().sageProfileAddress!
     const destinationTokenAccount = tokenTO.address
     const ship = findShipByMint(mint)
     const shipEscrowTokenAccount = tokenFROM.address
-    const starbasePlayer = findStarbasePlayerAddress()
-    const starbase = useGameStore().starbase!.key
-    const gameID = useGameStore().gameID
-    const gameState = useGameStore().game!.data.gameState
+
     const input = {
       shipAmount: new BN(amount),
-      index: null,
-    } as AddShipEscrowInput
+      permissionKeyIndex: 0,
+      shipEscrowIndex: useGameStore().starbasePlayer?.wrappedShipEscrows.findIndex(
+        (wse) => wse.ship.toString() == ship?.toString() && wse.amount.toNumber() == amount,
+      ),
+    } as RemoveShipEscrowInput
 
     ixs.push(
       SagePlayerProfile.removeShipEscrow(
-        program,
-        key,
-        profile,
-        profileFaction,
-        sagePlayerProfile,
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        this.getSageProfileAddress(),
         destinationTokenAccount,
         ship!,
         shipEscrowTokenAccount,
-        starbasePlayer,
-        starbase,
-        gameID,
-        gameState,
+        this.getStarbasePlayerAddress(),
+        this.getStarbaseAddress(),
+        this.getGameId(),
+        this.getGameState(),
         input,
       ),
     )
@@ -149,20 +138,12 @@ export class GameInstructionHandler {
       ixs.push(tokenTO.instructions)
     }
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const cargoProgram = useWorkspaceAdapter()!.cargoProgram.value!
-
-    const starbasePlayer = findStarbasePlayerAddress()
     const key = this.signer
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
-    const starbase = useGameStore().starbase!.key
     const cargoStatsDefinition = useGameStore().cargoStatsDefinition
     const cargoType = findCargoTypeAddress(cargoStatsDefinition, mint)
     const tokenFrom = tokenFROM.address
     const tokenTo = tokenTO.address
-    const gameId = useGameStore().gameID
-    const gameState = useGameStore().game!.data.gameState
+
     const input = {
       amount: new BN(amount),
       keyIndex: 0,
@@ -170,20 +151,20 @@ export class GameInstructionHandler {
 
     ixs.push(
       StarbasePlayer.depositCargoToGame(
-        program,
-        cargoProgram,
-        starbasePlayer,
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getStarbasePlayerAddress(),
         key,
-        playerProfile,
-        profileFaction,
-        starbase,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        this.getStarbaseAddress(),
         cargoPod,
         cargoType,
         cargoStatsDefinition,
         tokenFrom,
         tokenTo,
-        gameId,
-        gameState,
+        this.getGameId(),
+        this.getGameState(),
         input,
       ),
     )
@@ -206,22 +187,13 @@ export class GameInstructionHandler {
       ixs.push(tokenTO.instructions)
     }
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const cargoProgram = useWorkspaceAdapter()!.cargoProgram.value!
-
-    const starbasePlayer = findStarbasePlayerAddress()
     const key = this.signer
     const fundsTo = this.signer.publicKey()
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
-    const starbase = useGameStore().starbase!.key
     const cargoStatsDefinition = useGameStore().cargoStatsDefinition
     const cargoType = findCargoTypeAddress(cargoStatsDefinition, mint)
     const tokenFrom = tokenFROM.address
     const tokenTo = tokenTO.address
     const tokenMint = mint
-    const gameId = useGameStore().gameID
-    const gameState = useGameStore().game!.data.gameState
     const input = {
       amount: new BN(amount),
       keyIndex: 0,
@@ -229,22 +201,22 @@ export class GameInstructionHandler {
 
     ixs.push(
       StarbasePlayer.withdrawCargoFromGame(
-        program,
-        cargoProgram,
-        starbasePlayer,
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getStarbasePlayerAddress(),
         key,
         fundsTo,
-        playerProfile,
-        profileFaction,
-        starbase,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        this.getStarbaseAddress(),
         cargoPod,
         cargoType,
         cargoStatsDefinition,
         tokenFrom,
         tokenTo,
         tokenMint,
-        gameId,
-        gameState,
+        this.getGameId(),
+        this.getGameState(),
         input,
       ),
     )
@@ -269,14 +241,8 @@ export class GameInstructionHandler {
       },
     ] as CrewTransferInput[]
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
     const crewOwner = this.signer
-    const starbasePlayer = findStarbasePlayerAddress()
-    const starbase = useGameStore().starbase!.key
     const crewProgramConfig = new PublicKey('4ZaW8ecxSP13NTC9SyTTJ2s2s2jexp9cDwGuuZrphQcd')
-    const gameId = useGameStore().gameID
 
     const input = {
       items: items,
@@ -286,14 +252,14 @@ export class GameInstructionHandler {
 
     ixs.push(
       SagePlayerProfile.addCrewToGame(
-        program,
-        playerProfile,
-        profileFaction,
+        this.getSageProgram(),
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
         crewOwner,
-        starbasePlayer,
-        starbase,
+        this.getStarbasePlayerAddress(),
+        this.getStarbaseAddress(),
         crewProgramConfig,
-        gameId,
+        this.getGameId(),
         input,
         crewDelegate,
       ),
@@ -319,15 +285,8 @@ export class GameInstructionHandler {
       },
     ] as CrewTransferInput[]
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const key = this.signer
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
     const newCrewOwner = this.signer.publicKey()
-    const starbasePlayer = findStarbasePlayerAddress()
-    const starbase = useGameStore().starbase!.key
     const crewProgramConfig = new PublicKey('4ZaW8ecxSP13NTC9SyTTJ2s2s2jexp9cDwGuuZrphQcd')
-    const gameId = useGameStore().gameID
 
     const input = {
       items: items,
@@ -338,15 +297,15 @@ export class GameInstructionHandler {
 
     ixs.push(
       SagePlayerProfile.removeCrewFromGame(
-        program,
-        key,
-        playerProfile,
-        profileFaction,
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
         newCrewOwner,
-        starbasePlayer,
-        starbase,
+        this.getStarbasePlayerAddress(),
+        this.getStarbaseAddress(),
         crewProgramConfig,
-        gameId,
+        this.getGameId(),
         input,
         crewDelegate,
       ),
@@ -363,18 +322,6 @@ export class GameInstructionHandler {
     const shipAmountChunks = chunkShipAmounts(shipAmount)
     const fleetLabel = stringToByteArray(fleetName, 32)
 
-    const program = useWorkspaceAdapter()!.sageProgram.value!
-    const cargoProgram = useWorkspaceAdapter()!.cargoProgram.value!
-    const key = this.signer
-    const playerProfile = useProfileStore().playerProfileAddress!
-    const profileFaction = useProfileStore().factionProfileAddress!
-    const ship = findShipByMint(shipMint)!
-    const starbasePlayer = findStarbasePlayerAddress()
-    const starbase = useGameStore().starbase!.key
-    const gameId = useGameStore().gameID
-    const gameState = useGameStore().game!.data.gameState
-    const cargoStatsDefinition = useGameStore().cargoStatsDefinition
-
     const input = {
       shipAmount: shipAmountChunks[0],
       shipEscrowIndex: 0,
@@ -382,25 +329,85 @@ export class GameInstructionHandler {
       keyIndex: 0,
     } as CustomCreateFleetInput
 
-    ixs.push(
-      Fleet.createFleet(
-        program,
-        cargoProgram,
-        key,
-        playerProfile,
-        profileFaction,
-        ship,
-        starbasePlayer,
-        starbase,
-        gameId,
-        gameState,
-        cargoStatsDefinition,
-        input,
-      ),
+    const createFleet = Fleet.createFleet(
+      this.getSageProgram(),
+      this.getCargoProgram(),
+      this.signer,
+      this.getPlayerProfileAddress(),
+      this.getProfileFactionAddress(),
+      findShipByMint(shipMint)!,
+      findStarbasePlayerAddress(),
+      this.getStarbaseAddress(),
+      this.getGameId(),
+      this.getGameState(),
+      this.getCargoStatsDefinition(),
+      input,
     )
+
+    ixs.push(createFleet.instructions)
 
     return ixs
   }
+
+  private getSageProgram = () =>
+    useWorkspaceAdapter()?.sageProgram.value ??
+    (() => {
+      throw new Error('no sageProgram set')
+    })()
+
+  private getCargoProgram = () =>
+    useWorkspaceAdapter()?.cargoProgram.value ??
+    (() => {
+      throw new Error('no cargoProgram set')
+    })()
+
+  private getPlayerProfileAddress = () =>
+    useProfileStore()?.playerProfileAddress ??
+    (() => {
+      throw new Error('no playerProfileAddress set')
+    })()
+
+  private getSageProfileAddress = () =>
+    useProfileStore()?.sageProfileAddress ??
+    (() => {
+      throw new Error('no sageProfileAddress set')
+    })()
+
+  private getProfileFactionAddress = () =>
+    useProfileStore()?.factionProfileAddress ??
+    (() => {
+      throw new Error('no factionProfileAddress set')
+    })()
+
+  private getStarbaseAddress = () =>
+    useGameStore().starbase!.key ??
+    (() => {
+      throw new Error('no starbase set')
+    })()
+
+  private getStarbasePlayerAddress = () =>
+    findStarbasePlayerAddress() ??
+    (() => {
+      throw new Error('no starbase set')
+    })()
+
+  private getGameId = () =>
+    useGameStore().gameID ??
+    (() => {
+      throw new Error('no gameId set')
+    })()
+
+  private getGameState = () =>
+    useGameStore().game!.data.gameState ??
+    (() => {
+      throw new Error('no gameState set')
+    })()
+
+  private getCargoStatsDefinition = () =>
+    useGameStore().cargoStatsDefinition ??
+    (() => {
+      throw new Error('no cargoStatsDefinition set')
+    })()
 }
 
 const chunkShipAmounts = (amount: number, max = 254) => {

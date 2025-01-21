@@ -86,7 +86,7 @@ async function prepareWalletTransaction(
       connection: useRPCStore().connection,
       commitment: 'confirmed',
     },
-    [LUT!],
+    //[LUT!],
   )
 
   console.log('TX', tx)

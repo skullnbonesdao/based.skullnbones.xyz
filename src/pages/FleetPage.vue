@@ -7,10 +7,10 @@ import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
-import FleetCreate from 'components/fleet/FleetCreate.vue'
+import FleetCreateView from 'components/fleet/FleetCreateView.vue'
+import { findStarbasePlayerAddress } from 'src/handler/interfaces/GameInterface'
 
-const tabDirection = ref('deposit')
-const tabItemType = ref('ship')
+const tabAction = ref('manage')
 
 onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
@@ -55,10 +55,19 @@ watch(
       </template>
     </q-select>
 
-    <InfoBanner v-if="!useGameStore().starbase" message="Please select a starabse" />
+    <InfoBanner v-if="!useGameStore().starbase" message="Please select a starbase" />
 
     <div v-if="useGameStore().starbase">
-      <FleetCreate />
+      <q-tabs v-model="tabAction" active-bg-color="secondary" align="justify" inline-label>
+        <q-tab label="Manage" name="manage"></q-tab>
+        <q-tab label="Create" name="create"></q-tab>
+      </q-tabs>
+
+      {{ useGameStore().fleets }}
+      <div>====</div>
+      {{ findStarbasePlayerAddress() }}
+
+      <FleetCreateView v-if="tabAction == 'create'" />
     </div>
   </q-page>
 </template>

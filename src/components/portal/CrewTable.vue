@@ -10,7 +10,7 @@ const props = defineProps({
     type: {} as PropType<cNFT[]>,
     required: true,
   },
-  direction: {
+  action: {
     type: String,
   },
 })
@@ -162,12 +162,12 @@ const columns = [
         </div>
 
         <CrewDeposit
-          v-if="props.col.name == 'action' && direction == 'deposit'"
+          v-if="props.col.name == 'action' && action == 'deposit'"
           :id="props.row.id"
         ></CrewDeposit>
 
         <CrewWithdraw
-          v-if="props.col.name == 'action' && direction == 'withdraw'"
+          v-if="props.col.name == 'action' && action == 'withdraw'"
           :id="props.row.id"
         ></CrewWithdraw>
       </q-td>

@@ -28,7 +28,7 @@ watch(
 watch(
   () => useGameStore().starbase,
   async () => {
-    await useGameStore().updateStore()
+    await useGameStore().updateStarbasePlayer()
     await useTokenStore().updateStore(getSigner())
   },
 )
@@ -91,7 +91,7 @@ watch(
           (tabItemType == 'ship' || tabItemType == 'resource') &&
           tabDirection == 'deposit'
         "
-        :direction="tabDirection"
+        :action="tabDirection"
         :item-type="tabItemType"
         :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
       />
@@ -102,7 +102,7 @@ watch(
           (tabItemType == 'ship' || tabItemType == 'resource') &&
           tabDirection == 'withdraw'
         "
-        :direction="tabDirection"
+        :action="tabDirection"
         :item-type="tabItemType"
         :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
       />
@@ -111,7 +111,7 @@ watch(
         v-if="
           useTokenStore().walletCrewAccounts && tabItemType == 'crew' && tabDirection == 'deposit'
         "
-        :direction="tabDirection"
+        :action="tabDirection"
         :rows="useTokenStore().walletCrewAccounts!"
       />
 
@@ -119,7 +119,7 @@ watch(
         v-if="
           useTokenStore().gameCrewAccounts && tabItemType == 'crew' && tabDirection == 'withdraw'
         "
-        :direction="tabDirection"
+        :action="tabDirection"
         :rows="useTokenStore().gameCrewAccounts!"
       />
     </div>

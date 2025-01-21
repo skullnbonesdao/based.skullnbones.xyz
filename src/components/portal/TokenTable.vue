@@ -1,14 +1,30 @@
 <script lang="ts" setup>
-import type { TokenAccount } from 'stores/tokenStore'
+import { TokenAccount, useTokenStore } from 'stores/tokenStore'
 import TokenDeposit from 'components/portal/TokenDeposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
-import { ref } from 'vue'
+import { type PropType, ref } from 'vue'
 import TokenWithdraw from 'components/portal/TokenWithdraw.vue'
 
-const props = defineProps(['rows', 'itemType', 'direction'])
+const props = defineProps({
+  rows: {
+    type: {} as PropType<TokenAccount[]>,
+    required: true,
+  },
+  itemType: {
+    type: String,
+  },
+  action: {
+    type: String,
+  },
+  selection: {
+    type: String,
+    default: undefined,
+  },
+})
+
 const filter = ref()
 
-const columns = [
+const columns = ref([
   {
     name: 'symbol',
     required: true,
@@ -41,25 +57,30 @@ const columns = [
     field: (row: TokenAccount) => row.uiAmountSelected,
     sortable: false,
   },
-  {
+])
+
+if (props.action)
+  columns.value.push({
     name: 'action',
     required: true,
     label: 'Action',
     align: 'right',
     field: (row: TokenAccount) => row.uiAmountSelected,
     sortable: false,
-  },
-]
+  })
 </script>
 
 <template>
   <q-table
+    v-if="props.rows"
+    v-model:selected="useTokenStore().gameTokenAccountsSelected"
     :columns="columns"
     :filter="filter"
     :pagination="{
       rowsPerPage: 0,
     }"
     :rows="rows"
+    :selection="selection"
     flat
     hide-bottom
     row-key="name"
@@ -94,14 +115,14 @@ const columns = [
         />
 
         <TokenDeposit
-          v-else-if="props.col.name == 'action' && direction == 'deposit'"
+          v-else-if="props.col.name == 'action' && action == 'deposit'"
           :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
           :item-type="itemType"
           :mint="props.row.mint"
         ></TokenDeposit>
 
         <TokenWithdraw
-          v-else-if="props.col.name == 'action' && direction == 'withdraw'"
+          v-else-if="props.col.name == 'action' && action == 'withdraw'"
           :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
           :item-type="itemType"
           :mint="props.row.mint"

@@ -13,7 +13,6 @@ async function sendTx() {
   const signer = getAsyncSigner()
   const staratlasIxs = []
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
-
   try {
     switch (props.itemType) {
       case 'ship':
@@ -47,7 +46,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn color="primary" icon-right="call_made" label="Deposit" @click="sendTx"></q-btn>
+  <q-btn color="primary" icon-right="call_made" label="Deposit" @click.prevent="sendTx"></q-btn>
 </template>
 
 <style scoped></style>

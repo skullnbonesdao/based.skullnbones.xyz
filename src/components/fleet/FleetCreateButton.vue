@@ -1,12 +1,13 @@
 <script lang="ts" setup>
+import { useTokenStore } from 'stores/tokenStore'
+import { useQuasar } from 'quasar'
 import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
-import { useQuasar } from 'quasar'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
+import { ref } from 'vue'
 
-const props = defineProps(['mint', 'amount', 'itemType'])
-
+const inputFleetName = ref('test')
 const $q = useQuasar()
 
 async function sendTx() {
@@ -15,19 +16,12 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    switch (props.itemType) {
-      case 'ship':
-        staratlasIxs.push(
-          ...(await gameInstructionHandler.withdrawShipFromGameIx(props.mint, props.amount)),
-        )
-        break
-      case 'resource':
-        staratlasIxs.push(
-          ...(await gameInstructionHandler.withdrawCargoFromGameIx(props.mint, props.amount)),
-        )
-        break
-    }
+    const shipMint = useTokenStore()!.gameTokenAccountsSelected![0]!.mint
+    const shipAmount = useTokenStore()!.gameTokenAccountsSelected![0]!.uiAmountSelected
 
+    staratlasIxs.push(
+      ...gameInstructionHandler.createNewFleetIx(shipMint, shipAmount, inputFleetName.value),
+    )
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
         `Instructions Withdraw`,
@@ -47,7 +41,8 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn color="primary" icon-right="call_received" label="Withdraw" @click="sendTx"></q-btn>
+  <q-input v-model="inputFleetName" label="Fleet Name" />
+  <q-btn class="full-width" color="primary" label="Form new fleet" @click.prevent="sendTx" />
 </template>
 
 <style scoped></style>

@@ -3,7 +3,7 @@ import { SagePlayerProfile } from '@staratlas/sage/src'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { readAllFromRPC, readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
-import { Game, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
+import { Fleet, Game, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
 import { useGameStore } from 'stores/gameStore'
 import { useProfileStore } from 'stores/profileStore'
 
@@ -16,6 +16,7 @@ export function findSageProfileAddress(profileAddress: PublicKey, gameID: Public
 }
 
 export function findStarbasePlayerAddress() {
+  if (!useGameStore().starbase) throw Error('starbase is not set')
   return StarbasePlayer.findAddress(
     useWorkspaceAdapter()!.sageProgram.value,
     useGameStore().starbase!.key,
@@ -78,7 +79,38 @@ export async function loadShips() {
   return ships
 }
 
+export async function loadFleets() {
+  const fleets: Fleet[] = []
+  const temp = await useRPCStore().connection.getProgramAccounts(
+    useWorkspaceAdapter()!.sageProgram.value!.programId,
+    {
+      filters: [
+        {
+          memcmp: {
+            offset: 8 + 1 + 32, // number of bytes
+            bytes: useProfileStore().playerProfileAddress!.toBase58(),
+          },
+        },
+      ],
+    },
+  )
+
+  for (const fleet of temp) {
+    fleets.push(
+      await readFromRPCOrError(
+        useRPCStore().connection,
+        useWorkspaceAdapter()!.sageProgram.value!,
+        fleet.pubkey,
+        Fleet,
+      ),
+    )
+  }
+  return fleets
+}
+
 export function findShipByMint(mint: PublicKey) {
+  if (!useGameStore().ships) throw Error(`ships not set`)
+
   return useGameStore().ships?.find(
     (ship) =>
       ship.data.mint.toString() == mint.toString() &&
