@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import { ref, watch } from 'vue'
+import HeaderBanner from 'components/general/HeaderBanner.vue'
 
 const newMultisigLabel = ref('')
 const newMultisigPDA = ref()
@@ -15,10 +16,11 @@ watch(
 
 <template>
   <q-page class="bg-black">
+    <HeaderBanner text="Squad.so Integration" />
+
     <q-card flat>
       <q-card-section class="row items-center q-gutter-x-md">
-        <q-icon name="diversity_3" size="md" />
-        <div class="col text-h6">Squads.so Integration</div>
+        <q-space />
         <q-btn
           :href="useSquadsStore().getLink"
           color="primary"

@@ -4,7 +4,7 @@ import {
   readFromRPCOrError,
   stringToByteArray,
 } from '@staratlas/data-source'
-import { SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
+import { FleetShips, SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
 import { BN } from '@staratlas/anchor'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { findShipByMint, findStarbasePlayerAddress } from 'src/handler/interfaces/GameInterface'
@@ -17,13 +17,14 @@ import {
   AddShipToFleetInput,
   CrewTransferInput,
   CustomCreateFleetInput,
+  DisbandedFleet,
+  DisbandedFleetToEscrowInput,
   DisbandFleetInput,
   Fleet,
   RemoveCrewFromGameInput,
   RemoveShipEscrowInput,
   StarbaseDepositCargoToGameInput,
   StarbaseWithdrawCargoFromGameInput,
-  WrappedShipEscrow,
 } from '@staratlas/sage'
 import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interfaces/CargoInterface'
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
@@ -38,12 +39,16 @@ export class GameInstructionHandler {
     this.signer = signer
   }
 
-  async depositShipToGameIx(mint: PublicKey, amount: number) {
+  async depositShipToGameIx(shipMint: PublicKey, amount: number) {
     const ixs = []
 
-    const tokenFROM = createAssociatedTokenAccountIdempotent(mint, this.signer.publicKey(), true)
+    const tokenFROM = createAssociatedTokenAccountIdempotent(
+      shipMint,
+      this.signer.publicKey(),
+      true,
+    )
     const tokenTO = createAssociatedTokenAccountIdempotent(
-      mint,
+      shipMint,
       useProfileStore().sageProfileAddress!,
       true,
     )
@@ -54,7 +59,7 @@ export class GameInstructionHandler {
 
     const signerShipOrigin = this.signer
     const originTokenAccount = tokenFROM.address
-    const ship = findShipByMint(mint)
+    const ship = this.getShipByMint(shipMint)
     const shipEscrowTokenAccount = tokenTO.address
 
     const input = {
@@ -89,7 +94,6 @@ export class GameInstructionHandler {
     let amountToTransfer = 0
 
     while (amountIncluded < amount) {
-      console.log('hello')
       const wrappedShipEscrow = this.getShipEscrow(shipMint)
 
       amountToTransfer =
@@ -113,13 +117,12 @@ export class GameInstructionHandler {
       }
 
       const destinationTokenAccount = tokenTO.address
-      const ship = findShipByMint(shipMint)!
       const shipEscrowTokenAccount = tokenFROM.address
 
       const input = {
         shipAmount: new BN(amountToTransfer),
         permissionKeyIndex: 0,
-        shipEscrowIndex: this.getShipEscrowIndex(ship, wrappedShipEscrow),
+        shipEscrowIndex: this.getShipEscrowIndex(shipMint),
       } as RemoveShipEscrowInput
 
       ixs.push(
@@ -130,7 +133,7 @@ export class GameInstructionHandler {
           this.getProfileFactionAddress(),
           this.getSageProfileAddress(),
           destinationTokenAccount,
-          ship,
+          this.getShipByMint(shipMint),
           shipEscrowTokenAccount,
           this.getStarbasePlayerAddress(),
           this.getStarbaseAddress(),
@@ -345,7 +348,7 @@ export class GameInstructionHandler {
 
     const input = {
       shipAmount: shipAmountChunks[0],
-      shipEscrowIndex: 0,
+      shipEscrowIndex: this.getShipEscrowIndex(shipMint),
       fleetLabel: fleetLabel,
       keyIndex: 0,
     } as CustomCreateFleetInput
@@ -373,12 +376,9 @@ export class GameInstructionHandler {
   addShipsToFleetIx(fleetKey: PublicKey, shipMint: PublicKey, shipAmount: number) {
     const ixs = []
 
-    const wrappedShipEscrow = this.getShipEscrow(shipMint)
-    const ship = findShipByMint(shipMint)!
-
     const input = {
       shipAmount: shipAmount,
-      shipEscrowIndex: this.getShipEscrowIndex(ship, wrappedShipEscrow),
+      shipEscrowIndex: this.getShipEscrowIndex(shipMint),
       fleetShipInfoIndex: null,
       keyIndex: 0,
     } as AddShipToFleetInput
@@ -390,7 +390,7 @@ export class GameInstructionHandler {
         this.getPlayerProfileAddress(),
         this.getProfileFactionAddress(),
         fleetKey,
-        findShipByMint(shipMint)!,
+        this.getShipByMint(shipMint),
         findStarbasePlayerAddress(),
         this.getStarbaseAddress(),
         this.getGameId(),
@@ -413,7 +413,7 @@ export class GameInstructionHandler {
       'confirmed',
     )
 
-    const input = {
+    const input0 = {
       keyIndex: 0,
     } as DisbandFleetInput
 
@@ -429,10 +429,31 @@ export class GameInstructionHandler {
       this.getStarbaseAddress(),
       this.getGameId(),
       this.getGameState(),
-      input,
+      input0,
     )
 
     ixs.push(disbandFleet.instructions)
+
+    const input1 = {
+      keyIndex: 0,
+    } as DisbandedFleetToEscrowInput
+
+    const disbandedFleetToEscrow = DisbandedFleet.disbandedFleetToEscrow(
+      this.getSageProgram(),
+      this.signer,
+      this.getPlayerProfileAddress(),
+      this.getProfileFactionAddress(),
+      fleetKey,
+      FleetShips.findAddress(useWorkspaceAdapter()!.sageProgram.value!, fleetKey)[0],
+      this.getShipByMint(fleetKey),
+      this.getStarbasePlayerAddress(),
+      this.getStarbaseAddress(),
+      this.getGameId(),
+      this.getGameState(),
+      input1,
+    )
+
+    ixs.push(disbandedFleetToEscrow)
 
     return ixs
   }
@@ -497,6 +518,12 @@ export class GameInstructionHandler {
       throw new Error('no cargoStatsDefinition set')
     })()
 
+  private getShipByMint = (shipMint: PublicKey) =>
+    findShipByMint(shipMint) ??
+    (() => {
+      throw new Error('no ship found')
+    })()
+
   private getShipEscrow = (shipMint: PublicKey) =>
     useTokenStore()
       .gameTokenAccounts?.filter((gTA) => gTA.itemType == 'ship')
@@ -504,15 +531,17 @@ export class GameInstructionHandler {
       ?.wrappedShipEscrows.sort((a, b) => a.amount.toNumber() - b.amount.toNumber())
       .at(0) ??
     (() => {
-      throw new Error('no shipEscrow set')
+      throw new Error('no shipEscrow found')
     })()
 
-  private getShipEscrowIndex = (ship: PublicKey, wrappedShipEscrow: WrappedShipEscrow) =>
+  private getShipEscrowIndex = (shipMint: PublicKey) =>
     useGameStore().starbasePlayer?.wrappedShipEscrows.findIndex(
-      (wse) => wse.ship.toString() == ship?.toString() && wse.amount == wrappedShipEscrow?.amount,
+      (wse) =>
+        wse.ship.toString() == this.getShipByMint(shipMint)?.toString() &&
+        wse.amount == this.getShipEscrow(shipMint)?.amount,
     ) ??
     (() => {
-      throw new Error('no getShipEscrowIndex set')
+      throw new Error('no getShipEscrowIndex found')
     })()
 }
 

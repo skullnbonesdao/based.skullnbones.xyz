@@ -7,6 +7,7 @@ import CreatePlayerProfile from 'components/playerProfile/actions/CreateAccounts
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { useGlobalStore } from 'stores/globalStore'
+import HeaderBanner from 'components/general/HeaderBanner.vue'
 
 onMounted(async () => {
   await update()
@@ -30,7 +31,9 @@ const tab = ref('overview')
 </script>
 
 <template>
-  <div class="col">
+  <q-page class="col">
+    <HeaderBanner text="Player Profile" />
+    <q-separator />
     <q-tabs v-model="tab" active-bg-color="primary" align="justify" inline-label>
       <q-tab icon="dashboard" label="Overview" name="overview" />
       <q-tab icon="settings" label="Permissions" name="permissions" />
@@ -45,7 +48,7 @@ const tab = ref('overview')
         <PlayerProfilePermissions />
       </q-tab-panel>
     </q-tab-panels>
-  </div>
+  </q-page>
 </template>
 
 <style scoped></style>

@@ -10,6 +10,7 @@ import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 import FleetCreateView from 'components/fleet/views/FleetCreateView.vue'
 import FleetTable from 'components/fleet/views/FleetTable.vue'
 import { Faction } from '@staratlas/profile-faction'
+import HeaderBanner from 'components/general/HeaderBanner.vue'
 
 const tabAction = ref('manage')
 
@@ -53,6 +54,8 @@ watch(
     <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
+    <HeaderBanner text="Fleet manager" />
+
     <div>
       <q-tabs v-model="tabAction" active-bg-color="primary" align="justify" inline-label>
         <q-tab label="Manage" name="manage"></q-tab>

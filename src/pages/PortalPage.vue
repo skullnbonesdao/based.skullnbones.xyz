@@ -10,6 +10,7 @@ import InfoBanner from 'components/general/InfoBanner.vue'
 import CrewTable from 'components/portal/CrewTable.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 import { Faction } from '@staratlas/profile-faction'
+import HeaderBanner from 'components/general/HeaderBanner.vue'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -54,34 +55,37 @@ watch(
     <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
-    <q-select
-      v-model="useGameStore().starbase"
-      :disable="true"
-      :option-label="(value) => byteArrayToString(value.data.name)"
-      :options="
-        useGameStore().starbases?.filter((starbase) =>
-          byteArrayToString(starbase.data.name).includes('Central'),
-        )
-      "
-      class=""
-      label="Selected Starbase"
-      square
-      standout
-    >
-      <template v-slot:prepend>
-        <q-icon name="home" />
-      </template>
-    </q-select>
+    <!--    <q-select
+          v-model="useGameStore().starbase"
+          :disable="true"
+          :option-label="(value) => byteArrayToString(value.data.name)"
+          :options="
+            useGameStore().starbases?.filter((starbase) =>
+              byteArrayToString(starbase.data.name).includes('Central'),
+            )
+          "
+          class=""
+          label="Selected Starbase"
+          square
+          standout
+        >
+          <template v-slot:prepend>
+            <q-icon name="home" />
+          </template>
+        </q-select>-->
 
     <InfoBanner v-if="!useGameStore().starbase" message="Please select a starabse" />
 
     <div v-if="useGameStore().starbase">
+      <HeaderBanner text="Wallet/Sage Portal" />
+
       <q-separator />
       <q-tabs v-model="tabDirection" active-bg-color="primary" align="justify" inline-label>
         <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
         <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
       </q-tabs>
       <q-separator />
+
       <q-tabs v-model="tabItemType" active-bg-color="primary" align="justify" inline-label>
         <q-tab icon="sailing" label="Ships" name="ship"></q-tab>
         <q-tab icon="category" label="Resources" name="resource"></q-tab>
