@@ -64,6 +64,7 @@ watch(
       <div v-if="tabAction == 'create'">
         <q-select
           v-model="useGameStore().starbase"
+          :disable="true"
           :option-label="(value) => byteArrayToString(value.data.name)"
           :options="
             useGameStore().starbases?.filter((starbase) =>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
 import { PublicKey } from '@solana/web3.js'
@@ -16,6 +16,13 @@ const props = defineProps({
     required: true,
   },
 })
+
+watch(
+  () => showDialog.value,
+  () => {
+    useTokenStore().gameTokenAccountsSelected = undefined
+  },
+)
 </script>
 
 <template>
@@ -38,7 +45,7 @@ const props = defineProps({
       <q-card-section>
         <TokenTable
           v-if="useTokenStore().walletTokenAccounts"
-          :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == 'ship')!"
+          :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == 'resource')!"
           item-type="ship"
           selection="multiple"
         />
