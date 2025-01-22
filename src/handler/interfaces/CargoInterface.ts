@@ -21,6 +21,8 @@ export async function findCargoPodAddress(index: number = 0) {
     findStarbasePlayerAddress(),
   )
 
-  if (cargoPods) return cargoPods[index].key
+  console.log(JSON.stringify(cargoPods))
+
+  if (cargoPods) return cargoPods[index]!.key
   else throw Error('Unable to find cargo POD')
 }

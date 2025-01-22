@@ -2,11 +2,25 @@
 import { useQuasar } from 'quasar'
 import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
-import { useTokenStore } from 'stores/tokenStore'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
+import { PublicKey } from '@solana/web3.js'
+import { ref } from 'vue'
+
+const props = defineProps({
+  fleet: { type: PublicKey, required: true },
+  cargoType: {
+    type: String,
+    required: true,
+  },
+  initAmount: {
+    type: Number,
+    default: 0,
+  },
+})
 
 const $q = useQuasar()
+const inputAmount = ref(props.initAmount)
 
 async function sendTx() {
   const signer = getAsyncSigner()
@@ -14,11 +28,12 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    const shipMint = useTokenStore()!.gameTokenAccountsSelected![0]!.mint
-    const shipAmount = useTokenStore()!.gameTokenAccountsSelected![0]!.uiAmountSelected
-
     staratlasIxs.push(
-      ...gameInstructionHandler.createNewFleetIx(shipMint, shipAmount, inputFleetName.value),
+      ...(await gameInstructionHandler.cargoToFleetIx(
+        props.fleet,
+        props.cargoType,
+        inputAmount.value,
+      )),
     )
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
@@ -39,7 +54,10 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn color="secondary" label="Load" @click.prevent="sendTx" />
+  <div class="row">
+    <q-input v-model="inputAmount" class="col" dense label="Ammo Amount" standout />
+    <q-btn color="secondary" label="Load" @click.prevent="sendTx" />
+  </div>
 </template>
 
 <style scoped></style>

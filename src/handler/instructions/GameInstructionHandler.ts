@@ -45,6 +45,7 @@ export class GameInstructionHandler {
       this.signer.publicKey(),
       true,
     )
+
     const tokenTO = createAssociatedTokenAccountIdempotent(
       shipMint,
       useProfileStore().sageProfileAddress!,
@@ -161,8 +162,7 @@ export class GameInstructionHandler {
     }
 
     const key = this.signer
-    const cargoStatsDefinition = useGameStore().cargoStatsDefinition
-    const cargoType = findCargoTypeAddress(cargoStatsDefinition, mint)
+
     const tokenFrom = tokenFROM.address
     const tokenTo = tokenTO.address
 
@@ -181,8 +181,8 @@ export class GameInstructionHandler {
         this.getProfileFactionAddress(),
         this.getStarbaseAddress(),
         cargoPod,
-        cargoType,
-        cargoStatsDefinition,
+        this.getCargoType(mint),
+        this.getCargoStatsDefinition(),
         tokenFrom,
         tokenTo,
         this.getGameId(),
@@ -405,7 +405,7 @@ export class GameInstructionHandler {
 
     const fleet = await readFromRPCOrError(
       useRPCStore().connection,
-      useWorkspaceAdapter()?.sageProgram.value!,
+      useWorkspaceAdapter()!.sageProgram.value!,
       fleetKey,
       Fleet,
       'confirmed',
@@ -536,6 +536,71 @@ export class GameInstructionHandler {
     return ixs
   }
 
+  async cargoToFleetIx(fleetKey: PublicKey, cargoSymbol: string, amount: number) {
+    const ixs = []
+
+    const fleet = await readFromRPCOrError(
+      useRPCStore().connection,
+      useWorkspaceAdapter()!.sageProgram.value!,
+      fleetKey,
+      Fleet,
+      'confirmed',
+    )
+
+    console.log(JSON.stringify(fleet, null, 2))
+
+    const tokenMint = new PublicKey(
+      useTokenStore().tokenList.find((token) => token.symbol == cargoSymbol)!.mint,
+    )
+    const cargoPod = new PublicKey('8YPDojQ5dVz6QnpDHQXYUquYa5qcjhPG6nVAG8bqUDek')
+    const cargoPodFROM = cargoPod
+
+    let cargoPodTO
+    const tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPod, true)
+    let tokenTO
+
+    switch (cargoSymbol) {
+      case 'FUEL':
+        cargoPodTO = fleet.data.fuelTank
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, fleet.data.fuelTank, true)
+        break
+      default:
+        throw Error('Cargo Symbol not defined')
+    }
+
+    if (!(await checkAccountExists(tokenTO.address))) {
+      ixs.push(tokenTO.instructions)
+    }
+
+    ixs.push(
+      Fleet.depositCargoToFleet(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        'funder',
+        this.getStarbaseAddress(),
+        this.getStarbasePlayerAddress(),
+        fleetKey,
+        cargoPodFROM,
+        cargoPodTO,
+        this.getCargoType(tokenMint),
+        this.getCargoStatsDefinition(),
+        tokenFROM.address,
+        tokenTO.address,
+        tokenMint,
+        this.getGameId(),
+        this.getGameState(),
+        {
+          amount: new BN(amount),
+          keyIndex: 0,
+        },
+      ),
+    )
+    return ixs
+  }
+
   private getSageProgram = () =>
     useWorkspaceAdapter()?.sageProgram.value ??
     (() => {
@@ -592,6 +657,12 @@ export class GameInstructionHandler {
 
   private getCargoStatsDefinition = () =>
     useGameStore().cargoStatsDefinition ??
+    (() => {
+      throw new Error('no cargoStatsDefinition set')
+    })()
+
+  private getCargoType = (mint: PublicKey) =>
+    findCargoTypeAddress(this.getCargoStatsDefinition(), mint) ??
     (() => {
       throw new Error('no cargoStatsDefinition set')
     })()

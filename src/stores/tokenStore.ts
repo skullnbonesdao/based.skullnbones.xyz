@@ -32,7 +32,7 @@ export interface StarbaseTokenAccount extends TokenAccount {
 
 export const useTokenStore = defineStore('tokenStore', {
   state: () => ({
-    staratlasNFTs: undefined as PublicKey | undefined,
+    tokenList: tokenList,
     walletTokenAccounts: undefined as TokenAccount[] | undefined,
     gameTokenAccounts: undefined as StarbaseTokenAccount[] | undefined,
     gameTokenAccountsSelected: undefined as StarbaseTokenAccount | undefined,
