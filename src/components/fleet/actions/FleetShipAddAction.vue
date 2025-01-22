@@ -52,7 +52,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn class="" color="secondary" label="Add" @click.prevent="sendTx" />
+  <q-btn class="full-width" color="secondary" label="Add" @click.prevent="sendTx" />
 </template>
 
 <style scoped></style>

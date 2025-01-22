@@ -4,7 +4,7 @@ import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
 import FleetShipAddAction from 'components/fleet/actions/FleetShipAddAction.vue'
 import { PublicKey } from '@solana/web3.js'
-import FleetShipRemoveAction from 'components/fleet/actions/FleetShipRemoveAction.vue'
+import FleetShipDisbandAction from 'components/fleet/actions/FleetShipDisbandAction.vue'
 
 const showDialog = ref(false)
 const tabAction = ref('add')
@@ -42,7 +42,7 @@ watch(
 
       <q-tabs v-model="tabAction" active-bg-color="primary" align="justify" inline-label>
         <q-tab label="Add" name="add"></q-tab>
-        <q-tab label="Remove" name="remove"></q-tab>
+        <q-tab label="Disband" name="disband"></q-tab>
       </q-tabs>
       <q-separator />
 
@@ -58,7 +58,7 @@ watch(
       <q-card-section class="row">
         <q-space />
         <FleetShipAddAction v-if="tabAction == 'add'" :fleet="fleet" />
-        <FleetShipRemoveAction v-if="tabAction == 'remove'" :fleet="fleet" />
+        <FleetShipDisbandAction v-if="tabAction == 'disband'" :fleet="fleet" />
       </q-card-section>
     </q-card>
   </q-dialog>

@@ -40,7 +40,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn class="" color="secondary" label="Remove" @click.prevent="sendTx" />
+  <q-btn class="full-width" color="secondary" label="Disband" @click.prevent="sendTx" />
 </template>
 
 <style scoped></style>

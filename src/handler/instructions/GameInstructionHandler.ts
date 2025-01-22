@@ -18,8 +18,6 @@ import {
   CrewTransferInput,
   CustomCreateFleetInput,
   DisbandedFleet,
-  DisbandedFleetToEscrowInput,
-  DisbandFleetInput,
   Fleet,
   RemoveCrewFromGameInput,
   RemoveShipEscrowInput,
@@ -413,10 +411,6 @@ export class GameInstructionHandler {
       'confirmed',
     )
 
-    const input0 = {
-      keyIndex: 0,
-    } as DisbandFleetInput
-
     const disbandFleet = Fleet.disbandFleet(
       this.getSageProgram(),
       this.getCargoProgram(),
@@ -429,31 +423,115 @@ export class GameInstructionHandler {
       this.getStarbaseAddress(),
       this.getGameId(),
       this.getGameState(),
-      input0,
+      {
+        keyIndex: 0,
+      },
     )
 
     ixs.push(disbandFleet.instructions)
 
-    const input1 = {
-      keyIndex: 0,
-    } as DisbandedFleetToEscrowInput
-
-    const disbandedFleetToEscrow = DisbandedFleet.disbandedFleetToEscrow(
+    const fleetShipsKey = FleetShips.findAddress(this.getSageProgram(), fleetKey)[0]
+    const fleetShips = await readFromRPCOrError(
+      useRPCStore().connection,
       this.getSageProgram(),
-      this.signer,
-      this.getPlayerProfileAddress(),
-      this.getProfileFactionAddress(),
-      fleetKey,
-      FleetShips.findAddress(useWorkspaceAdapter()!.sageProgram.value!, fleetKey)[0],
-      this.getShipByMint(fleetKey),
-      this.getStarbasePlayerAddress(),
-      this.getStarbaseAddress(),
-      this.getGameId(),
-      this.getGameState(),
-      input1,
+      fleetShipsKey,
+      FleetShips,
     )
 
-    ixs.push(disbandedFleetToEscrow)
+    fleetShips.fleetShips.forEach((fleetShip) => {
+      ixs.push(
+        DisbandedFleet.disbandedFleetToEscrow(
+          this.getSageProgram(),
+          this.signer,
+          this.getPlayerProfileAddress(),
+          this.getProfileFactionAddress(),
+          disbandFleet.disbandedFleetKey[0],
+          fleetShipsKey,
+          fleetShip.ship,
+          this.getStarbasePlayerAddress(),
+          this.getStarbaseAddress(),
+          this.getGameId(),
+          this.getGameState(),
+          {
+            fleetShipInfoIndex: 0,
+            shipAmount: fleetShip.amount.toNumber(),
+            shipEscrowIndex: null,
+            keyIndex: 0,
+          },
+        ),
+      )
+    })
+
+    ixs.push(
+      DisbandedFleet.closeDisbandedFleet(
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        'funder',
+        disbandFleet.disbandedFleetKey[0],
+        fleetShipsKey,
+        {
+          keyIndex: 0,
+        },
+      ),
+    )
+
+    ixs.push(
+      StarbasePlayer.removeCargoPod(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getStarbasePlayerAddress(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        'funder',
+        this.getStarbaseAddress(),
+        fleet.data.ammoBank,
+        this.getGameId(),
+        this.getGameState(),
+        {
+          keyIndex: 0,
+        },
+      ),
+    )
+
+    ixs.push(
+      StarbasePlayer.removeCargoPod(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getStarbasePlayerAddress(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        'funder',
+        this.getStarbaseAddress(),
+        fleet.data.cargoHold,
+        this.getGameId(),
+        this.getGameState(),
+        {
+          keyIndex: 0,
+        },
+      ),
+    )
+
+    ixs.push(
+      StarbasePlayer.removeCargoPod(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getStarbasePlayerAddress(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        'funder',
+        this.getStarbaseAddress(),
+        fleet.data.fuelTank,
+        this.getGameId(),
+        this.getGameState(),
+        {
+          keyIndex: 0,
+        },
+      ),
+    )
 
     return ixs
   }

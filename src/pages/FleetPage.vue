@@ -54,7 +54,7 @@ watch(
     <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
-    <HeaderBanner text="Fleet manager" />
+    <HeaderBanner text="Fleet Manager" />
 
     <div>
       <q-separator />
