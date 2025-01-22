@@ -4,11 +4,13 @@ defineProps(['message'])
 
 <template>
   <div class="row text-h4 text-center items-center q-ma-md">
-    <q-icon class="col" name="arrow_upward" size="xl" />
-    <div>
+    <q-icon name="warning" size="md" />
+    <q-separator class="col" />
+    <div class="q-mx-md">
       {{ message }}
     </div>
-    <q-icon class="col" name="arrow_upward" size="xl" />
+    <q-separator class="col" />
+    <q-icon name="warning" size="md" />
   </div>
 </template>
 

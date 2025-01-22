@@ -1,6 +1,7 @@
 import {
   AsyncSigner,
   createAssociatedTokenAccountIdempotent,
+  readFromRPCOrError,
   stringToByteArray,
 } from '@staratlas/data-source'
 import { SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
@@ -16,6 +17,7 @@ import {
   AddShipToFleetInput,
   CrewTransferInput,
   CustomCreateFleetInput,
+  DisbandFleetInput,
   Fleet,
   RemoveCrewFromGameInput,
   RemoveShipEscrowInput,
@@ -27,6 +29,7 @@ import { findCargoPodAddress, findCargoTypeAddress } from 'src/handler/interface
 import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
 import { useTokenStore } from 'stores/tokenStore'
 import { getCrewProof } from 'stores/interfaces/cNFTInterface'
+import { useRPCStore } from 'stores/rpcStore'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -367,7 +370,7 @@ export class GameInstructionHandler {
     return ixs
   }
 
-  addShipsToFleetIx(fleet: PublicKey, shipMint: PublicKey, shipAmount: number) {
+  addShipsToFleetIx(fleetKey: PublicKey, shipMint: PublicKey, shipAmount: number) {
     const ixs = []
 
     const wrappedShipEscrow = this.getShipEscrow(shipMint)
@@ -386,7 +389,7 @@ export class GameInstructionHandler {
         this.signer,
         this.getPlayerProfileAddress(),
         this.getProfileFactionAddress(),
-        fleet,
+        fleetKey,
         findShipByMint(shipMint)!,
         findStarbasePlayerAddress(),
         this.getStarbaseAddress(),
@@ -395,6 +398,41 @@ export class GameInstructionHandler {
         input,
       ),
     )
+
+    return ixs
+  }
+
+  async disbandFleetIx(fleetKey: PublicKey) {
+    const ixs = []
+
+    const fleet = await readFromRPCOrError(
+      useRPCStore().connection,
+      useWorkspaceAdapter()?.sageProgram.value!,
+      fleetKey,
+      Fleet,
+      'confirmed',
+    )
+
+    const input = {
+      keyIndex: 0,
+    } as DisbandFleetInput
+
+    const disbandFleet = Fleet.disbandFleet(
+      this.getSageProgram(),
+      this.getCargoProgram(),
+      this.signer,
+      this.getPlayerProfileAddress(),
+      this.getProfileFactionAddress(),
+      fleet,
+
+      findStarbasePlayerAddress(),
+      this.getStarbaseAddress(),
+      this.getGameId(),
+      this.getGameState(),
+      input,
+    )
+
+    ixs.push(disbandFleet.instructions)
 
     return ixs
   }

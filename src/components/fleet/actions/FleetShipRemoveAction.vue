@@ -2,7 +2,6 @@
 import { useQuasar } from 'quasar'
 import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
-import { useTokenStore } from 'stores/tokenStore'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { PublicKey } from '@solana/web3.js'
@@ -24,20 +23,9 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    staratlasIxs.push(
-      ...gameInstructionHandler.addShipsToFleetIx(
-        props.fleet,
-        useTokenStore().gameTokenAccountsSelected[0]?.mint,
-        useTokenStore().gameTokenAccountsSelected[0]?.uiAmountSelected,
-      ),
-    )
+    staratlasIxs.push(...(await gameInstructionHandler.disbandFleetIx(props.fleet)))
     if (staratlasIxs.length > 0)
-      await handleStarAtlasTransaction(
-        `Add Ships to fleet`,
-        staratlasIxs,
-        signer,
-        FEE_TYPES.DEFAULT_FEE,
-      )
+      await handleStarAtlasTransaction(`Disband fleet`, staratlasIxs, signer, FEE_TYPES.DEFAULT_FEE)
 
     useGameStore().fleets = await loadFleets()
   } catch (error: unknown) {

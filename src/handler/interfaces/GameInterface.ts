@@ -92,6 +92,7 @@ export async function loadFleets() {
           },
         },
       ],
+      commitment: 'processed',
     },
   )
 

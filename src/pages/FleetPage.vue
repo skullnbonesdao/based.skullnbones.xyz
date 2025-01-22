@@ -58,8 +58,14 @@ watch(
         <q-tab label="Manage" name="manage"></q-tab>
         <q-tab label="Create" name="create"></q-tab>
       </q-tabs>
+      <q-separator />
 
-      <FleetTable v-if="tabAction == 'manage'" :rows="useGameStore().fleets" />
+      <InfoBanner
+        v-if="!useGameStore().fleets?.length && tabAction == 'manage'"
+        message="Fleets found"
+      />
+
+      <FleetTable v-else-if="tabAction == 'manage'" :rows="useGameStore().fleets" />
 
       <div v-if="tabAction == 'create'">
         <q-select
