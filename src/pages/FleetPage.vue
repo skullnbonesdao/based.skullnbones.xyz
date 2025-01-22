@@ -7,8 +7,8 @@ import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
-import FleetCreateView from 'components/fleet/FleetCreateView.vue'
-import FleetTable from 'components/fleet/FleetTable.vue'
+import FleetCreateView from 'components/fleet/views/FleetCreateView.vue'
+import FleetTable from 'components/fleet/views/FleetTable.vue'
 
 const tabAction = ref('manage')
 
@@ -27,7 +27,7 @@ watch(
 watch(
   () => useGameStore().starbase,
   async () => {
-    await useGameStore().updateStore()
+    await useGameStore().updateStarbasePlayer()
     await useTokenStore().updateStore(getSigner())
   },
 )
@@ -37,27 +37,7 @@ watch(
     <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
-    <q-select
-      v-model="useGameStore().starbase"
-      :option-label="(value) => byteArrayToString(value.data.name)"
-      :options="
-        useGameStore().starbases?.filter((starbase) =>
-          byteArrayToString(starbase.data.name).includes('Central'),
-        )
-      "
-      class=""
-      label="Selected Starbase"
-      square
-      standout
-    >
-      <template v-slot:prepend>
-        <q-icon name="home" />
-      </template>
-    </q-select>
-
-    <InfoBanner v-if="!useGameStore().starbase" message="Please select a starbase" />
-
-    <div v-if="useGameStore().starbase">
+    <div>
       <q-tabs v-model="tabAction" active-bg-color="secondary" align="justify" inline-label>
         <q-tab label="Manage" name="manage"></q-tab>
         <q-tab label="Create" name="create"></q-tab>
@@ -65,7 +45,28 @@ watch(
 
       <FleetTable v-if="tabAction == 'manage'" :rows="useGameStore().fleets" />
 
-      <FleetCreateView v-if="tabAction == 'create'" />
+      <div v-if="tabAction == 'create'">
+        <q-select
+          v-model="useGameStore().starbase"
+          :option-label="(value) => byteArrayToString(value.data.name)"
+          :options="
+            useGameStore().starbases?.filter((starbase) =>
+              byteArrayToString(starbase.data.name).includes('Central'),
+            )
+          "
+          class=""
+          label="Selected Starbase"
+          square
+          standout
+        >
+          <template v-slot:prepend>
+            <q-icon name="home" />
+          </template>
+        </q-select>
+        <InfoBanner v-if="!useGameStore().starbase" message="Please select a starbase" />
+
+        <FleetCreateView v-else />
+      </div>
     </div>
   </q-page>
 </template>

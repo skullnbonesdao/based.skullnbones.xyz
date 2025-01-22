@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
-import FleetCreateButton from 'components/fleet/FleetCreateButton.vue'
+import FleetCreateAction from 'components/fleet/actions/FleetCreateAction.vue'
 
 useTokenStore()
 </script>
@@ -9,7 +9,7 @@ useTokenStore()
 <template>
   <q-card flat>
     <q-card-section>
-      <FleetCreateButton v-if="useTokenStore().gameTokenAccountsSelected" />
+      <FleetCreateAction v-if="useTokenStore().gameTokenAccountsSelected" />
     </q-card-section>
     <TokenTable
       v-if="useTokenStore().walletTokenAccounts"

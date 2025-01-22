@@ -141,7 +141,21 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-card bordered flat>
+  <q-card
+    v-if="
+      enable_createPlayerProfile ||
+      enable_createPlayerProfileName ||
+      enable_chooseFaction ||
+      enable_createSagePlayerProfile ||
+      enable_createPoints[0] ||
+      enable_createPoints[1] ||
+      enable_createPoints[2] ||
+      enable_createPoints[3] ||
+      enable_createPoints[4]
+    "
+    bordered
+    flat
+  >
     <q-card-section class="row items-center q-gutter-md">
       <q-icon name="create" size="md"></q-icon>
       <div class="text-h6">Create Accounts</div>

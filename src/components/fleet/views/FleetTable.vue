@@ -3,6 +3,7 @@ import { TokenAccount } from 'stores/tokenStore'
 import { type PropType, ref } from 'vue'
 import { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
+import FleetAddShipDialog from 'components/fleet/dialogs/FleetAddShipDialog.vue'
 
 const props = defineProps({
   rows: {
@@ -35,6 +36,13 @@ const columns = ref([
     align: 'left',
     field: (row: Fleet) => Object.keys(row.state)[0],
     sortable: true,
+  },
+  {
+    name: 'actions',
+    required: false,
+    label: 'Actions',
+    align: 'left',
+    sortable: false,
   },
 ])
 </script>
@@ -89,7 +97,12 @@ const columns = ref([
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          {{ col.value }}
+          <div v-if="col.name == 'actions'">
+            <FleetAddShipDialog :fleet="props.row.key" />
+          </div>
+          <div v-else>
+            {{ col.value }}
+          </div>
         </q-td>
       </q-tr>
       <q-tr v-show="props.expand" :props="props">
