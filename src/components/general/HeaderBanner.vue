@@ -8,8 +8,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <div>
-    <q-card bordered class="text-h4 text-center q-ma-sm q-pa-xs" flat>{{ props.text }}</q-card>
+  <div class="col q-pa-sm">
+    <q-card bordered class="text-h4 text-center" flat>{{ props.text }}</q-card>
   </div>
 </template>
 

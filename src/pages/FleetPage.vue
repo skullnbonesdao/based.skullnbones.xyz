@@ -57,6 +57,7 @@ watch(
     <HeaderBanner text="Fleet manager" />
 
     <div>
+      <q-separator />
       <q-tabs v-model="tabAction" active-bg-color="primary" align="justify" inline-label>
         <q-tab label="Manage" name="manage"></q-tab>
         <q-tab label="Create" name="create"></q-tab>
