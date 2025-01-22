@@ -3,7 +3,8 @@ import { TokenAccount } from 'stores/tokenStore'
 import { type PropType, ref } from 'vue'
 import { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
-import FleetAddShipDialog from 'components/fleet/dialogs/FleetAddShipDialog.vue'
+import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
+import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
 
 const props = defineProps({
   rows: {
@@ -97,8 +98,12 @@ const columns = ref([
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <div v-if="col.name == 'actions'">
-            <FleetAddShipDialog
+          <div v-if="col.name == 'actions'" class="row q-gutter-x-sm">
+            <FleetShipDialog
+              :fleet="props.row.key"
+              :name="byteArrayToString(props.row.data.fleetLabel)"
+            />
+            <FleetCargoDialog
               :fleet="props.row.key"
               :name="byteArrayToString(props.row.data.fleetLabel)"
             />

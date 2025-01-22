@@ -39,7 +39,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn class="full-width" color="primary" label="Form new fleet" @click.prevent="sendTx" />
+  <q-btn color="secondary" label="Load" @click.prevent="sendTx" />
 </template>
 
 <style scoped></style>

@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useTokenStore } from 'stores/tokenStore'
 import TokenTable from 'components/portal/TokenTable.vue'
-import FleetAddShipAction from 'components/fleet/actions/FleetAddShipAction.vue'
 import { PublicKey } from '@solana/web3.js'
+import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
 
 const showDialog = ref(false)
 const props = defineProps({
@@ -19,18 +19,20 @@ const props = defineProps({
 </script>
 
 <template>
-  <q-btn color="primary" label="Add Ships" @click="showDialog = true" />
+  <q-btn color="secondary" label="Cargo" @click="showDialog = true" />
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
-      <q-card-section>
-        <div class="text-h6">Add ships to fleet {{ props.name }}</div>
+      <q-card-section class="row q-gutter-x-sm items-center">
+        <div class="text-h6">[Cargo]</div>
+        <div class="text-h5">{{ props.name }}</div>
       </q-card-section>
+
+      <q-separator />
 
       <q-card-section class="row">
         <q-space />
-
-        <FleetAddShipAction :fleet="fleet" />
+        <FleetCargoLoadAction :fleet="fleet" />
       </q-card-section>
 
       <q-card-section>
