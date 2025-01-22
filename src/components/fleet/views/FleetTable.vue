@@ -98,7 +98,10 @@ const columns = ref([
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
           <div v-if="col.name == 'actions'">
-            <FleetAddShipDialog :fleet="props.row.key" />
+            <FleetAddShipDialog
+              :fleet="props.row.key"
+              :name="byteArrayToString(props.row.data.fleetLabel)"
+            />
           </div>
           <div v-else>
             {{ col.value }}

@@ -7,6 +7,10 @@ import { PublicKey } from '@solana/web3.js'
 
 const showDialog = ref(false)
 const props = defineProps({
+  name: {
+    type: String,
+    default: 'none',
+  },
   fleet: {
     type: PublicKey,
     required: true,
@@ -20,7 +24,7 @@ const props = defineProps({
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
       <q-card-section>
-        <div class="text-h6">Add ships to fleet</div>
+        <div class="text-h6">Add ships to fleet {{ props.name }}</div>
       </q-card-section>
 
       <q-card-section class="row">

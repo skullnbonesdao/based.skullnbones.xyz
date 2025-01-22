@@ -33,5 +33,5 @@ const route = useRouter().currentRoute
 <style lang="sass" scoped>
 .menu-link
   color: white
-  background: $secondary
+  background: $primary
 </style>

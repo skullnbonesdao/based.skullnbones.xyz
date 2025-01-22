@@ -12,8 +12,8 @@
       <q-separator />
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" bordered class="bg-primary" show-if-above>
-      <q-card class="q-mb-md bg-primary" flat>
+    <q-drawer v-model="leftDrawerOpen" bordered show-if-above>
+      <q-card class="q-mb-md" flat>
         <q-card-section>
           <q-img fit="scale-down" height="50px" src="icon.png"></q-img>
         </q-card-section>

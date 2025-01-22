@@ -77,12 +77,12 @@ watch(
 
     <div v-if="useGameStore().starbase">
       <q-separator />
-      <q-tabs v-model="tabDirection" active-bg-color="secondary" align="justify" inline-label>
+      <q-tabs v-model="tabDirection" active-bg-color="primary" align="justify" inline-label>
         <q-tab icon="call_made" label="Deposit" name="deposit"></q-tab>
         <q-tab icon="call_received" label="Withdraw" name="withdraw"></q-tab>
       </q-tabs>
       <q-separator />
-      <q-tabs v-model="tabItemType" active-bg-color="secondary" align="justify" inline-label>
+      <q-tabs v-model="tabItemType" active-bg-color="primary" align="justify" inline-label>
         <q-tab icon="sailing" label="Ships" name="ship"></q-tab>
         <q-tab icon="category" label="Resources" name="resource"></q-tab>
         <q-tab icon="person" label="Crew" name="crew"></q-tab>

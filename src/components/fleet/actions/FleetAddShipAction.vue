@@ -6,6 +6,8 @@ import { useTokenStore } from 'stores/tokenStore'
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { PublicKey } from '@solana/web3.js'
+import { loadFleets } from 'src/handler/interfaces/GameInterface'
+import { useGameStore } from 'stores/gameStore'
 
 const $q = useQuasar()
 
@@ -36,6 +38,8 @@ async function sendTx() {
         signer,
         FEE_TYPES.DEFAULT_FEE,
       )
+
+    useGameStore().fleets = await loadFleets()
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',

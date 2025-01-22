@@ -1,21 +1,12 @@
 <template>
   <q-page class="row q-pa-md justify-evenly">
     <div>
-      <q-card flat>
-        <q-separator />
+      <q-card bordered flat>
         <q-card-section class="items-center q-gutter-md">
           <q-img src="icon.png" width="400px"></q-img>
         </q-card-section>
-      </q-card>
-      <q-card flat>
-        <q-separator />
         <q-card-section class="items-center q-gutter-md">
-          <div class="text-h5 text-center text-uppercase">manage your StarAtlas</div>
-        </q-card-section>
-        <q-card-section class="items-center q-gutter-md row">
-          <div class="col"></div>
-          <WalletMultiButton dark />
-          <div class="col"></div>
+          <div class="text-h5 text-center text-uppercase">manage your StarAtlas Sage</div>
         </q-card-section>
       </q-card>
     </div>
@@ -25,7 +16,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { Meta, Todo } from 'components/models'
-import { WalletMultiButton } from 'solana-wallets-vue'
 
 const todos = ref<Todo[]>([
   {
