@@ -4,15 +4,23 @@ const props = defineProps({
     type: String,
     default: 'none',
   },
+  caption: {
+    type: String,
+    default: 'none',
+  },
 })
 </script>
 
 <template>
-  <div class="col">
-    <q-separator />
-    <q-card class="text-h6 q-pa-sm" flat>{{ props.text }}</q-card>
-    <q-separator />
-  </div>
+  <q-card class="text-h6 row q-gutter-x-md q-ma-md" flat>
+    <div>
+      {{ props.text }}
+    </div>
+    
+    <div class="col text-center">
+      {{ props.caption }}
+    </div>
+  </q-card>
 </template>
 
 <style scoped></style>

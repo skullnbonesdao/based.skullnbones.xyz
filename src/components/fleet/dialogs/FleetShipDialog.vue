@@ -5,6 +5,8 @@ import TokenTable from 'components/portal/TokenTable.vue'
 import FleetShipAddAction from 'components/fleet/actions/FleetShipAddAction.vue'
 import { PublicKey } from '@solana/web3.js'
 import FleetShipDisbandAction from 'components/fleet/actions/FleetShipDisbandAction.vue'
+import HeaderBanner2 from 'components/general/HeaderBanner2.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const showDialog = ref(false)
 const tabAction = ref('add')
@@ -23,20 +25,17 @@ const props = defineProps({
 watch(
   () => showDialog.value,
   () => {
-    useTokenStore().gameTokenAccountsSelected = undefined
+    usePlayerStore().starbaseTokenAccountsSelected = undefined
   },
 )
 </script>
 
 <template>
-  <q-btn color="secondary" label="Edit Ships" @click="showDialog = true" />
+  <q-btn color="secondary" label="Edit Fleet" @click="showDialog = true" />
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
-      <q-card-section class="row q-gutter-x-sm items-center">
-        <div class="text-h6">[Ships]</div>
-        <div class="text-h5">{{ props.name }}</div>
-      </q-card-section>
+      <HeaderBanner2 :caption="props.name" :text="'Fleet '" />
 
       <q-separator />
 
@@ -49,7 +48,7 @@ watch(
       <q-card-section>
         <TokenTable
           v-if="tabAction === 'add' && useTokenStore().walletTokenAccounts"
-          :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == 'ship')!"
+          :rows="usePlayerStore().starbaseTokenAccounts?.filter((acc) => acc.itemType == 'ship')!"
           item-type="ship"
           selection="multiple"
         />

@@ -43,19 +43,12 @@ const columns = ref([
     field: (row: Fleet) => Object.keys(row.state)[0],
     sortable: true,
   },
-  {
-    name: 'sector',
-    required: true,
-    label: 'Sector',
-    align: 'left',
-    field: (row: Fleet) => `none `,
-    sortable: true,
-  },
+
   {
     name: 'actions',
     required: false,
     label: 'Actions',
-    align: 'left',
+    align: 'right',
     sortable: false,
   },
 ])
@@ -78,20 +71,22 @@ const columns = ref([
     square
   >
     <template v-slot:top-left>
-      <q-btn
-        class="q-mr-sm"
-        color="primary"
-        icon="refresh"
-        @click="usePlayerStore().updateFleet()"
-      ></q-btn>
       <div class="text-grey-5">Found {{ rows.length }} Items</div>
     </template>
     <template v-slot:top-right>
-      <q-input v-model="filter" borderless debounce="300" dense placeholder="Search">
-        <template v-slot:append>
-          <q-icon name="search" />
-        </template>
-      </q-input>
+      <q-btn-group>
+        <q-input v-model="filter" debounce="300" dense placeholder="Search" standout>
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+        <q-btn
+          color="primary"
+          icon="refresh"
+          square
+          @click="usePlayerStore().updateFleet()"
+        ></q-btn>
+      </q-btn-group>
     </template>
 
     <template v-slot:header="props">
@@ -117,19 +112,25 @@ const columns = ref([
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <div v-if="col.name == 'actions'" class="row q-gutter-x-sm">
+          <div v-if="col.name == 'actions'" class="row q-gutter-x-sm justify-end">
+            {{}}
             <FleetShipDialog
+              v-if="props.row.state['StarbaseLoadingBay']"
               :fleet="props.row.key"
               :name="byteArrayToString(props.row.data.fleetLabel)"
             />
             <FleetCargoDialog
+              v-if="props.row.state['StarbaseLoadingBay']"
               :fleet="props.row.key"
               :name="byteArrayToString(props.row.data.fleetLabel)"
             />
-            <FleetDockAction :fleet="props.row.key" />
-            <FleetUndockAction :fleet="props.row.key" />
-            <FleetStartMiningAction :fleet="props.row.key" />
-            <FleetStopMiningAction :fleet="props.row.key" />
+            <FleetDockAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
+            <FleetUndockAction
+              v-if="props.row.state['StarbaseLoadingBay']"
+              :fleet="props.row.key"
+            />
+            <FleetStartMiningAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
+            <FleetStopMiningAction v-if="props.row.state['MineAsteroid']" :fleet="props.row.key" />
           </div>
           <div v-else>
             {{ col.value }}

@@ -175,7 +175,11 @@ function getCargoAmount(mint: PublicKey) {
               <div>@Cargo</div>
               <div class="col">
                 {{
-                  ((getCargoAmount(props.row.mint) / getCapacity(props.row.mint)) * 100).toFixed(0)
+                  (
+                    ((getCargoAmount(props.row.mint) + props.row.uiAmountChange) /
+                      getCapacity(props.row.mint)) *
+                    100
+                  ).toFixed(0)
                 }}%
               </div>
 
