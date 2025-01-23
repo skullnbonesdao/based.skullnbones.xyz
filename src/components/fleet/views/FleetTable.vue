@@ -5,6 +5,8 @@ import { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
 import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
+import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
+import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 
 const props = defineProps({
   rows: {
@@ -107,6 +109,8 @@ const columns = ref([
               :fleet="props.row.key"
               :name="byteArrayToString(props.row.data.fleetLabel)"
             />
+            <FleetDockAction :fleet="props.row.key" />
+            <FleetUndockAction :fleet="props.row.key" />
           </div>
           <div v-else>
             {{ col.value }}

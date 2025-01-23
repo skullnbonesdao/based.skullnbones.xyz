@@ -2,8 +2,9 @@
 import { computed, ref, watch } from 'vue'
 import { useTokenStore } from 'stores/tokenStore'
 import { PublicKey } from '@solana/web3.js'
-import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
+
 import { useGameStore } from 'stores/gameStore'
+import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
 
 const showDialog = ref(false)
 const expanded = ref(false)
@@ -43,8 +44,8 @@ watch(
       <q-separator />
 
       <q-card-section class="row q-gutter-x-sm">
-        <q-card>
-          <q-card-section> FUEL</q-card-section>
+        <q-card bordered class="col" flat>
+          <q-card-section>FUEL</q-card-section>
           <q-card-section>
             <FleetCargoLoadAction
               :fleet="props.fleet"
@@ -54,13 +55,37 @@ watch(
           </q-card-section>
         </q-card>
 
-        <q-card>
-          <q-card-section> AMMO</q-card-section>
+        <q-card bordered class="col" flat>
+          <q-card-section>AMMO</q-card-section>
           <q-card-section>
             <FleetCargoLoadAction
               :fleet="props.fleet"
               :init-amount="fleetData?.data.stats.cargoStats.ammoCapacity"
               cargo-type="AMMO"
+            />
+          </q-card-section>
+        </q-card>
+      </q-card-section>
+
+      <q-card-section class="row q-gutter-x-sm">
+        <q-card bordered class="col" flat>
+          <q-card-section>FOOD</q-card-section>
+          <q-card-section>
+            <FleetCargoLoadAction
+              :fleet="props.fleet"
+              :init-amount="fleetData?.data.stats.cargoStats.cargoCapacity"
+              cargo-type="FOOD"
+            />
+          </q-card-section>
+        </q-card>
+
+        <q-card bordered class="col" flat>
+          <q-card-section>TOOL</q-card-section>
+          <q-card-section>
+            <FleetCargoLoadAction
+              :fleet="props.fleet"
+              :init-amount="fleetData?.data.stats.cargoStats.cargoCapacity"
+              cargo-type="TOOL"
             />
           </q-card-section>
         </q-card>

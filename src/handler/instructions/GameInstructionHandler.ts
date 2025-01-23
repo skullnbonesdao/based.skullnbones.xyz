@@ -547,26 +547,35 @@ export class GameInstructionHandler {
       'confirmed',
     )
 
-    console.log(JSON.stringify(fleet, null, 2))
-
-    const tokenMint = new PublicKey(
-      useTokenStore().tokenList.find((token) => token.symbol == cargoSymbol)!.mint,
-    )
-    const cargoPod = new PublicKey('8YPDojQ5dVz6QnpDHQXYUquYa5qcjhPG6nVAG8bqUDek')
-    const cargoPodFROM = cargoPod
-
+    const tokenMint = this.getTokenMintBySymbol(cargoSymbol)
+    const cargoPodFROM = await findCargoPodAddress()
     let cargoPodTO
-    const tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPod, true)
+    let tokenFROM
     let tokenTO
 
     switch (cargoSymbol) {
       case 'FUEL':
         cargoPodTO = fleet.data.fuelTank
-        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, fleet.data.fuelTank, true)
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
         break
+      case 'AMMO':
+        cargoPodTO = fleet.data.ammoBank
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
+        break
+
       default:
-        throw Error('Cargo Symbol not defined')
+        cargoPodTO = fleet.data.cargoHold
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
+        break
     }
+
+    console.log('cargoPodFROM', cargoPodFROM.toString())
+    console.log('cargoPodTO', cargoPodTO.toString())
+    console.log('tokenFROM', tokenFROM.address.toString())
+    console.log('tokenTO', tokenTO.address.toString())
 
     if (!(await checkAccountExists(tokenTO.address))) {
       ixs.push(tokenTO.instructions)
@@ -596,6 +605,46 @@ export class GameInstructionHandler {
           amount: new BN(amount),
           keyIndex: 0,
         },
+      ),
+    )
+    return ixs
+  }
+
+  async fleetUndock(fleetKey: PublicKey) {
+    const ixs = []
+
+    ixs.push(
+      Fleet.loadingBayToIdle(
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        fleetKey,
+        this.getStarbaseAddress(),
+        this.getStarbasePlayerAddress(),
+        this.getGameId(),
+        this.getGameState(),
+        0,
+      ),
+    )
+    return ixs
+  }
+
+  async fleetDock(fleetKey: PublicKey) {
+    const ixs = []
+
+    ixs.push(
+      Fleet.idleToLoadingBay(
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        fleetKey,
+        this.getStarbaseAddress(),
+        this.getStarbasePlayerAddress(),
+        this.getGameId(),
+        this.getGameState(),
+        0,
       ),
     )
     return ixs
@@ -654,6 +703,14 @@ export class GameInstructionHandler {
     (() => {
       throw new Error('no gameState set')
     })()
+
+  private getTokenMintBySymbol = (symbol: String) =>
+    useTokenStore().tokenList.find((token) => token.symbol == symbol)?.mint
+      ? new PublicKey(useTokenStore().tokenList.find((token) => token.symbol == symbol)!.mint)
+      : (undefined ??
+        (() => {
+          throw new Error('no cargoStatsDefinition set')
+        })())
 
   private getCargoStatsDefinition = () =>
     useGameStore().cargoStatsDefinition ??
