@@ -21,6 +21,7 @@ const filter = ref()
 
 const columns = ref([
   {
+    style: 'width: 10px',
     name: 'extend',
     required: true,
     align: 'left',
@@ -54,8 +55,8 @@ const columns = ref([
 
 const remainingCapacity = computed(() => {
   const cargoUsed = usePlayerStore()
-    .fleetCargoAccounts?.flatMap((fCA) => fCA.uiAmount)
-    .reduce((a, b) => a + b)
+    ?.fleetCargoAccounts?.flatMap((fCA) => fCA.uiAmount)
+    ?.reduce((partialSum, b) => partialSum + b, 0)
   return (
     usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())?.data
       .stats.cargoStats.cargoCapacity - (cargoUsed ?? 0)
@@ -93,14 +94,12 @@ const remainingCapacity = computed(() => {
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <q-td v-if="col.name == 'extend'" class="row">
+          <q-td v-if="col.name == 'extend'" class="">
             <q-td auto-width>
               <q-btn
                 :icon="props.expand ? 'remove' : 'add'"
-                color="accent"
-                dense
-                round
-                size="sm"
+                color="primary"
+                size="md"
                 @click="props.expand = !props.expand"
               />
             </q-td>
@@ -148,7 +147,7 @@ const remainingCapacity = computed(() => {
         </q-td>
       </q-tr>
       <q-tr v-show="props.expand" :props="props">
-        <q-td colspan="100%">
+        <q-td class="bg-primary" colspan="100%">
           <div class="row">
             <div class="col">
               <div class="row items-center q-mr-sm">

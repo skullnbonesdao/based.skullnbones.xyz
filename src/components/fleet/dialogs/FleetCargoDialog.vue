@@ -91,9 +91,12 @@ watch(
 
       <q-card-section>
         <CargoTable
-          v-if="usePlayerStore().fleetCargoAccounts"
+          v-if="usePlayerStore().fleetCargoAccounts && usePlayerStore().starbaseTokenAccounts"
           :fleet="props.fleet"
-          :rows="usePlayerStore().fleetCargoAccounts"
+          :rows="[
+            ...usePlayerStore().fleetCargoAccounts,
+            ...usePlayerStore().starbaseTokenAccounts?.filter((sTA) => sTA.itemType == 'resource'),
+          ]"
           action="sync"
         />
       </q-card-section>

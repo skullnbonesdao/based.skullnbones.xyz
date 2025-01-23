@@ -49,7 +49,7 @@ async function sendTx() {
 
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
-        `Transfer Cargo: ${props.amount > 0 ? 'Starbase to Fleet' : 'FLeet to Crew'}`,
+        `Transfer Cargo: ${props.amount > 0 ? 'Starbase -> Fleet' : 'Fleet -> Starbase'}`,
         staratlasIxs,
         signer,
         FEE_TYPES.DEFAULT_FEE,
