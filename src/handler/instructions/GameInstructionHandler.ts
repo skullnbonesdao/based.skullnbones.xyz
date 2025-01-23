@@ -39,6 +39,7 @@ import { useRPCStore } from 'stores/rpcStore'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { CargoType } from '@staratlas/cargo'
 import { UserPoints } from '@staratlas/points'
+import { usePlayerStore } from 'stores/playerStore'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -159,7 +160,7 @@ export class GameInstructionHandler {
   async depositCargoToGameIx(mint: PublicKey, amount: number) {
     if (!mint) throw Error('mint can not be empty')
     if (!amount || amount == 0) throw Error('amount can not be empty')
-    if (!useGameStore().starbase) throw Error('no starbase selected')
+    if (!usePlayerStore().currentStarbase) throw Error('no starbase selected')
     const ixs = []
 
     const cargoPod = await findCargoPodAddress()
@@ -207,7 +208,7 @@ export class GameInstructionHandler {
   async withdrawCargoFromGameIx(mint: PublicKey, amount: number) {
     if (!mint) throw Error('mint can not be empty')
     if (!amount || amount == 0) throw Error('amount can not be empty')
-    if (!useGameStore().starbase) throw Error('no starbase selected')
+    if (!usePlayerStore().currentStarbase) throw Error('no starbase selected')
     const ixs = []
 
     const cargoPod = await findCargoPodAddress()
@@ -303,7 +304,7 @@ export class GameInstructionHandler {
   async withdrawCrewFromGameIx(id: string) {
     const ixs = []
 
-    const crew = useTokenStore().gameCrewAccounts?.find((c) => c.id.toString() == id)
+    const crew = usePlayerStore().starbaseCrewAccounts?.find((c) => c.id.toString() == id)
     const proof = await getCrewProof(new PublicKey(id))
 
     const items = [
@@ -546,7 +547,7 @@ export class GameInstructionHandler {
     return ixs
   }
 
-  async cargoToFleetIx(fleetKey: PublicKey, cargoSymbol: string, amount: number) {
+  async cargoToFleetIx(fleetKey: PublicKey, tokenMint: PublicKey, amount: number) {
     const ixs = []
 
     const fleet = await readFromRPCOrError(
@@ -557,7 +558,10 @@ export class GameInstructionHandler {
       'confirmed',
     )
 
-    const tokenMint = this.getTokenMintBySymbol(cargoSymbol)
+    const cargoSymbol = useTokenStore().tokenList.find(
+      (t) => t.mint == tokenMint.toString(),
+    )!.symbol
+
     const cargoPodFROM = await findCargoPodAddress()
     let cargoPodTO
     let tokenFROM
@@ -599,6 +603,84 @@ export class GameInstructionHandler {
         this.getPlayerProfileAddress(),
         this.getProfileFactionAddress(),
         'funder',
+        this.getStarbaseAddress(),
+        this.getStarbasePlayerAddress(),
+        fleetKey,
+        cargoPodFROM,
+        cargoPodTO,
+        this.getCargoType(tokenMint),
+        this.getCargoStatsDefinition(),
+        tokenFROM.address,
+        tokenTO.address,
+        tokenMint,
+        this.getGameId(),
+        this.getGameState(),
+        {
+          amount: new BN(amount),
+          keyIndex: 0,
+        },
+      ),
+    )
+    return ixs
+  }
+
+  async cargoToStarbaseIx(fleetKey: PublicKey, tokenMint: PublicKey, amount: number) {
+    const ixs = []
+
+    const fleet = await readFromRPCOrError(
+      useRPCStore().connection,
+      useWorkspaceAdapter()!.sageProgram.value!,
+      fleetKey,
+      Fleet,
+      'confirmed',
+    )
+
+    const cargoSymbol = useTokenStore().tokenList.find(
+      (t) => t.mint == tokenMint.toString(),
+    )!.symbol
+
+    let cargoPodFROM
+    const cargoPodTO = await findCargoPodAddress()
+    let tokenFROM
+    let tokenTO
+
+    switch (cargoSymbol) {
+      case 'FUEL':
+        cargoPodFROM = fleet.data.fuelTank
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
+        break
+      case 'AMMO':
+        cargoPodFROM = fleet.data.ammoBank
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
+        break
+
+      default:
+        cargoPodFROM = fleet.data.cargoHold
+        tokenFROM = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodFROM, true)
+        tokenTO = createAssociatedTokenAccountIdempotent(tokenMint, cargoPodTO, true)
+        break
+    }
+
+    console.log('cargoPodFROM', cargoPodFROM.toString())
+    console.log('cargoPodTO', cargoPodTO.toString())
+    console.log('tokenFROM', tokenFROM.address.toString())
+    console.log('tokenTO', tokenTO.address.toString())
+
+    if (!(await checkAccountExists(tokenTO.address))) {
+      ixs.push(tokenTO.instructions)
+    }
+
+    ixs.push(
+      Fleet.withdrawCargoFromFleet(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.signer,
+        'funder',
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+
         this.getStarbaseAddress(),
         this.getStarbasePlayerAddress(),
         fleetKey,
@@ -895,7 +977,7 @@ export class GameInstructionHandler {
     })()
 
   private getStarbaseAddress = () =>
-    useGameStore().starbase!.key ??
+    usePlayerStore().currentStarbase?.key ??
     (() => {
       throw new Error('no starbase set')
     })()
@@ -903,7 +985,7 @@ export class GameInstructionHandler {
   private getStarbasePlayerAddress = () =>
     findStarbasePlayerAddress() ??
     (() => {
-      throw new Error('no starbase set')
+      throw new Error('no starbasePlayerAddress found')
     })()
 
   private getGameId = () =>
@@ -918,14 +1000,6 @@ export class GameInstructionHandler {
       throw new Error('no gameState set')
     })()
 
-  private getTokenMintBySymbol = (symbol: String) =>
-    useTokenStore().tokenList.find((token) => token.symbol == symbol)?.mint
-      ? new PublicKey(useTokenStore().tokenList.find((token) => token.symbol == symbol)!.mint)
-      : (undefined ??
-        (() => {
-          throw new Error('no cargoStatsDefinition set')
-        })())
-
   private getCargoType = (mint: PublicKey) =>
     findCargoTypeAddress(this.getCargoStatsDefinition(), mint) ??
     (() => {
@@ -939,8 +1013,8 @@ export class GameInstructionHandler {
     })()
 
   private getShipEscrow = (shipMint: PublicKey) =>
-    useTokenStore()
-      .gameTokenAccounts?.filter((gTA) => gTA.itemType == 'ship')
+    usePlayerStore()
+      .starbaseTokenAccounts?.filter((gTA) => gTA.itemType == 'ship')
       ?.find((gTA) => gTA.mint.toString() == shipMint.toString())
       ?.wrappedShipEscrows.sort((a, b) => a.amount.toNumber() - b.amount.toNumber())
       .at(0) ??
@@ -949,7 +1023,7 @@ export class GameInstructionHandler {
     })()
 
   private getShipEscrowIndex = (shipMint: PublicKey) =>
-    useGameStore().starbasePlayer?.wrappedShipEscrows.findIndex(
+    usePlayerStore().starbasePlayer?.wrappedShipEscrows.findIndex(
       (wse) =>
         wse.ship.toString() == this.getShipByMint(shipMint)?.toString() &&
         wse.amount == this.getShipEscrow(shipMint)?.amount,
@@ -959,7 +1033,7 @@ export class GameInstructionHandler {
     })()
 
   private getFleetByKey = (fleetKey: PublicKey) =>
-    useGameStore().fleets?.find((f) => f.key.toString() == fleetKey.toString()) ??
+    usePlayerStore().fleets?.find((f) => f.key.toString() == fleetKey.toString()) ??
     (() => {
       throw new Error('no fleet key found')
     })()

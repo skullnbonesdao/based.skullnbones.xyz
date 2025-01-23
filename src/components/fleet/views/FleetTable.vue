@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { TokenAccountInfo } from 'stores/tokenStore'
+import type { TokenAccountInfo } from 'stores/tokenStore'
 import { type PropType, ref } from 'vue'
-import { Fleet } from '@staratlas/sage'
+import type { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
 import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'

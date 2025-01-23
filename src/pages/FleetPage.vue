@@ -1,16 +1,15 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
 import { byteArrayToString } from '@staratlas/data-source'
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
-import { useTokenStore } from 'stores/tokenStore'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 import FleetCreateView from 'components/fleet/views/FleetCreateView.vue'
 import FleetTable from 'components/fleet/views/FleetTable.vue'
-import { Faction } from '@staratlas/profile-faction'
 import HeaderBanner from 'components/general/HeaderBanner.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const tabAction = ref('manage')
 
@@ -18,36 +17,6 @@ onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
 })
-
-watch(
-  () => getSigner(),
-  async () => {
-    await useProfileStore().updateStore(getSigner())
-  },
-)
-
-watch(
-  () => useGameStore().starbase,
-  async () => {
-    await useGameStore().updateStarbasePlayer()
-    await useTokenStore().updateStore(getSigner())
-  },
-)
-
-watch(
-  () => useGameStore().starbases,
-  () => {
-    useGameStore().starbase = useGameStore().starbases!.find(
-      (starbase) =>
-        byteArrayToString(starbase.data.name).toLowerCase().includes('Central'.toLowerCase()) &&
-        byteArrayToString(starbase.data.name)
-          .toLowerCase()
-          .includes(
-            (Faction[useProfileStore().factionProfile?.data.faction ?? 0] ?? 'none').toLowerCase(),
-          ),
-    )
-  },
-)
 </script>
 <template>
   <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
@@ -65,15 +34,15 @@ watch(
       <q-separator />
 
       <InfoBanner
-        v-if="!useGameStore().fleets?.length && tabAction == 'manage'"
+        v-if="!usePlayerStore().fleets?.length && tabAction == 'manage'"
         message="Fleets found"
       />
 
-      <FleetTable v-else-if="tabAction == 'manage'" :rows="useGameStore().fleets" />
+      <FleetTable v-else-if="tabAction == 'manage'" :rows="usePlayerStore().fleets" />
 
       <div v-if="tabAction == 'create'">
         <q-select
-          v-model="useGameStore().starbase"
+          v-model="usePlayerStore().currentStarbase"
           :disable="true"
           :option-label="(value) => byteArrayToString(value.data.name)"
           :options="
@@ -90,7 +59,7 @@ watch(
             <q-icon name="home" />
           </template>
         </q-select>
-        <InfoBanner v-if="!useGameStore().starbase" message="Please select a starbase" />
+        <InfoBanner v-if="!usePlayerStore().currentStarbase" message="Please select a starbase" />
 
         <FleetCreateView v-else />
       </div>

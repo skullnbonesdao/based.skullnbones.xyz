@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useTokenStore } from 'stores/tokenStore'
 import { PublicKey } from '@solana/web3.js'
-
-import { useGameStore } from 'stores/gameStore'
 import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
 import HeaderBanner from 'components/general/HeaderBanner.vue'
 import CargoTable from 'components/fleet/views/CargoTable.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const showDialog = ref(false)
 const expanded = ref(false)
@@ -22,14 +20,14 @@ const props = defineProps({
 })
 
 const fleetData = computed(() => {
-  return useGameStore().fleets.find((fleet) => fleet.key == props.fleet)
+  return usePlayerStore().fleets.find((fleet) => fleet.key == props.fleet)
 })
 
 watch(
   () => showDialog.value,
   async () => {
-    await useTokenStore().updateFleetCargoAccounts(props.fleet)
-    useTokenStore().gameTokenAccountsSelected = undefined
+    await usePlayerStore().updateFleetCargoAccounts(props.fleet)
+    usePlayerStore().starbaseTokenAccountsSelected = undefined
   },
 )
 </script>
@@ -93,8 +91,9 @@ watch(
 
       <q-card-section>
         <CargoTable
-          v-if="useTokenStore().fleetCargoAccounts"
-          :rows="useTokenStore().fleetCargoAccounts"
+          v-if="usePlayerStore().fleetCargoAccounts"
+          :fleet="props.fleet"
+          :rows="usePlayerStore().fleetCargoAccounts"
           action="sync"
         />
       </q-card-section>

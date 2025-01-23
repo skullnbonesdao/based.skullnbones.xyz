@@ -5,7 +5,7 @@ import { GameInstructionHandler } from 'src/handler/instructions/GameInstruction
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { PublicKey } from '@solana/web3.js'
-import { ref } from 'vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const props = defineProps({
   fleet: { type: PublicKey, required: true },
@@ -13,18 +13,13 @@ const props = defineProps({
     type: PublicKey,
     required: true,
   },
-  shouldAmount: {
-    type: Number,
-    default: 0,
-  },
-  isAmount: {
+  amount: {
     type: Number,
     default: 0,
   },
 })
 
 const $q = useQuasar()
-const inputAmount = ref(props.initAmount)
 
 async function sendTx() {
   const signer = getAsyncSigner()
@@ -32,20 +27,36 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    staratlasIxs.push(
-      ...(await gameInstructionHandler.cargoToFleetIx(
-        props.fleet,
-        props.cargoType,
-        inputAmount.value,
-      )),
-    )
+    if (props.amount > 0) {
+      staratlasIxs.push(
+        ...(await gameInstructionHandler.cargoToFleetIx(
+          props.fleet,
+          props.cargoMint,
+          Math.abs(props.amount),
+        )),
+      )
+    }
+
+    if (props.amount < 0) {
+      staratlasIxs.push(
+        ...(await gameInstructionHandler.cargoToStarbaseIx(
+          props.fleet,
+          props.cargoMint,
+          Math.abs(props.amount),
+        )),
+      )
+    }
+
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
-        `Instructions Withdraw`,
+        `Transfer Cargo: ${props.amount > 0 ? 'Starbase to Fleet' : 'FLeet to Crew'}`,
         staratlasIxs,
         signer,
         FEE_TYPES.DEFAULT_FEE,
       )
+
+    await usePlayerStore().updateFleet()
+    await usePlayerStore().updateFleetCargoAccounts(props.fleet)
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',

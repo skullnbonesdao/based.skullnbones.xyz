@@ -16,6 +16,7 @@ import {
 import { useGameStore } from 'stores/gameStore'
 import { useProfileStore } from 'stores/profileStore'
 import { MineItem } from '@staratlas/sage/dist/src/mineItem'
+import { usePlayerStore } from 'stores/playerStore'
 
 export function findSageProfileAddress(profileAddress: PublicKey, gameID: PublicKey) {
   return SagePlayerProfile.findAddress(
@@ -26,12 +27,12 @@ export function findSageProfileAddress(profileAddress: PublicKey, gameID: Public
 }
 
 export function findStarbasePlayerAddress() {
-  if (!useGameStore().starbase) throw Error('starbase is not set')
+  if (!usePlayerStore().currentStarbase) throw Error('starbase is not set')
   return StarbasePlayer.findAddress(
     useWorkspaceAdapter()!.sageProgram.value,
-    useGameStore().starbase!.key,
+    usePlayerStore().currentStarbase!.key,
     findSageProfileAddress(useProfileStore().playerProfileAddress!, useGameStore().gameID),
-    useGameStore().starbase!.data.seqId,
+    usePlayerStore().currentStarbase!.data.seqId,
   )[0]
 }
 

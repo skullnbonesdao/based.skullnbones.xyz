@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
-import { byteArrayToString } from '@staratlas/data-source'
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
 import { useTokenStore } from 'stores/tokenStore'
@@ -9,8 +8,8 @@ import TokenTable from 'components/portal/TokenTable.vue'
 import InfoBanner from 'components/general/InfoBanner.vue'
 import CrewTable from 'components/portal/CrewTable.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
-import { Faction } from '@staratlas/profile-faction'
 import HeaderBanner from 'components/general/HeaderBanner.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const tabDirection = ref('deposit')
 const tabItemType = ref('ship')
@@ -19,36 +18,6 @@ onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
 })
-
-watch(
-  () => getSigner(),
-  async () => {
-    await useProfileStore().updateStore(getSigner())
-  },
-)
-
-watch(
-  () => useGameStore().starbase,
-  async () => {
-    await useGameStore().updateStarbasePlayer()
-    await useTokenStore().updateStore(getSigner())
-  },
-)
-
-watch(
-  () => useGameStore().starbases,
-  () => {
-    useGameStore().starbase = useGameStore().starbases!.find(
-      (starbase) =>
-        byteArrayToString(starbase.data.name).toLowerCase().includes('Central'.toLowerCase()) &&
-        byteArrayToString(starbase.data.name)
-          .toLowerCase()
-          .includes(
-            (Faction[useProfileStore().factionProfile?.data.faction ?? 0] ?? 'none').toLowerCase(),
-          ),
-    )
-  },
-)
 </script>
 <template>
   <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
@@ -74,9 +43,9 @@ watch(
           </template>
         </q-select>-->
 
-    <InfoBanner v-if="!useGameStore().starbase" message="Please select a starabse" />
+    <InfoBanner v-if="!usePlayerStore().currentStarbase" message="Please select a starabse" />
 
-    <div v-if="useGameStore().starbase">
+    <div v-else>
       <HeaderBanner text="Wallet/Sage Portal" />
 
       <q-separator />
@@ -119,13 +88,13 @@ watch(
 
       <TokenTable
         v-if="
-          useTokenStore().gameTokenAccounts &&
+          usePlayerStore().starbaseTokenAccounts &&
           (tabItemType == 'ship' || tabItemType == 'resource') &&
           tabDirection == 'withdraw'
         "
         :action="tabDirection"
         :item-type="tabItemType"
-        :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        :rows="usePlayerStore().starbaseTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
       />
 
       <CrewTable
@@ -138,10 +107,12 @@ watch(
 
       <CrewTable
         v-if="
-          useTokenStore().gameCrewAccounts && tabItemType == 'crew' && tabDirection == 'withdraw'
+          usePlayerStore().starbaseCrewAccounts &&
+          tabItemType == 'crew' &&
+          tabDirection == 'withdraw'
         "
         :action="tabDirection"
-        :rows="useTokenStore().gameCrewAccounts!"
+        :rows="usePlayerStore().starbaseCrewAccounts!"
       />
     </div>
   </q-page>

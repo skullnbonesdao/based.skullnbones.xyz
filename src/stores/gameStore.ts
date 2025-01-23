@@ -25,25 +25,10 @@ export const useGameStore = defineStore(STORE_NAME, {
     mineItems: [] as MineItem[] | undefined,
     planets: [] as Planet[] | undefined,
     resources: [] as Resource[] | undefined,
-
     ships: [] as Ship[] | undefined,
-    starbase: undefined as Starbase | undefined,
   }),
 
   actions: {
-    initStore() {
-      const localStarbase = localStorage.getItem(STARBASE_LOCALSTORAGE_KEY)
-      if (localStarbase) {
-        try {
-          // parse the saved data and set it in the store
-          const parsed = JSON.parse(localStarbase) as Starbase
-          this.starbase = parsed
-        } catch (err) {
-          this.starbase = undefined
-          console.warn(`[${this.$id}]parsing stored starbase`, err)
-        }
-      }
-    },
     async updateStore() {
       try {
         this.game = await loadGame(this.gameID)
