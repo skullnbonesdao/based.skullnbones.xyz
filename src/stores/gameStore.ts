@@ -1,17 +1,15 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
-import { Game, Planet, Resource, Sector, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
+import { Game, Planet, Resource, Sector, Ship, Starbase } from '@staratlas/sage'
 import {
-  loadFleets,
   loadGame,
   loadMineItem,
   loadPlanets,
   loadResources,
   loadShips,
-  loadStarbasePlayer,
   loadStarbases,
 } from 'src/handler/interfaces/GameInterface'
-import { Fleet, MineItem } from '@staratlas/sage/src'
+import { MineItem } from '@staratlas/sage/src'
 
 const STORE_NAME = 'gameStore'
 const STARBASE_LOCALSTORAGE_KEY = 'gameStore_starbase'
@@ -30,8 +28,6 @@ export const useGameStore = defineStore(STORE_NAME, {
 
     ships: [] as Ship[] | undefined,
     starbase: undefined as Starbase | undefined,
-    fleets: [] as Fleet[] | undefined,
-    starbasePlayer: undefined as StarbasePlayer | undefined,
   }),
 
   actions: {
@@ -57,20 +53,10 @@ export const useGameStore = defineStore(STORE_NAME, {
         this.planets = await loadPlanets()
         this.resources = await loadResources()
         this.ships = await loadShips()
-        this.fleets = await loadFleets()
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {
         console.log(`[${this.$id}] updated`)
-      }
-    },
-    async updateStarbasePlayer() {
-      try {
-        this.starbasePlayer = await loadStarbasePlayer()
-      } catch (error) {
-        console.error(`[${this.$id}] waring:`, error)
-      } finally {
-        console.log(`[${this.$id}] updated starbase player`)
       }
     },
   },

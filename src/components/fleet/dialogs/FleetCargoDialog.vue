@@ -5,7 +5,8 @@ import { PublicKey } from '@solana/web3.js'
 
 import { useGameStore } from 'stores/gameStore'
 import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
-import TokenTable from 'components/portal/TokenTable.vue'
+import HeaderBanner from 'components/general/HeaderBanner.vue'
+import CargoTable from 'components/fleet/views/CargoTable.vue'
 
 const showDialog = ref(false)
 const expanded = ref(false)
@@ -38,10 +39,7 @@ watch(
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
-      <q-card-section class="row q-gutter-x-sm items-center">
-        <div class="text-h6">[Cargo]</div>
-        <div class="text-h5">{{ props.name }}</div>
-      </q-card-section>
+      <HeaderBanner text="Cargo" />
 
       <q-separator />
 
@@ -94,11 +92,10 @@ watch(
       </q-card-section>
 
       <q-card-section>
-        <TokenTable
+        <CargoTable
           v-if="useTokenStore().fleetCargoAccounts"
           :rows="useTokenStore().fleetCargoAccounts"
-          item-type="ship"
-          selection="multiple"
+          action="sync"
         />
       </q-card-section>
     </q-card>

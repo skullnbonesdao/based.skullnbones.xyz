@@ -14,7 +14,7 @@ import { findShipByMint } from 'src/handler/interfaces/GameInterface'
 
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
 
-export interface TokenAccount {
+export interface TokenAccountInfo {
   name: string
   symbol: string
   key: PublicKey
@@ -26,29 +26,29 @@ export interface TokenAccount {
   thumbnailUrl: string
 }
 
-export interface StarbaseTokenAccount extends TokenAccount {
+export interface StarbaseTokenAccount extends TokenAccountInfo {
   wrappedShipEscrows: WrappedShipEscrow[]
 }
 
 export const useTokenStore = defineStore('tokenStore', {
   state: () => ({
     tokenList: tokenList,
-    walletTokenAccounts: undefined as TokenAccount[] | undefined,
+    walletTokenAccounts: undefined as TokenAccountInfo[] | undefined,
     gameTokenAccounts: undefined as StarbaseTokenAccount[] | undefined,
     gameTokenAccountsSelected: undefined as StarbaseTokenAccount | undefined,
 
     walletCrewAccounts: undefined as cNFT[] | undefined,
     gameCrewAccounts: undefined as cNFT[] | undefined,
 
-    fleetCargoAccounts: [] as TokenAccount[] | undefined,
+    fleetCargoAccounts: [] as TokenAccountInfo[] | undefined,
   }),
 
   actions: {
     async updateStore(wallet: PublicKey) {
       try {
-        this.walletTokenAccounts = toTokenAccount<TokenAccount>(await getAccounts([wallet])).filter(
-          (account) => account.uiAmount > 0,
-        )
+        this.walletTokenAccounts = toTokenAccount<TokenAccountInfo>(
+          await getAccounts([wallet]),
+        ).filter((account) => account.uiAmount > 0)
 
         this.gameTokenAccounts = toTokenAccount<StarbaseTokenAccount>(
           await getAccounts([await findCargoPodAddress(), useProfileStore().sageProfileAddress!]),
@@ -87,7 +87,9 @@ export const useTokenStore = defineStore('tokenStore', {
           ?.data.cargoHold
 
         if (cargoHold)
-          this.fleetCargoAccounts = toTokenAccount<TokenAccount>(await getAccounts([cargoHold!]))
+          this.fleetCargoAccounts = toTokenAccount<TokenAccountInfo>(
+            await getAccounts([cargoHold!]),
+          )
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {

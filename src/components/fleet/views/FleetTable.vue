@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { TokenAccount } from 'stores/tokenStore'
+import { TokenAccountInfo } from 'stores/tokenStore'
 import { type PropType, ref } from 'vue'
 import { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
@@ -12,7 +12,7 @@ import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningActio
 
 const props = defineProps({
   rows: {
-    type: {} as PropType<TokenAccount[]>,
+    type: {} as PropType<TokenAccountInfo[]>,
     required: true,
   },
 })
