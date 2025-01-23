@@ -56,7 +56,6 @@ export const useGameStore = defineStore(STORE_NAME, {
         this.mineItems = await loadMineItem()
         this.planets = await loadPlanets()
         this.resources = await loadResources()
-
         this.ships = await loadShips()
         this.fleets = await loadFleets()
       } catch (error) {
@@ -71,11 +70,8 @@ export const useGameStore = defineStore(STORE_NAME, {
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {
-        console.log(`[${this.$id}] updated`)
+        console.log(`[${this.$id}] updated starbase player`)
       }
-    },
-    setStarbase() {
-      localStorage.setItem(STARBASE_LOCALSTORAGE_KEY, JSON.stringify(this.starbase))
     },
   },
 })

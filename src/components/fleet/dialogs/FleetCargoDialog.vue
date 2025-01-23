@@ -5,6 +5,7 @@ import { PublicKey } from '@solana/web3.js'
 
 import { useGameStore } from 'stores/gameStore'
 import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
+import TokenTable from 'components/portal/TokenTable.vue'
 
 const showDialog = ref(false)
 const expanded = ref(false)
@@ -25,7 +26,8 @@ const fleetData = computed(() => {
 
 watch(
   () => showDialog.value,
-  () => {
+  async () => {
+    await useTokenStore().updateFleetCargoAccounts(props.fleet)
     useTokenStore().gameTokenAccountsSelected = undefined
   },
 )
@@ -91,14 +93,14 @@ watch(
         </q-card>
       </q-card-section>
 
-      <!--      <q-card-section>
-              <TokenTable
-                v-if="useTokenStore().walletTokenAccounts"
-                :rows="useTokenStore().gameTokenAccounts?.filter((acc) => acc.itemType == 'resource')!"
-                item-type="ship"
-                selection="multiple"
-              />
-            </q-card-section>-->
+      <q-card-section>
+        <TokenTable
+          v-if="useTokenStore().fleetCargoAccounts"
+          :rows="useTokenStore().fleetCargoAccounts"
+          item-type="ship"
+          selection="multiple"
+        />
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>

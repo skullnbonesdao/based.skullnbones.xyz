@@ -39,6 +39,8 @@ export const useTokenStore = defineStore('tokenStore', {
 
     walletCrewAccounts: undefined as cNFT[] | undefined,
     gameCrewAccounts: undefined as cNFT[] | undefined,
+
+    fleetCargoAccounts: [] as TokenAccount[] | undefined,
   }),
 
   actions: {
@@ -76,6 +78,20 @@ export const useTokenStore = defineStore('tokenStore', {
         console.error(`[${this.$id}]`, err)
       } finally {
         console.log(`[${this.$id}] updated`)
+      }
+    },
+
+    async updateFleetCargoAccounts(fleet: PublicKey) {
+      try {
+        const cargoHold = useGameStore().fleets?.find((f) => f.key.toString() == fleet.toString())
+          ?.data.cargoHold
+
+        if (cargoHold)
+          this.fleetCargoAccounts = toTokenAccount<TokenAccount>(await getAccounts([cargoHold!]))
+      } catch (error) {
+        console.error(`[${this.$id}] waring:`, error)
+      } finally {
+        console.log(`[${this.$id}] updated fleet cargo accounts`)
       }
     },
     resetStore() {
