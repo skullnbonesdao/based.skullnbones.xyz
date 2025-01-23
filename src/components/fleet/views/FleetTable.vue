@@ -9,6 +9,7 @@ import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
 import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const props = defineProps({
   rows: {
@@ -77,6 +78,12 @@ const columns = ref([
     square
   >
     <template v-slot:top-left>
+      <q-btn
+        class="q-mr-sm"
+        color="primary"
+        icon="refresh"
+        @click="usePlayerStore().updateFleet()"
+      ></q-btn>
       <div class="text-grey-5">Found {{ rows.length }} Items</div>
     </template>
     <template v-slot:top-right>

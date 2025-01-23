@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { TokenAccountInfo } from 'stores/tokenStore'
+import { TokenAccountInfo, useTokenStore } from 'stores/tokenStore'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 import { computed, type PropType, ref } from 'vue'
 import FleetCargoSyncAction from 'components/fleet/actions/FleetCargoSyncAction.vue'
@@ -53,15 +53,71 @@ const columns = ref([
   },
 ])
 
-const remainingCapacity = computed(() => {
+const remainingFuelCapacity = computed(() => {
+  const cargoUsed = usePlayerStore()?.fleetFuelAccount?.uiAmount
+  return (
+    usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())?.data
+      .stats.cargoStats.fuelCapacity - (cargoUsed ?? 0)
+  )
+})
+
+const remainingAmmoCapacity = computed(() => {
+  const cargoUsed = usePlayerStore()?.fleetAmmoAccount?.uiAmount
+  return (
+    usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())?.data
+      .stats.cargoStats.ammoCapacity - (cargoUsed ?? 0)
+  )
+})
+
+const remainingCargoCapacity = computed(() => {
   const cargoUsed = usePlayerStore()
     ?.fleetCargoAccounts?.flatMap((fCA) => fCA.uiAmount)
     ?.reduce((partialSum, b) => partialSum + b, 0)
+
   return (
     usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())?.data
       .stats.cargoStats.cargoCapacity - (cargoUsed ?? 0)
   )
 })
+
+function getCapacity(mint: PublicKey) {
+  switch (useTokenStore().tokenList.find((t) => t.mint.toString() == mint.toString())?.symbol) {
+    case 'FUEL':
+      return usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())
+        ?.data.stats.cargoStats.fuelCapacity
+    case 'AMMO':
+      return usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())
+        ?.data.stats.cargoStats.ammoCapacity
+    default:
+      return usePlayerStore().fleets?.find((f) => f.key.toString() == globalProps.fleet.toString())
+        ?.data.stats.cargoStats.cargoCapacity
+  }
+}
+
+function getRemainingCapacity(mint: PublicKey) {
+  switch (useTokenStore().tokenList.find((t) => t.mint.toString() == mint.toString())?.symbol) {
+    case 'FUEL':
+      return remainingFuelCapacity.value
+    case 'AMMO':
+      return remainingAmmoCapacity.value
+    default:
+      return remainingCargoCapacity.value
+  }
+}
+
+function getCargoAmount(mint: PublicKey) {
+  switch (useTokenStore().tokenList.find((t) => t.mint.toString() == mint.toString())?.symbol) {
+    case 'FUEL':
+      return usePlayerStore().fleetFuelAccount?.uiAmount || 0
+    case 'AMMO':
+      return usePlayerStore().fleetAmmoAccount?.uiAmount || 0
+    default:
+      return (
+        usePlayerStore().fleetCargoAccounts?.find((fCA) => fCA.mint.toString() == mint.toString())
+          ?.uiAmount || 0
+      )
+  }
+}
 </script>
 
 <template>
@@ -74,7 +130,8 @@ const remainingCapacity = computed(() => {
       sortBy: 'name',
       descending: true,
     }"
-    :rows="rows"
+    :rows="globalProps.rows"
+    dense
     flat
     hide-bottom
     row-key="name"
@@ -92,18 +149,11 @@ const remainingCapacity = computed(() => {
     </template>
 
     <template v-slot:body="props">
-      <q-tr :props="props">
+      <q-tr :props="props" @click="props.expand = !props.expand">
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <q-td v-if="col.name == 'extend'" class="">
-            <q-td auto-width>
-              <q-btn
-                :icon="props.expand ? 'remove' : 'add'"
-                color="primary"
-                size="md"
-                @click="props.expand = !props.expand"
-              />
-            </q-td>
-          </q-td>
+          <div v-if="col.name == 'extend'" class="col row">
+            <q-btn class="" color="primary" icon="expand"></q-btn>
+          </div>
 
           <div v-else-if="col.name == 'uiAmount'" class="col">
             <div class="row items-center">
@@ -123,9 +173,15 @@ const remainingCapacity = computed(() => {
             </div>
             <div class="row items-center">
               <div>@Cargo</div>
+              <div class="col">
+                {{
+                  ((getCargoAmount(props.row.mint) / getCapacity(props.row.mint)) * 100).toFixed(0)
+                }}%
+              </div>
+
               <AmountFormatter
-                :number="props.row['uiAmount']"
-                :url="props.row['thumbnailUrl']"
+                :number="getCargoAmount(props.row.mint)"
+                :url="props.row.thumbnailUrl"
                 class="col"
                 decimals="1"
                 pad-start="10"
@@ -147,28 +203,34 @@ const remainingCapacity = computed(() => {
         </q-td>
       </q-tr>
       <q-tr v-show="props.expand" :props="props">
-        <q-td class="bg-primary" colspan="100%">
-          <div class="row">
+        <q-td class="" colspan="100%">
+          <div class="row q-gutter-x-sm">
             <div class="col">
-              <div class="row items-center q-mr-sm">
-                <div class="col text-h6">Load/Unload</div>
-                <q-input v-model="props.row['uiAmountChange']" dense standout type="number" />
-              </div>
               <div class="row items-center">
-                <div class="col row items-center q-gutter-x-md">
-                  <div class="text-subtitle2">Starbase</div>
-                  <q-slider
-                    v-model="props.row['uiAmountChange']"
-                    :max="remainingCapacity"
-                    :min="-props.row['uiAmount']"
-                    :step="1"
-                    class="col"
-                    color="accent"
-                    label
-                  />
-                  <div class="text-subtitle2">Cargo</div>
+                <div class="col row items-center">
+                  <div class="col row items-center">
+                    <div class="text-subtitle2">@Starbase</div>
+
+                    <q-slider
+                      v-model="props.row.uiAmountChange"
+                      :max="getRemainingCapacity(props.row.mint)"
+                      :min="-props.row.uiAmount"
+                      :step="1"
+                      class="col q-mx-md"
+                      color="accent"
+                      label
+                    />
+                    <div class="text-subtitle2">@Cargo</div>
+                  </div>
                 </div>
               </div>
+              <q-input
+                v-model="props.row.uiAmountChange"
+                class="col"
+                dense
+                standout
+                type="number"
+              />
             </div>
 
             <FleetCargoSyncAction

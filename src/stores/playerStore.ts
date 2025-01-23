@@ -37,6 +37,11 @@ export const usePlayerStore = defineStore(STORE_NAME, {
     starbaseCrewAccountsSelected: undefined as cNFT[] | undefined,
 
     fleetCargoAccounts: [] as FleetCargoAccount[] | undefined,
+    fleetFuelAccount: undefined as FleetCargoAccount | undefined,
+    fleetAmmoAccount: undefined as FleetCargoAccount | undefined,
+
+    fleetFilteredConsumptionAccounts: [] as FleetCargoAccount[] | undefined,
+    fleetFilteredCargoAccounts: [] as FleetCargoAccount[] | undefined,
   }),
 
   actions: {
@@ -86,6 +91,22 @@ export const usePlayerStore = defineStore(STORE_NAME, {
 
     async updateFleetCargoAccounts(fleet: PublicKey) {
       try {
+        const fuelTank = usePlayerStore().fleets?.find((f) => f.key.toString() == fleet.toString())
+          ?.data.fuelTank
+
+        if (fuelTank)
+          this.fleetFuelAccount = toTokenAccount<FleetCargoAccount>(
+            await getAccounts([fuelTank!]),
+          )[0]
+
+        const ammoBank = usePlayerStore().fleets?.find((f) => f.key.toString() == fleet.toString())
+          ?.data.ammoBank
+
+        if (ammoBank)
+          this.fleetAmmoAccount = toTokenAccount<FleetCargoAccount>(
+            await getAccounts([ammoBank!]),
+          )[0]
+
         const cargoHold = usePlayerStore().fleets?.find((f) => f.key.toString() == fleet.toString())
           ?.data.cargoHold
 
@@ -93,6 +114,42 @@ export const usePlayerStore = defineStore(STORE_NAME, {
           this.fleetCargoAccounts = toTokenAccount<FleetCargoAccount>(
             await getAccounts([cargoHold!]),
           )
+
+        this.fleetFilteredConsumptionAccounts = [
+          ...(usePlayerStore().fleetCargoAccounts || []),
+          ...(usePlayerStore()
+            .starbaseTokenAccounts?.filter((sTA) => sTA.itemType == 'resource')
+            .filter(
+              (sTA) =>
+                !usePlayerStore().fleetCargoAccounts?.some(
+                  (fCA) => fCA.mint.toString() == sTA.mint.toString(),
+                ),
+            )
+            ?.map((sTA) => {
+              return {
+                ...sTA,
+                uiAmount: 0,
+              }
+            }) || []),
+        ].filter((acc) => ['FOOD', 'FUEL', 'AMMO', 'TOOL'].includes(acc.symbol))
+
+        this.fleetFilteredCargoAccounts = [
+          ...(usePlayerStore().fleetCargoAccounts || []),
+          ...(usePlayerStore()
+            .starbaseTokenAccounts?.filter((sTA) => sTA.itemType == 'resource')
+            .filter(
+              (sTA) =>
+                !usePlayerStore().fleetCargoAccounts?.some(
+                  (fCA) => fCA.mint.toString() == sTA.mint.toString(),
+                ),
+            )
+            ?.map((sTA) => {
+              return {
+                ...sTA,
+                uiAmount: 0,
+              }
+            }) || []),
+        ].filter((acc) => !['FOOD', 'FUEL', 'AMMO', 'TOOL'].includes(acc.symbol))
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {

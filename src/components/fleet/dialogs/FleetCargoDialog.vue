@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { PublicKey } from '@solana/web3.js'
-import FleetCargoLoadAction from 'components/fleet/actions/FleetCargoLoadAction.vue'
 import HeaderBanner from 'components/general/HeaderBanner.vue'
-import CargoTable from 'components/fleet/views/CargoTable.vue'
 import { usePlayerStore } from 'stores/playerStore'
+import CargoTable from 'components/fleet/views/CargoTable.vue'
 
 const showDialog = ref(false)
-const expanded = ref(false)
+
 const props = defineProps({
   name: {
     type: String,
@@ -33,73 +32,44 @@ watch(
 </script>
 
 <template>
-  <q-btn color="secondary" label="Cargo" @click="showDialog = true" />
+  <q-btn color="secondary" label="Edit Cargo" @click="showDialog = true" />
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
       <HeaderBanner text="Cargo" />
 
       <q-separator />
-
-      <q-card-section class="row q-gutter-x-sm">
-        <q-card bordered class="col" flat>
-          <q-card-section>FUEL</q-card-section>
-          <q-card-section>
-            <FleetCargoLoadAction
-              :fleet="props.fleet"
-              :init-amount="fleetData?.data.stats.cargoStats.fuelCapacity"
-              cargo-type="FUEL"
-            />
-          </q-card-section>
-        </q-card>
-
-        <q-card bordered class="col" flat>
-          <q-card-section>AMMO</q-card-section>
-          <q-card-section>
-            <FleetCargoLoadAction
-              :fleet="props.fleet"
-              :init-amount="fleetData?.data.stats.cargoStats.ammoCapacity"
-              cargo-type="AMMO"
-            />
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
-      <q-card-section class="row q-gutter-x-sm">
-        <q-card bordered class="col" flat>
-          <q-card-section>FOOD</q-card-section>
-          <q-card-section>
-            <FleetCargoLoadAction
-              :fleet="props.fleet"
-              :init-amount="fleetData?.data.stats.cargoStats.cargoCapacity"
-              cargo-type="FOOD"
-            />
-          </q-card-section>
-        </q-card>
-
-        <q-card bordered class="col" flat>
-          <q-card-section>TOOL</q-card-section>
-          <q-card-section>
-            <FleetCargoLoadAction
-              :fleet="props.fleet"
-              :init-amount="fleetData?.data.stats.cargoStats.cargoCapacity"
-              cargo-type="TOOL"
-            />
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
-      <q-card-section>
+      <q-expansion-item
+        caption="Consumed Resources"
+        default-opened
+        expand-separator
+        icon="perm_identity"
+        label="Fleet Provision"
+      >
         <CargoTable
-          v-if="usePlayerStore().fleetCargoAccounts && usePlayerStore().starbaseTokenAccounts"
+          v-if="usePlayerStore().fleetFilteredConsumptionAccounts"
           :fleet="props.fleet"
-          :rows="[
-            ...usePlayerStore().fleetCargoAccounts,
-            ...usePlayerStore().starbaseTokenAccounts?.filter((sTA) => sTA.itemType == 'resource'),
-          ]"
+          :rows="usePlayerStore().fleetFilteredConsumptionAccounts!"
           action="sync"
+          class="bg-primary"
         />
-      </q-card-section>
+      </q-expansion-item>
+
+      <q-expansion-item
+        caption="Cargo fleet storage"
+        default-opened
+        expand-separator
+        icon="perm_identity"
+        label="Fleet Cargo"
+      >
+        <CargoTable
+          v-if="usePlayerStore().fleetFilteredCargoAccounts"
+          :fleet="props.fleet"
+          :rows="usePlayerStore().fleetFilteredCargoAccounts!"
+          action="sync"
+          class="bg-primary"
+        />
+      </q-expansion-item>
     </q-card>
   </q-dialog>
 </template>

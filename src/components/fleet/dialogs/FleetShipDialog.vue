@@ -29,7 +29,7 @@ watch(
 </script>
 
 <template>
-  <q-btn color="secondary" label="Ships" @click="showDialog = true" />
+  <q-btn color="secondary" label="Edit Ships" @click="showDialog = true" />
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
