@@ -3,9 +3,19 @@ import { SagePlayerProfile } from '@staratlas/sage/src'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { readAllFromRPC, readFromRPCOrError } from '@staratlas/data-source'
 import { useRPCStore } from 'stores/rpcStore'
-import { Fleet, Game, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
+import {
+  Fleet,
+  Game,
+  Planet,
+  Resource,
+  Sector,
+  Ship,
+  Starbase,
+  StarbasePlayer,
+} from '@staratlas/sage'
 import { useGameStore } from 'stores/gameStore'
 import { useProfileStore } from 'stores/profileStore'
+import { MineItem } from '@staratlas/sage/dist/src/mineItem'
 
 export function findSageProfileAddress(profileAddress: PublicKey, gameID: PublicKey) {
   return SagePlayerProfile.findAddress(
@@ -61,6 +71,84 @@ export async function loadStarbases() {
   })
 
   return starbases
+}
+
+export async function loadSectors() {
+  const data = await readAllFromRPC(
+    useRPCStore().connection,
+    useWorkspaceAdapter()!.sageProgram.value!,
+    Sector,
+    'confirmed',
+  )
+
+  const sectors: Sector[] = []
+
+  data.map((d) => {
+    if (d.type == 'ok') {
+      sectors.push(
+        new Sector(d.data.data, d.data.key, JSON.parse(JSON.stringify(d.data.connections))),
+      )
+    }
+  })
+
+  return sectors
+}
+
+export async function loadMineItem() {
+  const data = await readAllFromRPC(
+    useRPCStore().connection,
+    useWorkspaceAdapter()!.sageProgram.value!,
+    MineItem,
+    'confirmed',
+  )
+
+  const mineItems: MineItem[] = []
+
+  data.map((d) => {
+    if (d.type == 'ok') {
+      mineItems.push(new MineItem(d.data.data, d.data.key))
+    }
+  })
+
+  return mineItems
+}
+
+export async function loadPlanets() {
+  const data = await readAllFromRPC(
+    useRPCStore().connection,
+    useWorkspaceAdapter()!.sageProgram.value!,
+    Planet,
+    'confirmed',
+  )
+
+  const planets: Planet[] = []
+
+  data.map((d) => {
+    if (d.type == 'ok') {
+      planets.push(new Planet(d.data.data, d.data.key))
+    }
+  })
+
+  return planets
+}
+
+export async function loadResources() {
+  const data = await readAllFromRPC(
+    useRPCStore().connection,
+    useWorkspaceAdapter()!.sageProgram.value!,
+    Resource,
+    'confirmed',
+  )
+
+  const resources: Resource[] = []
+
+  data.map((d) => {
+    if (d.type == 'ok') {
+      resources.push(new Resource(d.data.data, d.data.key))
+    }
+  })
+
+  return resources
 }
 
 export async function loadShips() {

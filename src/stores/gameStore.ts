@@ -1,14 +1,17 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
-import type { Game, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
+import { Game, Planet, Resource, Sector, Ship, Starbase, StarbasePlayer } from '@staratlas/sage'
 import {
   loadFleets,
   loadGame,
+  loadMineItem,
+  loadPlanets,
+  loadResources,
   loadShips,
   loadStarbasePlayer,
   loadStarbases,
 } from 'src/handler/interfaces/GameInterface'
-import { Fleet } from '@staratlas/sage/src'
+import { Fleet, MineItem } from '@staratlas/sage/src'
 
 const STORE_NAME = 'gameStore'
 const STARBASE_LOCALSTORAGE_KEY = 'gameStore_starbase'
@@ -17,9 +20,14 @@ export const useGameStore = defineStore(STORE_NAME, {
   state: () => ({
     wallet: undefined as PublicKey | undefined,
     gameID: new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr'),
-    cargoStatsDefinition: new PublicKey('CSTatsVpHbvZmwHbCjZKVfYQT5JXfsXccXufhEcwCqTg'),
+
     game: undefined as Game | undefined,
     starbases: [] as Starbase[] | undefined,
+    sectors: [] as Sector[] | undefined,
+    mineItems: [] as MineItem[] | undefined,
+    planets: [] as Planet[] | undefined,
+    resources: [] as Resource[] | undefined,
+
     ships: [] as Ship[] | undefined,
     starbase: undefined as Starbase | undefined,
     fleets: [] as Fleet[] | undefined,
@@ -44,6 +52,11 @@ export const useGameStore = defineStore(STORE_NAME, {
       try {
         this.game = await loadGame(this.gameID)
         this.starbases = await loadStarbases()
+        //this.sectors = await loadSectors()
+        this.mineItems = await loadMineItem()
+        this.planets = await loadPlanets()
+        this.resources = await loadResources()
+
         this.ships = await loadShips()
         this.fleets = await loadFleets()
       } catch (error) {

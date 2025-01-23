@@ -7,6 +7,8 @@ import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
 import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
 import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
 import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
+import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
+import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 
 const props = defineProps({
   rows: {
@@ -38,6 +40,14 @@ const columns = ref([
     label: 'State',
     align: 'left',
     field: (row: Fleet) => Object.keys(row.state)[0],
+    sortable: true,
+  },
+  {
+    name: 'sector',
+    required: true,
+    label: 'Sector',
+    align: 'left',
+    field: (row: Fleet) => `none `,
     sortable: true,
   },
   {
@@ -111,6 +121,8 @@ const columns = ref([
             />
             <FleetDockAction :fleet="props.row.key" />
             <FleetUndockAction :fleet="props.row.key" />
+            <FleetStartMiningAction :fleet="props.row.key" />
+            <FleetStopMiningAction :fleet="props.row.key" />
           </div>
           <div v-else>
             {{ col.value }}

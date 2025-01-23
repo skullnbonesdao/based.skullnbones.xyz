@@ -4,7 +4,14 @@ import {
   readFromRPCOrError,
   stringToByteArray,
 } from '@staratlas/data-source'
-import { FleetShips, SagePlayerProfile, StarbasePlayer } from '@staratlas/sage/src'
+import {
+  FleetShips,
+  Game,
+  MineItem,
+  Resource,
+  SagePlayerProfile,
+  StarbasePlayer,
+} from '@staratlas/sage/src'
 import { BN } from '@staratlas/anchor'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { findShipByMint, findStarbasePlayerAddress } from 'src/handler/interfaces/GameInterface'
@@ -29,6 +36,9 @@ import { checkAccountExists } from 'src/handler/helper/checkAccountExists'
 import { useTokenStore } from 'stores/tokenStore'
 import { getCrewProof } from 'stores/interfaces/cNFTInterface'
 import { useRPCStore } from 'stores/rpcStore'
+import { getAssociatedTokenAddressSync } from '@solana/spl-token'
+import { CargoType } from '@staratlas/cargo'
+import { UserPoints } from '@staratlas/points'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -211,8 +221,8 @@ export class GameInstructionHandler {
 
     const key = this.signer
     const fundsTo = this.signer.publicKey()
-    const cargoStatsDefinition = useGameStore().cargoStatsDefinition
-    const cargoType = findCargoTypeAddress(cargoStatsDefinition, mint)
+
+    const cargoType = findCargoTypeAddress(this.getCargoStatsDefinition(), mint)
     const tokenFrom = tokenFROM.address
     const tokenTo = tokenTO.address
     const tokenMint = mint
@@ -233,7 +243,7 @@ export class GameInstructionHandler {
         this.getStarbaseAddress(),
         cargoPod,
         cargoType,
-        cargoStatsDefinition,
+        this.getCargoStatsDefinition(),
         tokenFrom,
         tokenTo,
         tokenMint,
@@ -650,6 +660,204 @@ export class GameInstructionHandler {
     return ixs
   }
 
+  async startMining(fleetKey: PublicKey) {
+    const ixs = []
+
+    const planet = this.getPlanetAddressByFleetKey(fleetKey)
+    const resource = this.getResourceByPlanetKey(planet)
+    const resourceKey = resource?.key
+    const mineItemKey = resource?.data.mineItem
+
+    ixs.push(
+      Fleet.startMiningAsteroid(
+        this.getSageProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        fleetKey,
+        this.getStarbaseAddress(),
+        this.getStarbasePlayerAddress(),
+        mineItemKey,
+        resourceKey,
+        planet,
+        this.getGameState(),
+        this.getGameId(),
+        this.getFuelTokenAccountByFleetKey(fleetKey),
+        {
+          keyIndex: 0,
+        },
+      ),
+    )
+    return ixs
+  }
+
+  async asteroidMiningHandler(fleetKey: PublicKey) {
+    const ixs = []
+    const planet = new PublicKey('AEE2o2CH7mGqaxA5aD3yhWwCHatmYxopnNevvMTcHS9C')
+
+    const fuelMint = this.getMintBySymbol('FUEL')
+    const foodMint = this.getMintBySymbol('FOOD')
+    const ammoMint = this.getMintBySymbol('AMMO')
+    const resourceMint = this.getMintBySymbol('HYG')
+
+    const feetFuelTank = this.getFleetByKey(fleetKey)?.data.fuelTank
+    const fleetCargoHold = this.getFleetByKey(fleetKey)?.data.cargoHold
+    const fleetAmmoBank = this.getFleetByKey(fleetKey)?.data.ammoBank
+
+    const fleetFuelToken = createAssociatedTokenAccountIdempotent(
+      fuelMint,
+      this.getFuelTokenAccountByFleetKey(fleetKey),
+      true,
+    )
+
+    const mineItemKey = this.getMineItemAddress(resourceMint)
+    const resourceKey = this.getResourceAddress(mineItemKey, planet)
+    const fleetFoodToken = createAssociatedTokenAccountIdempotent(foodMint, fleetCargoHold, true)
+    const fleetAmmoToken = createAssociatedTokenAccountIdempotent(ammoMint, fleetAmmoBank, true)
+    const resourceTokenFrom = createAssociatedTokenAccountIdempotent(
+      resourceMint,
+      mineItemKey,
+      true,
+    )
+    const resourceTokenTo = createAssociatedTokenAccountIdempotent(
+      resourceMint,
+      fleetCargoHold,
+      true,
+    )
+
+    if (!(await checkAccountExists(fleetFoodToken.address))) {
+      ixs.push(fleetFoodToken.instructions)
+    }
+    if (!(await checkAccountExists(fleetAmmoToken.address))) {
+      ixs.push(fleetAmmoToken.instructions)
+    }
+    if (!(await checkAccountExists(resourceTokenFrom.address))) {
+      ixs.push(resourceTokenFrom.instructions)
+    }
+    if (!(await checkAccountExists(resourceTokenTo.address))) {
+      ixs.push(resourceTokenTo.instructions)
+    }
+
+    ixs.push(
+      Fleet.asteroidMiningHandler(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        fleetKey,
+        this.getStarbaseAddress(),
+        mineItemKey,
+        resourceKey,
+        planet,
+        fleetCargoHold,
+        fleetAmmoBank,
+        this.getCargoTypeAddress(foodMint),
+        this.getCargoTypeAddress(ammoMint),
+        this.getCargoTypeAddress(resourceMint),
+        this.getCargoStatsDefinition(),
+        this.getGameState(),
+        this.getGameId(),
+        fleetFoodToken.address,
+        fleetAmmoToken.address,
+        resourceTokenFrom.address,
+        resourceTokenTo.address,
+        foodMint,
+        ammoMint,
+      ),
+    )
+
+    return ixs
+  }
+
+  async stopMining(fleetKey: PublicKey) {
+    const ixs = []
+
+    const planet = new PublicKey('AEE2o2CH7mGqaxA5aD3yhWwCHatmYxopnNevvMTcHS9C')
+
+    const resourceMint = this.getMintBySymbol('HYG')
+    const fuelMint = this.getMintBySymbol('FUEL')
+
+    const mineItemKey = this.getMineItemAddress(resourceMint)
+    const resourceKey = this.getResourceAddress(mineItemKey, planet)
+
+    const fleetFuelTank = this.getFleetByKey(fleetKey)?.data.fuelTank
+
+    const fleetFuelToken = createAssociatedTokenAccountIdempotent(fuelMint, fleetFuelTank, true)
+
+    if (!(await checkAccountExists(fleetFuelToken.address))) {
+      ixs.push(fleetFuelToken.instructions)
+    }
+
+    const a = [
+      this.getSageProgram(),
+      this.getCargoProgram(),
+      this.getPointsProgram(),
+      this.signer,
+      this.getPlayerProfileAddress(),
+      this.getProfileFactionAddress(),
+      fleetKey,
+      mineItemKey,
+      resourceKey,
+      planet,
+      fleetFuelTank,
+      this.getCargoTypeAddress(resourceMint),
+      this.getCargoStatsDefinition(),
+
+      this.getUserPointsAccountAddress(this.getMiningXpCategory()),
+      this.getMiningXpCategory(),
+      this.getPointsModifierAddress(this.getMiningXpCategory()),
+
+      this.getUserPointsAccountAddress(this.getPilotXpCategory()),
+      this.getPilotXpCategory(),
+      this.getPointsModifierAddress(this.getPilotXpCategory()),
+
+      this.getUserPointsAccountAddress(this.getCouncilRankXpCategory()),
+      this.getCouncilRankXpCategory(),
+      this.getPointsModifierAddress(this.getCouncilRankXpCategory()),
+
+      this.getGameState(),
+      this.getGameId(),
+      fleetFuelToken.address,
+      fuelMint,
+    ]
+    a.forEach((a) => console.log(a.toString()))
+
+    ixs.push(
+      Fleet.stopMiningAsteroid(
+        this.getSageProgram(),
+        this.getCargoProgram(),
+        this.getPointsProgram(),
+        this.signer,
+        this.getPlayerProfileAddress(),
+        this.getProfileFactionAddress(),
+        fleetKey,
+        mineItemKey,
+        resourceKey,
+        planet,
+        fleetFuelTank,
+        this.getCargoTypeAddress(fuelMint),
+        this.getCargoStatsDefinition(),
+
+        this.getUserPointsAccountAddress(this.getMiningXpCategory()),
+        this.getMiningXpCategory(),
+        this.getPointsModifierAddress(this.getMiningXpCategory()),
+
+        this.getUserPointsAccountAddress(this.getPilotXpCategory()),
+        this.getPilotXpCategory(),
+        this.getPointsModifierAddress(this.getPilotXpCategory()),
+
+        this.getUserPointsAccountAddress(this.getCouncilRankXpCategory()),
+        this.getCouncilRankXpCategory(),
+        this.getPointsModifierAddress(this.getCouncilRankXpCategory()),
+
+        this.getGameState(),
+        this.getGameId(),
+        fleetFuelToken.address,
+        fuelMint,
+        { keyIndex: 0 },
+      ),
+    )
+    return ixs
+  }
+
   private getSageProgram = () =>
     useWorkspaceAdapter()?.sageProgram.value ??
     (() => {
@@ -660,6 +868,12 @@ export class GameInstructionHandler {
     useWorkspaceAdapter()?.cargoProgram.value ??
     (() => {
       throw new Error('no cargoProgram set')
+    })()
+
+  private getPointsProgram = () =>
+    useWorkspaceAdapter()?.pointsProgram.value ??
+    (() => {
+      throw new Error('no pointsProgram set')
     })()
 
   private getPlayerProfileAddress = () =>
@@ -712,12 +926,6 @@ export class GameInstructionHandler {
           throw new Error('no cargoStatsDefinition set')
         })())
 
-  private getCargoStatsDefinition = () =>
-    useGameStore().cargoStatsDefinition ??
-    (() => {
-      throw new Error('no cargoStatsDefinition set')
-    })()
-
   private getCargoType = (mint: PublicKey) =>
     findCargoTypeAddress(this.getCargoStatsDefinition(), mint) ??
     (() => {
@@ -748,6 +956,100 @@ export class GameInstructionHandler {
     ) ??
     (() => {
       throw new Error('no getShipEscrowIndex found')
+    })()
+
+  private getFleetByKey = (fleetKey: PublicKey) =>
+    useGameStore().fleets?.find((f) => f.key.toString() == fleetKey.toString()) ??
+    (() => {
+      throw new Error('no fleet key found')
+    })()
+
+  private getPlanetAddressByFleetKey = (fleetKey: PublicKey) =>
+    useGameStore()
+      .planets?.filter((p) => p.data.numResources > 0)
+      .find(
+        (p) =>
+          p.data.sector[0]?.eq(this.getFleetByKey(fleetKey).state.Idle?.sector[0] ?? new BN(0)) &&
+          p.data.sector[1]?.eq(this.getFleetByKey(fleetKey).state.Idle?.sector[1] ?? new BN(0)),
+      )?.key ??
+    (() => {
+      throw new Error('no planet address found')
+    })()
+
+  private getResourceByPlanetKey = (planet: PublicKey) =>
+    useGameStore().resources?.find((r) => r.data.location.toString() == planet.toString()) ??
+    (() => {
+      throw new Error('no resource for planet found')
+    })()
+
+  private getFuelTokenAccountByFleetKey = (fleetKey: PublicKey) =>
+    getAssociatedTokenAddressSync(
+      new PublicKey(useTokenStore().tokenList.find((t) => t.symbol == 'FUEL')?.mint ?? ''),
+      this.getFleetByKey(fleetKey)?.data?.fuelTank,
+      true,
+    ) ??
+    (() => {
+      throw new Error('no fleetFuelToken found')
+    })()
+
+  private getCargoStatsDefinition = () =>
+    useGameStore().game?.data.cargo.statsDefinition ??
+    (() => {
+      throw new Error('no cargoStatsDefinition found')
+    })()
+
+  private getCargoTypeAddress = (mint: PublicKey) =>
+    CargoType.findAddress(this.getCargoProgram(), this.getCargoStatsDefinition(), mint, 0)[0] ??
+    (() => {
+      throw new Error('no CargoTypeAddress found')
+    })()
+
+  private getMintBySymbol = (symbol: string) =>
+    new PublicKey(useTokenStore().tokenList.find((t) => t.symbol == symbol)?.mint ?? '') ??
+    (() => {
+      throw new Error('no MintBySymbol found')
+    })()
+
+  private getMineItemAddress = (mint: PublicKey) =>
+    MineItem.findAddress(this.getSageProgram(), this.getGameId(), mint)[0] ??
+    (() => {
+      throw new Error('no MintBySymbol found')
+    })()
+
+  private getResourceAddress = (mineItem: PublicKey, location: PublicKey) =>
+    Resource.findAddress(this.getSageProgram(), mineItem, location)[0] ??
+    (() => {
+      throw new Error('no ResourceAddress found')
+    })()
+
+  private getMiningXpCategory = () =>
+    useGameStore().game?.data.points.miningXpCategory?.category ??
+    (() => {
+      throw new Error('no miningXpCategory found')
+    })()
+
+  private getPilotXpCategory = () =>
+    useGameStore().game?.data.points.pilotXpCategory?.category ??
+    (() => {
+      throw new Error('no pilotXpCategory found')
+    })()
+
+  private getCouncilRankXpCategory = () =>
+    useGameStore().game?.data.points.councilRankXpCategory?.category ??
+    (() => {
+      throw new Error('no councilRankXpCategory found')
+    })()
+
+  private getUserPointsAccountAddress = (category: PublicKey) =>
+    UserPoints.findAddress(this.getPointsProgram(), category, this.getPlayerProfileAddress())[0] ??
+    (() => {
+      throw new Error('no miningXpCategory found')
+    })()
+
+  private getPointsModifierAddress = (category: PublicKey) =>
+    Game.findPointsModifierAddress(this.getSageProgram(), this.getGameId(), category)[0] ??
+    (() => {
+      throw new Error('no miningXpCategory found')
     })()
 }
 
