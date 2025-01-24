@@ -1,4 +1,9 @@
-import { PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from '@solana/web3.js'
 import {
   AsyncSigner,
   buildAndSignTransaction,
@@ -44,7 +49,13 @@ export async function handleStarAtlasTransaction(
     })
 
     const saInstructionsArray = Array.isArray(saInstructions) ? saInstructions : [saInstructions]
+
     const instructions = [
+      ixToIxReturn(
+        ComputeBudgetProgram.setComputeUnitPrice({
+          microLamports: useRPCStore().computeUnitPrice,
+        }),
+      ),
       ...saInstructionsArray,
       ixToIxReturn(new FeeInstructionHandler(feePayer).transferFeeIx(fee)),
     ]
@@ -163,7 +174,7 @@ async function sendSquadsAndCheck(tx: VersionedTransaction, notif: any) {
 
   notif({
     color: 'green-5',
-    message: `[1/2] Waiting until processed...`,
+    message: `[1/3] Waiting until processed...`,
     caption: `${signature}`,
   })
   result = await useRPCStore().connection.confirmTransaction(
@@ -176,8 +187,8 @@ async function sendSquadsAndCheck(tx: VersionedTransaction, notif: any) {
   )
 
   notif({
-    color: 'green-8',
-    message: `[2/2]  Waiting for confirmation...`,
+    color: 'green-6',
+    message: `[2/3]  Waiting for confirmation...`,
     caption: `${signature}`,
   })
 
@@ -188,6 +199,21 @@ async function sendSquadsAndCheck(tx: VersionedTransaction, notif: any) {
       lastValidBlockHeight: blockhash.lastValidBlockHeight,
     },
     'confirmed',
+  )
+
+  notif({
+    color: 'green-7',
+    message: `[3/3]  Waiting for finalization...`,
+    caption: `${signature}`,
+  })
+
+  result = await useRPCStore().connection.confirmTransaction(
+    {
+      signature,
+      blockhash: blockhash.blockhash,
+      lastValidBlockHeight: blockhash.lastValidBlockHeight,
+    },
+    'finalized',
   )
 
   if (result.value.err !== null) {
@@ -220,6 +246,7 @@ async function sendWalletAndCheck(
   notif: any,
 ) {
   const rawTransaction = tx.transaction.serialize()
+
   if (isVersionedTransaction(tx.transaction)) {
     verifySignatures(tx.transaction)
   }
