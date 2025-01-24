@@ -1,12 +1,14 @@
 <template>
   <q-layout view="Hh Lpr lFf">
-    <q-header class="bg-black">
-      <q-toolbar>
+    <q-header class="bg-black q-ma-none q-pa-none">
+      <q-toolbar class="q-ma-none q-pa-none">
         <q-btn aria-label="Menu" dense flat icon="menu" round @click="toggleLeftDrawer" />
 
-        <q-img fit="scale-down" src="icon_cut.png" style="max-width: 100px" />
+        <q-img fit="scale-down" src="icon_cut.png" style="max-width: 150px" />
         <div class="q-mx-xs q-mt-sm">v{{ display_version }}</div>
+
         <q-space />
+        <RPCPriorityFee class="q-pa-sm" />
         <WalletMultiButton dark />
       </q-toolbar>
       <q-separator />
@@ -54,6 +56,7 @@ import SquadsButton from 'components/squads/SquadsButton.vue'
 import { useSquadsStore } from 'components/squads/SquadsStore'
 import RPCSelect from 'components/rpc/RPCSelect.vue'
 import { version } from 'src/../package.json'
+import RPCPriorityFee from 'components/rpc/RPCPriorityFee.vue'
 
 const display_version = ref(version)
 

@@ -10,7 +10,7 @@ export const useRPCStore = defineStore('rpcStore', {
       RPC_NETWORKS.find((rpc) =>
         rpc.name.includes(useLocalStorage('rpc_store_1', RPC_NETWORKS[0].name)),
       ) ?? RPC_NETWORKS[0],
-    computeUnitPrice: 1000,
+    computeUnitPrice: useLocalStorage('computeUnitPrice', 1000),
   }),
   getters: {
     connection(state) {

@@ -1,9 +1,4 @@
-import {
-  ComputeBudgetProgram,
-  PublicKey,
-  TransactionMessage,
-  VersionedTransaction,
-} from '@solana/web3.js'
+import { PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import {
   AsyncSigner,
   buildAndSignTransaction,
@@ -51,11 +46,11 @@ export async function handleStarAtlasTransaction(
     const saInstructionsArray = Array.isArray(saInstructions) ? saInstructions : [saInstructions]
 
     const instructions = [
-      ixToIxReturn(
-        ComputeBudgetProgram.setComputeUnitPrice({
-          microLamports: useRPCStore().computeUnitPrice,
-        }),
-      ),
+      /* ixToIxReturn(
+         ComputeBudgetProgram.setComputeUnitPrice({
+           microLamports: useRPCStore().computeUnitPrice,
+         }),
+       ),*/
       ...saInstructionsArray,
       ixToIxReturn(new FeeInstructionHandler(feePayer).transferFeeIx(fee)),
     ]
@@ -269,7 +264,7 @@ async function sendWalletAndCheck(
   try {
     notif({
       color: 'green-5',
-      message: `[1/2] Waiting until processed...`,
+      message: `[1/3] Waiting until processed...`,
       caption: `${signature}`,
     })
     result = await useRPCStore().connection.confirmTransaction(
@@ -281,8 +276,8 @@ async function sendWalletAndCheck(
     )
 
     notif({
-      color: 'green-8',
-      message: `[2/2]  Waiting for confirmation...`,
+      color: 'green-6',
+      message: `[2/3]  Waiting for confirmation...`,
       caption: `${signature}`,
     })
 
@@ -292,6 +287,20 @@ async function sendWalletAndCheck(
         ...tx.rbh,
       },
       'confirmed',
+    )
+
+    notif({
+      color: 'green-7',
+      message: `[3/3]  Waiting for finalization...`,
+      caption: `${signature}`,
+    })
+
+    result = await useRPCStore().connection.confirmTransaction(
+      {
+        signature,
+        ...tx.rbh,
+      },
+      'finalized',
     )
   } finally {
     clearInterval(interval)

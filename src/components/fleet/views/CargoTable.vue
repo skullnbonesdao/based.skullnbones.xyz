@@ -51,6 +51,13 @@ const columns = ref([
     field: (row: TokenAccountInfo) => row.uiAmount,
     sortable: true,
   },
+  {
+    style: 'width: 10px',
+    name: 'extend2',
+    required: true,
+    align: 'left',
+    sortable: false,
+  },
 ])
 
 const remainingFuelCapacity = computed(() => {
@@ -152,13 +159,16 @@ function getCargoAmount(mint: PublicKey) {
       <q-tr :props="props" @click="props.expand = !props.expand">
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
           <div v-if="col.name == 'extend'" class="col row">
-            <q-btn class="" color="primary" icon="expand"></q-btn>
+            <q-icon :name="props.expand ? 'expand_less' : 'expand_more'" size="lg"></q-icon>
+          </div>
+          <div v-else-if="col.name == 'extend2'" class="col row">
+            <q-icon :name="props.expand ? 'expand_less' : 'expand_more'" size="lg"></q-icon>
           </div>
 
           <div v-else-if="col.name == 'uiAmount'" class="col">
             <div class="row items-center">
-              <div class="col-1">@Starbase</div>
-
+              <div class="col">@Starbase</div>
+              <div class="col-1">∞</div>
               <AmountFormatter
                 :number="
                   usePlayerStore().starbaseTokenAccounts?.find(
@@ -172,8 +182,8 @@ function getCargoAmount(mint: PublicKey) {
               />
             </div>
             <div class="row items-center">
-              <div>@Cargo</div>
-              <div class="col">
+              <div class="col">@Cargo</div>
+              <div class="col-1">
                 {{
                   (
                     ((getCargoAmount(props.row.mint) + props.row.uiAmountChange) /
