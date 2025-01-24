@@ -10,6 +10,7 @@ import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
+import FleetCargoElement from 'components/fleet/elements/FleetCargoElement.vue'
 
 const props = defineProps({
   rows: {
@@ -41,6 +42,30 @@ const columns = ref([
     label: 'State',
     align: 'left',
     field: (row: Fleet) => Object.keys(row.state)[0],
+    sortable: true,
+  },
+  {
+    name: 'fuel',
+    required: true,
+    label: 'Fuel',
+    align: 'center',
+    field: (row: Fleet) => row.data.fuelTank,
+    sortable: true,
+  },
+  {
+    name: 'ammo',
+    required: true,
+    label: 'Ammo',
+    align: 'center',
+    field: (row: Fleet) => row.data.ammoBank,
+    sortable: true,
+  },
+  {
+    name: 'cargo',
+    required: true,
+    label: 'Cargo',
+    align: 'center',
+    field: (row: Fleet) => row.data.ammoBank,
     sortable: true,
   },
 
@@ -132,6 +157,21 @@ const columns = ref([
             <FleetStartMiningAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
             <FleetStopMiningAction v-if="props.row.state['MineAsteroid']" :fleet="props.row.key" />
           </div>
+          <FleetCargoElement
+            v-else-if="col.name == 'fuel'"
+            :fleet="props.row.key.toString()"
+            symbol="FUEL"
+          />
+          <FleetCargoElement
+            v-else-if="col.name == 'ammo'"
+            :fleet="props.row.key.toString()"
+            symbol="AMMO"
+          />
+          <FleetCargoElement
+            v-else-if="col.name == 'cargo'"
+            :fleet="props.row.key.toString()"
+            symbol="CARGO"
+          />
           <div v-else>
             {{ col.value }}
           </div>

@@ -6,8 +6,8 @@ import { GameInstructionHandler } from 'src/handler/instructions/GameInstruction
 import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { ref } from 'vue'
-import { useGameStore } from 'stores/gameStore'
 import { loadFleets } from 'src/handler/interfaces/GameInterface'
+import { usePlayerStore } from 'stores/playerStore'
 
 const inputFleetName = ref('test')
 const $q = useQuasar()
@@ -31,7 +31,7 @@ async function sendTx() {
         signer,
         FEE_TYPES.DEFAULT_FEE,
       )
-    useGameStore().fleets = await loadFleets()
+    usePlayerStore().fleets = await loadFleets()
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',

@@ -6,6 +6,8 @@ import { handleStarAtlasTransaction } from 'src/handler/wallet/sendAndSign'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { PublicKey } from '@solana/web3.js'
 import { ref } from 'vue'
+import { usePlayerStore } from 'stores/playerStore'
+import { loadFleets } from 'src/handler/interfaces/GameInterface'
 
 const props = defineProps({
   fleet: { type: PublicKey, required: true },
@@ -42,6 +44,7 @@ async function sendTx() {
         signer,
         FEE_TYPES.DEFAULT_FEE,
       )
+    usePlayerStore().fleets = await loadFleets()
   } catch (error: unknown) {
     $q.notify({
       type: 'warning',
