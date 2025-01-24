@@ -1,4 +1,9 @@
-import { PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from '@solana/web3.js'
 import {
   AsyncSigner,
   buildAndSignTransaction,
@@ -45,12 +50,19 @@ export async function handleStarAtlasTransaction(
 
     const saInstructionsArray = Array.isArray(saInstructions) ? saInstructions : [saInstructions]
 
+    const preInstructions =
+      saInstructionsArray.length > 1
+        ? []
+        : [
+            ixToIxReturn(
+              ComputeBudgetProgram.setComputeUnitPrice({
+                microLamports: useRPCStore().computeUnitPrice,
+              }),
+            ),
+          ]
+
     const instructions = [
-      /* ixToIxReturn(
-         ComputeBudgetProgram.setComputeUnitPrice({
-           microLamports: useRPCStore().computeUnitPrice,
-         }),
-       ),*/
+      ...preInstructions,
       ...saInstructionsArray,
       ixToIxReturn(new FeeInstructionHandler(feePayer).transferFeeIx(fee)),
     ]

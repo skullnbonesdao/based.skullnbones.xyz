@@ -27,6 +27,17 @@ export const useTokenStore = defineStore('tokenStore', {
     walletTokenAccounts: undefined as TokenAccountInfo[] | undefined,
     walletCrewAccounts: undefined as cNFT[] | undefined,
   }),
+  getters: {
+    getTokenBySymbol: (state) => {
+      return (symbol: string) =>
+        new PublicKey(state.tokenList.find((t) => t.symbol == symbol)!.mint)
+    },
+
+    FOOD: (state) => new PublicKey(state.tokenList.find((t) => t.symbol == 'FOOD')!.mint),
+    FUEL: (state) => new PublicKey(state.tokenList.find((t) => t.symbol == 'FUEL')!.mint),
+    AMMO: (state) => new PublicKey(state.tokenList.find((t) => t.symbol == 'AMMO')!.mint),
+    TOOL: (state) => new PublicKey(state.tokenList.find((t) => t.symbol == 'TOOL')!.mint),
+  },
 
   actions: {
     async updateStore(wallet: PublicKey) {

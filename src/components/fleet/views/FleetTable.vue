@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { TokenAccountInfo } from 'stores/tokenStore'
-import { type PropType, ref } from 'vue'
+import { TokenAccountInfo, useTokenStore } from 'stores/tokenStore'
+import { onMounted, type PropType, ref } from 'vue'
 import type { Fleet } from '@staratlas/sage'
 import { byteArrayToString } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
@@ -11,6 +11,10 @@ import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAct
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
 import FleetCargoElement from 'components/fleet/elements/FleetCargoElement.vue'
+import { calculateMiningResults } from 'src/handler/interfaces/FleetInterface'
+import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
+import { useRPCStore } from 'stores/rpcStore'
+import { useGameStore } from 'stores/gameStore'
 
 const props = defineProps({
   rows: {
@@ -20,6 +24,47 @@ const props = defineProps({
 })
 
 const filter = ref()
+
+onMounted(async () => {
+  // console.log(await miningResults())
+})
+
+async function miningResults() {
+  const fleet = usePlayerStore().fleets![0]! as Fleet
+
+  const fleetAmmoTokenBefore = await getAccount(
+    useRPCStore().connection,
+    getAssociatedTokenAddressSync(useTokenStore().AMMO, fleet.data.ammoBank, true),
+    'processed',
+  )
+  const fleetFoodTokenBefore = await getAccount(
+    useRPCStore().connection,
+    getAssociatedTokenAddressSync(useTokenStore().FOOD, fleet.data.cargoHold, true),
+    'processed',
+  )
+
+  console.log(fleet.state.MineAsteroid.resource)
+
+  const mineItem = useGameStore().mineItems?.find(
+    (m) => m.data.mint.toString() == useTokenStore().getTokenBySymbol('HYG').toString(),
+  )
+  const resource = useGameStore().resources?.find(
+    (r) => r.key.toString() == fleet.state.MineAsteroid.resource.toString(),
+  )
+  console.log('mineItem', mineItem)
+  console.log('resource', resource)
+
+  const penalty = 0
+
+  return calculateMiningResults(
+    fleet,
+    fleetFoodTokenBefore,
+    fleetAmmoTokenBefore,
+    mineItem.data,
+    resource.data,
+    penalty,
+  )
+}
 
 const columns = ref([
   {
@@ -41,7 +86,8 @@ const columns = ref([
     required: true,
     label: 'State',
     align: 'left',
-    field: (row: Fleet) => Object.keys(row.state)[0],
+    field: (row: Fleet) =>
+      Object.keys(row.state)[0] == 'MineAsteroid' ? 'MineAsteroid' : Object.keys(row.state)[0],
     sortable: true,
   },
   {

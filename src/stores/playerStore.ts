@@ -131,7 +131,7 @@ export const usePlayerStore = defineStore(STORE_NAME, {
                 uiAmount: 0,
               }
             }) || []),
-        ].filter((acc) => ['FOOD', 'FUEL', 'AMMO', 'TOOL'].includes(acc.symbol))
+        ].filter((acc) => ['FUEL', 'AMMO'].includes(acc.symbol))
 
         this.fleetFilteredCargoAccounts = [
           ...(usePlayerStore().fleetCargoAccounts || []),
@@ -149,7 +149,7 @@ export const usePlayerStore = defineStore(STORE_NAME, {
                 uiAmount: 0,
               }
             }) || []),
-        ].filter((acc) => !['FOOD', 'FUEL', 'AMMO', 'TOOL'].includes(acc.symbol))
+        ].filter((acc) => !['FUEL', 'AMMO'].includes(acc.symbol))
       } catch (error) {
         console.error(`[${this.$id}] waring:`, error)
       } finally {

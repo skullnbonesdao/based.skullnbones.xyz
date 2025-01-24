@@ -55,6 +55,8 @@ watch(
         />
       </q-expansion-item>
 
+      <q-separator style="height: 10px" />
+
       <q-expansion-item
         caption="Cargo fleet storage"
         default-opened
