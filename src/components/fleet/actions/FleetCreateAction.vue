@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useTokenStore } from 'stores/tokenStore'
 import { useQuasar } from 'quasar'
 import { getAsyncSigner } from 'src/handler/convert/ToSigner'
 import { GameInstructionHandler } from 'src/handler/instructions/GameInstructionHandler'
@@ -9,7 +8,7 @@ import { ref } from 'vue'
 import { loadFleets } from 'src/handler/interfaces/GameInterface'
 import { usePlayerStore } from 'stores/playerStore'
 
-const inputFleetName = ref('test')
+const inputFleetName = ref('')
 const $q = useQuasar()
 
 async function sendTx() {
@@ -18,15 +17,17 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    const shipMint = useTokenStore()!.gameTokenAccountsSelected![0]!.mint
-    const shipAmount = useTokenStore()!.gameTokenAccountsSelected![0]!.uiAmountSelected
+    if (!inputFleetName.value) Error('Input FleetName is required')
+
+    const shipMint = usePlayerStore()!.starbaseTokenAccountsSelected![0]!.mint
+    const shipAmount = usePlayerStore()!.starbaseTokenAccountsSelected![0]!.uiAmountSelected
 
     staratlasIxs.push(
       ...gameInstructionHandler.createNewFleetIx(shipMint, shipAmount, inputFleetName.value),
     )
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
-        `Instructions Withdraw`,
+        `Create fleet...`,
         staratlasIxs,
         signer,
         FEE_TYPES.DEFAULT_FEE,
@@ -44,8 +45,10 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-input v-model="inputFleetName" label="Fleet Name" />
-  <q-btn class="full-width" color="primary" label="Form new fleet" @click.prevent="sendTx" />
+  <div class="row">
+    <q-input v-model="inputFleetName" class="col" label="Fleet Name" standout />
+    <q-btn color="primary" label="Form new fleet" @click.prevent="sendTx" />
+  </div>
 </template>
 
 <style scoped></style>

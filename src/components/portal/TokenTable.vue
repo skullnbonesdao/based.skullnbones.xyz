@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { TokenAccount, useTokenStore } from 'stores/tokenStore'
+import { TokenAccount } from 'stores/tokenStore'
 import TokenDeposit from 'components/portal/TokenDeposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 import { type PropType, ref } from 'vue'
 import TokenWithdraw from 'components/portal/TokenWithdraw.vue'
+import { usePlayerStore } from 'stores/playerStore'
 
 const props = defineProps({
   rows: {
@@ -73,7 +74,7 @@ if (props.action)
 <template>
   <q-table
     v-if="props.rows"
-    v-model:selected="useTokenStore().gameTokenAccountsSelected"
+    v-model:selected="usePlayerStore().starbaseTokenAccountsSelected"
     :columns="columns"
     :filter="filter"
     :pagination="{
