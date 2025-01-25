@@ -24,14 +24,17 @@ const props = defineProps({
 
 watch(
   () => showDialog.value,
-  () => {
+  async () => {
+    await usePlayerStore().updateStore()
     usePlayerStore().starbaseTokenAccountsSelected = undefined
   },
 )
 </script>
 
 <template>
-  <q-btn color="secondary" label="Edit Fleet" @click="showDialog = true" />
+  <q-btn color="primary" icon="workspaces" @click="showDialog = true">
+    <q-tooltip>Fleet</q-tooltip>
+  </q-btn>
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>
@@ -63,4 +66,4 @@ watch(
   </q-dialog>
 </template>
 
-<style scoped></style>
+<style lang="scss"></style>

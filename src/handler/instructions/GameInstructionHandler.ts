@@ -40,6 +40,7 @@ import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { CargoType } from '@staratlas/cargo'
 import { UserPoints } from '@staratlas/points'
 import { usePlayerStore } from 'stores/playerStore'
+import type { cNFT } from 'stores/interfaces/cNFT'
 
 export class GameInstructionHandler {
   signer: AsyncSigner
@@ -257,11 +258,10 @@ export class GameInstructionHandler {
     return ixs
   }
 
-  async depositCrewToGameIx(id: string) {
+  async depositCrewToGameIx(crew: cNFT) {
     const ixs = []
 
-    const crew = useTokenStore().walletCrewAccounts?.find((c) => c.id.toString() == id)
-    const proof = await getCrewProof(new PublicKey(id))
+    const proof = await getCrewProof(new PublicKey(crew.id))
 
     const items = [
       {
@@ -301,11 +301,10 @@ export class GameInstructionHandler {
     return ixs
   }
 
-  async withdrawCrewFromGameIx(id: string) {
+  async withdrawCrewFromGameIx(crew: cNFT) {
     const ixs = []
 
-    const crew = usePlayerStore().starbaseCrewAccounts?.find((c) => c.id.toString() == id)
-    const proof = await getCrewProof(new PublicKey(id))
+    const proof = await getCrewProof(new PublicKey(crew.id))
 
     const items = [
       {
@@ -384,6 +383,11 @@ export class GameInstructionHandler {
 
   addShipsToFleetIx(fleetKey: PublicKey, shipMint: PublicKey, shipAmount: number) {
     const ixs = []
+
+    console.log('fleetKey', fleetKey.toString())
+    console.log('shipMint', shipMint.toString())
+    console.log('shipAmount', shipAmount)
+    console.log(this.getShipEscrowIndex(shipMint))
 
     const input = {
       shipAmount: shipAmount,
@@ -1022,15 +1026,17 @@ export class GameInstructionHandler {
       throw new Error('no shipEscrow found')
     })()
 
-  private getShipEscrowIndex = (shipMint: PublicKey) =>
-    usePlayerStore().starbasePlayer?.wrappedShipEscrows.findIndex(
+  private getShipEscrowIndex = (shipMint: PublicKey) => {
+    const index = usePlayerStore().starbasePlayer?.wrappedShipEscrows.findIndex(
       (wse) =>
-        wse.ship.toString() == this.getShipByMint(shipMint)?.toString() &&
-        wse.amount == this.getShipEscrow(shipMint)?.amount,
-    ) ??
-    (() => {
-      throw new Error('no getShipEscrowIndex found')
-    })()
+        wse.ship.toString() === this.getShipByMint(shipMint)?.toString() &&
+        wse.amount >= this.getShipEscrow(shipMint)?.amount,
+    )
+    if (index === -1) {
+      throw new Error('no ShipEscrowIndex found')
+    }
+    return index
+  }
 
   private getFleetByKey = (fleetKey: PublicKey) =>
     usePlayerStore().fleets?.find((f) => f.key.toString() == fleetKey.toString()) ??

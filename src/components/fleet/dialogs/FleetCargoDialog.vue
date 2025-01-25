@@ -32,7 +32,9 @@ watch(
 </script>
 
 <template>
-  <q-btn color="secondary" label="Edit Cargo" @click="showDialog = true" />
+  <q-btn color="primary" icon="inventory_2" @click="showDialog = true">
+    <q-tooltip>Cargo</q-tooltip>
+  </q-btn>
 
   <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
     <q-card bordered flat>

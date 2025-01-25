@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { PublicKey } from '@solana/web3.js'
-import { Game, Planet, Resource, Sector, Ship, Starbase } from '@staratlas/sage'
+import type { Game, MineItem, Planet, Resource, Sector, Ship, Starbase } from '@staratlas/sage'
 import {
   loadGame,
   loadMineItem,
@@ -9,14 +9,11 @@ import {
   loadShips,
   loadStarbases,
 } from 'src/handler/interfaces/GameInterface'
-import { MineItem } from '@staratlas/sage/src'
 
 const STORE_NAME = 'gameStore'
-const STARBASE_LOCALSTORAGE_KEY = 'gameStore_starbase'
 
 export const useGameStore = defineStore(STORE_NAME, {
   state: () => ({
-    wallet: undefined as PublicKey | undefined,
     gameID: new PublicKey('GAMEzqJehF8yAnKiTARUuhZMvLvkZVAsCVri5vSfemLr'),
 
     game: undefined as Game | undefined,

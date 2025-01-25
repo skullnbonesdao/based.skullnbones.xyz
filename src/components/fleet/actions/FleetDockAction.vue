@@ -41,9 +41,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <div class="row">
-    <q-btn color="secondary" label="Dock" @click.prevent="sendTx" />
-  </div>
+  <q-btn color="secondary" icon="link" @click.prevent="sendTx" />
 </template>
 
 <style scoped></style>

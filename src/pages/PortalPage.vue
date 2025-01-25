@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { getSigner } from 'components/squads/SignerFinder'
 import { useProfileStore } from 'stores/profileStore'
 import { useGameStore } from 'stores/gameStore'
@@ -18,6 +18,13 @@ onMounted(async () => {
   await useProfileStore().updateStore(getSigner())
   await useGameStore().updateStore()
 })
+
+watch(
+  () => tabDirection.value,
+  () => {
+    usePlayerStore().starbaseCrewAccountsSelected = []
+  },
+)
 </script>
 <template>
   <q-page v-if="!useGameStore().starbases?.length" class="row justify-center items-center">
@@ -103,6 +110,7 @@ onMounted(async () => {
         "
         :action="tabDirection"
         :rows="useTokenStore().walletCrewAccounts!"
+        selection="multiple"
       />
 
       <CrewTable
@@ -113,6 +121,7 @@ onMounted(async () => {
         "
         :action="tabDirection"
         :rows="usePlayerStore().starbaseCrewAccounts!"
+        selection="multiple"
       />
     </div>
   </q-page>

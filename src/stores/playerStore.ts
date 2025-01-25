@@ -32,7 +32,7 @@ export const usePlayerStore = defineStore(STORE_NAME, {
     starbasePlayer: undefined as StarbasePlayer | undefined,
 
     starbaseTokenAccounts: undefined as StarbaseTokenAccount[] | undefined,
-    starbaseTokenAccountsSelected: undefined as StarbaseTokenAccount | undefined,
+    starbaseTokenAccountsSelected: undefined as StarbaseTokenAccount[] | undefined,
     starbaseCrewAccounts: undefined as cNFT[] | undefined,
     starbaseCrewAccountsSelected: undefined as cNFT[] | undefined,
 
@@ -46,34 +46,55 @@ export const usePlayerStore = defineStore(STORE_NAME, {
 
   actions: {
     async updateStore() {
-      try {
-        this.starbaseTokenAccounts = toTokenAccount<StarbaseTokenAccount>(
-          await getAccounts([await findCargoPodAddress(), useProfileStore().sageProfileAddress!]),
-        )
-          .map((gTA: StarbaseTokenAccount) => {
-            if (gTA.itemType == 'ship') {
-              const data = gTA
+      await this.updateStarbaseCrewAccounts()
+      await this.updateStarbaseTokenAccounts()
+      await this.updateFleet()
+    },
 
-              data.wrappedShipEscrows =
+    async updateStarbaseTokenAccounts() {
+      try {
+        if (!this.currentStarbase) throw new Error('No starbase selected')
+
+        const cargoPodAddress = await findCargoPodAddress()
+        const sageProfileAddress = useProfileStore().sageProfileAddress!
+
+        this.starbaseTokenAccounts = toTokenAccount<StarbaseTokenAccount>(
+          await getAccounts([cargoPodAddress, sageProfileAddress]),
+        )
+          .map((tokenAccount) => {
+            if (tokenAccount.itemType === 'ship') {
+              const shipData = tokenAccount
+
+              shipData.wrappedShipEscrows =
                 this.starbasePlayer?.wrappedShipEscrows.filter(
-                  (wSE) => wSE.ship.toString() == findShipByMint(gTA.mint)?.toString(),
-                ) ?? []
-              data.uiAmount = data.wrappedShipEscrows.reduce(
-                (sum, item) => sum + item.amount.toNumber(),
+                  (escrow) => escrow.ship.toString() === findShipByMint(shipData.mint)?.toString(),
+                ) || []
+              shipData.uiAmount = shipData.wrappedShipEscrows.reduce(
+                (sum, escrow) => sum + escrow.amount.toNumber(),
                 0,
               )
-              data.uiAmountSelected = data.uiAmount
+              shipData.uiAmountSelected = shipData.uiAmount
 
-              return data
-            } else return gTA
+              return shipData
+            }
+            return tokenAccount
           })
           .filter((account) => account.uiAmount > 0)
-
-        this.starbaseCrewAccounts = await searchCrewByOwner(useProfileStore().sageProfileAddress!)
-
-        await this.updateFleet()
       } catch (error) {
-        console.error(`[${this.$id}] waring:`, error)
+        console.error(`[${this.$id}] warning:`, error)
+      } finally {
+        console.log(`[${this.$id}] updated`)
+      }
+    },
+
+    async updateStarbaseCrewAccounts() {
+      try {
+        if (!this.currentStarbase) throw new Error('No starbase selected')
+
+        const sageProfileAddress = useProfileStore().sageProfileAddress!
+        this.starbaseCrewAccounts = await searchCrewByOwner(sageProfileAddress)
+      } catch (error) {
+        console.error(`[${this.$id}] warning:`, error)
       } finally {
         console.log(`[${this.$id}] updated`)
       }
@@ -83,7 +104,7 @@ export const usePlayerStore = defineStore(STORE_NAME, {
       try {
         this.fleets = await loadFleets()
       } catch (error) {
-        console.error(`[${this.$id}] waring:`, error)
+        console.error(`[${this.$id}] warning:`, error)
       } finally {
         console.log(`[${this.$id}] updated fleet`)
       }

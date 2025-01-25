@@ -6,7 +6,6 @@ import { byteArrayToString } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
 import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
 import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
-import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
@@ -15,6 +14,7 @@ import { calculateMiningResults } from 'src/handler/interfaces/FleetInterface'
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { useRPCStore } from 'stores/rpcStore'
 import { useGameStore } from 'stores/gameStore'
+import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 
 const props = defineProps({
   rows: {
@@ -183,8 +183,7 @@ const columns = ref([
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <div v-if="col.name == 'actions'" class="row q-gutter-x-sm justify-end">
-            {{}}
+          <q-btn-group v-if="col.name == 'actions'" class="">
             <FleetShipDialog
               v-if="props.row.state['StarbaseLoadingBay']"
               :fleet="props.row.key"
@@ -200,9 +199,10 @@ const columns = ref([
               v-if="props.row.state['StarbaseLoadingBay']"
               :fleet="props.row.key"
             />
+
             <FleetStartMiningAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
             <FleetStopMiningAction v-if="props.row.state['MineAsteroid']" :fleet="props.row.key" />
-          </div>
+          </q-btn-group>
           <FleetCargoElement
             v-else-if="col.name == 'fuel'"
             :fleet="props.row.key.toString()"

@@ -3,7 +3,6 @@ import { PublicKey } from '@solana/web3.js'
 import tokenList from 'stores/tokenlist/TokenList.json'
 import type { cNFT } from 'stores/interfaces/cNFT'
 import { searchCrewByOwner } from 'stores/interfaces/cNFTInterface'
-import { getSigner } from 'components/squads/SignerFinder'
 import { toTokenAccount } from 'stores/interfaces/toTokenAccount'
 import { getAccounts } from 'stores/interfaces/rpc'
 
@@ -41,16 +40,28 @@ export const useTokenStore = defineStore('tokenStore', {
 
   actions: {
     async updateStore(wallet: PublicKey) {
+      await this.updateWalletTokenAccounts(wallet)
+      await this.updateWalletCrewAccounts(wallet)
+    },
+    async updateWalletTokenAccounts(wallet: PublicKey) {
       try {
         this.walletTokenAccounts = toTokenAccount<TokenAccountInfo>(
           await getAccounts([wallet]),
         ).filter((account) => account.uiAmount > 0)
-
-        this.walletCrewAccounts = await searchCrewByOwner(getSigner())
       } catch (err) {
         console.error(`[${this.$id}]`, err)
       } finally {
-        console.log(`[${this.$id}] updated`)
+        console.log(`[${this.$id}] updateWalletTokenAccounts`)
+      }
+    },
+
+    async updateWalletCrewAccounts(wallet: PublicKey) {
+      try {
+        this.walletCrewAccounts = await searchCrewByOwner(wallet)
+      } catch (err) {
+        console.error(`[${this.$id}]`, err)
+      } finally {
+        console.log(`[${this.$id}] updateWalletCrewAccounts`)
       }
     },
 

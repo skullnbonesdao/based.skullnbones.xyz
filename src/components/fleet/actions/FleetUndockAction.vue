@@ -41,9 +41,9 @@ async function sendTx() {
 </script>
 
 <template>
-  <div class="row">
-    <q-btn color="secondary" label="Undock" @click.prevent="sendTx" />
-  </div>
+  <q-btn color="primary" icon="link_off" @click.prevent="sendTx">
+    <q-tooltip> Undock </q-tooltip>
+  </q-btn>
 </template>
 
 <style scoped></style>

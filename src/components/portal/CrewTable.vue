@@ -2,8 +2,8 @@
 import type { PropType } from 'vue'
 import { ref } from 'vue'
 import { Attribute, cNFT } from 'stores/interfaces/cNFT'
-import CrewDeposit from 'components/portal/CrewDeposit.vue'
-import CrewWithdraw from 'components/portal/CrewWithdraw.vue'
+import { usePlayerStore } from 'stores/playerStore'
+import CrewDepositWithdrawAction from 'components/portal/actions/CrewDepositWithdrawAction.vue'
 
 const props = defineProps({
   rows: {
@@ -13,27 +13,22 @@ const props = defineProps({
   action: {
     type: String,
   },
+  selection: {
+    type: {} as PropType<'single' | 'multiple' | 'none' | undefined>,
+    default: undefined,
+  },
 })
 const filter = ref()
 
 const columns = [
   /* {
-     name: 'id',
+     name: 'symbol',
      required: true,
-     label: 'ID',
+     label: 'Symbol',
      align: 'left',
-     field: (row: cNFT) => row.id,
+     field: (row: cNFT) => row.content.metadata.symbol,
      sortable: true,
    },*/
-
-  {
-    name: 'symbol',
-    required: true,
-    label: 'Symbol',
-    align: 'left',
-    field: (row: cNFT) => row.content.metadata.symbol,
-    sortable: true,
-  },
   {
     name: 'id_name',
     required: true,
@@ -99,6 +94,7 @@ const columns = [
 
 <template>
   <q-table
+    v-model:selected="usePlayerStore().starbaseCrewAccountsSelected"
     :columns="columns"
     :filter="filter"
     :pagination="{
@@ -107,9 +103,9 @@ const columns = [
       descending: true,
     }"
     :rows="rows"
+    :selection="selection"
     flat
     hide-bottom
-    row-key="name"
     square
   >
     <template v-slot:top-left>
@@ -163,15 +159,10 @@ const columns = [
           }}
         </div>
 
-        <CrewDeposit
-          v-if="props.col.name == 'action' && action == 'deposit'"
-          :id="props.row.id"
-        ></CrewDeposit>
-
-        <CrewWithdraw
-          v-if="props.col.name == 'action' && action == 'withdraw'"
-          :id="props.row.id"
-        ></CrewWithdraw>
+        <CrewDepositWithdrawAction
+          v-if="props.col.name == 'action'"
+          :direction="action == 'deposit' ? 'deposit' : 'withdraw'"
+        />
       </q-td>
     </template>
   </q-table>

@@ -6,8 +6,15 @@ import { useQuasar } from 'quasar'
 import { FEE_TYPES } from 'src/handler/instructions/FeeInstructionHandler'
 import { usePlayerStore } from 'stores/playerStore'
 import { useTokenStore } from 'stores/tokenStore'
+import type { PropType } from 'vue'
 
 const $q = useQuasar()
+const props = defineProps({
+  direction: {
+    type: {} as PropType<'deposit' | 'withdraw'>,
+    required: true,
+  },
+})
 
 async function sendTx() {
   const signer = getAsyncSigner()
@@ -15,13 +22,22 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(signer)
 
   try {
-    for (const wCAS of usePlayerStore().starbaseCrewAccountsSelected ?? []) {
-      staratlasIxs.push(...(await gameInstructionHandler.depositCrewToGameIx(wCAS)))
+    switch (props.direction) {
+      case 'deposit':
+        for (const wCAS of usePlayerStore().starbaseCrewAccountsSelected ?? []) {
+          staratlasIxs.push(...(await gameInstructionHandler.depositCrewToGameIx(wCAS)))
+        }
+        break
+      case 'withdraw':
+        for (const wCAS of usePlayerStore().starbaseCrewAccountsSelected ?? []) {
+          staratlasIxs.push(...(await gameInstructionHandler.withdrawCrewFromGameIx(wCAS)))
+        }
+        break
     }
 
     if (staratlasIxs.length > 0)
       await handleStarAtlasTransaction(
-        `Instructions Deposit`,
+        `Crew ${props.direction} [${usePlayerStore().starbaseCrewAccountsSelected?.length}]`,
         staratlasIxs,
         signer,
         FEE_TYPES.DEFAULT_FEE,
@@ -40,7 +56,12 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn color="primary" icon-right="call_made" label="Deposit" @click="sendTx"></q-btn>
+  <q-btn
+    :icon-right="props.direction == 'deposit' ? 'call_made' : 'call_received'"
+    :label="props.direction == 'deposit' ? 'Deposit' : 'Withdraw'"
+    color="primary"
+    @click="sendTx"
+  ></q-btn>
 </template>
 
 <style scoped></style>
