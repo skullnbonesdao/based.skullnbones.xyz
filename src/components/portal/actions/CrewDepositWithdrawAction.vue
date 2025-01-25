@@ -22,6 +22,9 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(signer)
 
   try {
+    if (usePlayerStore().starbaseCrewAccountsSelected?.length === 0)
+      throw Error('Please select some crew')
+
     switch (props.direction) {
       case 'deposit':
         for (const wCAS of usePlayerStore().starbaseCrewAccountsSelected ?? []) {
@@ -57,11 +60,11 @@ async function sendTx() {
 
 <template>
   <q-btn
-    :icon-right="props.direction == 'deposit' ? 'call_made' : 'call_received'"
-    :label="props.direction == 'deposit' ? 'Deposit' : 'Withdraw'"
+    :icon-right="props.direction === 'deposit' ? 'call_made' : 'call_received'"
+    :label="props.direction === 'deposit' ? 'Deposit' : 'Withdraw'"
     color="primary"
     @click="sendTx"
-  ></q-btn>
+  />
 </template>
 
 <style scoped></style>
