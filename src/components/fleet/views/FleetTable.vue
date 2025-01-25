@@ -2,7 +2,7 @@
 import { TokenAccountInfo, useTokenStore } from 'stores/tokenStore'
 import { onMounted, type PropType, ref } from 'vue'
 import type { Fleet } from '@staratlas/sage'
-import { byteArrayToString } from '@staratlas/data-source'
+import { byteArrayToString, readFromRPC } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
 import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
 import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
@@ -15,6 +15,9 @@ import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { useRPCStore } from 'stores/rpcStore'
 import { useGameStore } from 'stores/gameStore'
 import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
+import { useWorkspaceAdapter } from 'src/handler/connector'
+import { PublicKey } from '@solana/web3.js'
+import { FleetShips } from '@staratlas/sage/src'
 
 const props = defineProps({
   rows: {
@@ -26,7 +29,14 @@ const props = defineProps({
 const filter = ref()
 
 onMounted(async () => {
-  // console.log(await miningResults())
+  console.log(
+    await readFromRPC(
+      useRPCStore().connection,
+      useWorkspaceAdapter()?.sageProgram.value,
+      new PublicKey('GzTQjbRfw3VcBsu2YEqhkHrZn9yBtzJxGBtwVimxvGeg'),
+      FleetShips,
+    ),
+  )
 })
 
 async function miningResults() {
