@@ -137,8 +137,9 @@ export const usePlayerStore = defineStore(STORE_NAME, {
           )
 
         this.fleetFilteredConsumptionAccounts = [
-          ...(usePlayerStore().fleetCargoAccounts || []),
-          ...(usePlayerStore()
+          usePlayerStore().fleetFuelAccount,
+          usePlayerStore().fleetAmmoAccount,
+          /*...(usePlayerStore()
             .starbaseTokenAccounts?.filter((sTA) => sTA.itemType == 'resource')
             .filter(
               (sTA) =>
@@ -151,7 +152,7 @@ export const usePlayerStore = defineStore(STORE_NAME, {
                 ...sTA,
                 uiAmount: 0,
               }
-            }) || []),
+            }) || []),*/
         ].filter((acc) => ['FUEL', 'AMMO'].includes(acc.symbol))
 
         this.fleetFilteredCargoAccounts = [

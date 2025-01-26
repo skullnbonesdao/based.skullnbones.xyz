@@ -25,7 +25,7 @@ async function sendTx() {
   const staratlasIxs = []
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
   try {
-    if (usePlayerStore().starbaseTokenAccountsSelected?.length === 0)
+    if (!usePlayerStore().starbaseTokenAccountsSelected?.length)
       throw Error(`Please select some ${props.itemType}`)
 
     for (const sTAS of usePlayerStore().starbaseTokenAccountsSelected ?? []) {

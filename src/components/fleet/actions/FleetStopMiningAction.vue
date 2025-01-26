@@ -43,7 +43,9 @@ async function sendTx() {
 
 <template>
   <div class="row">
-    <q-btn color="secondary" label="Stop mining" @click.prevent="sendTx" />
+    <q-btn color="secondary" icon="airline_stops" @click.prevent="sendTx">
+      <q-tooltip>Stop mining</q-tooltip>
+    </q-btn>
   </div>
 </template>
 

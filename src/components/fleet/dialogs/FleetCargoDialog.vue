@@ -53,7 +53,6 @@ watch(
           :fleet="props.fleet"
           :rows="usePlayerStore().fleetFilteredConsumptionAccounts!"
           action="sync"
-          class="bg-primary"
         />
       </q-expansion-item>
 
@@ -71,7 +70,6 @@ watch(
           :fleet="props.fleet"
           :rows="usePlayerStore().fleetFilteredCargoAccounts!"
           action="sync"
-          class="bg-primary"
         />
       </q-expansion-item>
     </q-card>

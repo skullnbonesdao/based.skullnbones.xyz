@@ -17,7 +17,7 @@ async function sendTx() {
   const gameInstructionHandler = new GameInstructionHandler(getAsyncSigner())
 
   try {
-    if (!inputFleetName.value) Error('Input FleetName is required')
+    if (!inputFleetName.value.length) throw Error('Input FleetName is required')
 
     const shipMint = usePlayerStore()!.starbaseTokenAccountsSelected![0]!.mint
     const shipAmount = usePlayerStore()!.starbaseTokenAccountsSelected![0]!.uiAmountSelected
@@ -45,7 +45,7 @@ async function sendTx() {
 </script>
 
 <template>
-  <div class="row">
+  <div class="row q-gutter-x-xs">
     <q-input v-model="inputFleetName" class="col" label="Fleet Name" standout />
     <q-btn color="primary" label="Form new fleet" @click.prevent="sendTx" />
   </div>
