@@ -22,6 +22,7 @@ onMounted(async () => {
 watch(
   () => tabDirection.value,
   () => {
+    usePlayerStore().starbaseTokenAccountsSelected = []
     usePlayerStore().starbaseCrewAccountsSelected = []
   },
 )
@@ -91,6 +92,7 @@ watch(
         :action="tabDirection"
         :item-type="tabItemType"
         :rows="useTokenStore().walletTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        selection="multiple"
       />
 
       <TokenTable
@@ -102,6 +104,7 @@ watch(
         :action="tabDirection"
         :item-type="tabItemType"
         :rows="usePlayerStore().starbaseTokenAccounts?.filter((acc) => acc.itemType == tabItemType)"
+        selection="multiple"
       />
 
       <CrewTable

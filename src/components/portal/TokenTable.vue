@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import { TokenAccount } from 'stores/tokenStore'
-import TokenDeposit from 'components/portal/TokenDeposit.vue'
 import AmountFormatter from 'components/formatter/AmountFormatter.vue'
 import { type PropType, ref } from 'vue'
-import TokenWithdraw from 'components/portal/TokenWithdraw.vue'
 import { usePlayerStore } from 'stores/playerStore'
+import TokenDepositWithdrawAction from 'components/portal/actions/TokenDepositWithdrawAction.vue'
 
 const props = defineProps({
   rows: {
@@ -18,7 +17,7 @@ const props = defineProps({
     type: String,
   },
   selection: {
-    type: String,
+    type: {} as PropType<'single' | 'multiple' | 'none' | undefined>,
     default: undefined,
   },
 })
@@ -28,11 +27,18 @@ const filter = ref()
 const columns = ref([
   {
     name: 'symbol',
-    required: true,
     label: 'Symbol',
     align: 'left',
     field: (row: TokenAccount) => row.symbol,
     sortable: true,
+  },
+  {
+    name: 'icon',
+    label: '',
+    align: 'left',
+    field: (row: TokenAccount) => row.symbol,
+    sortable: false,
+    style: 'width: 5px',
   },
   {
     name: 'name',
@@ -44,7 +50,7 @@ const columns = ref([
   },
   {
     name: 'uiAmount',
-    required: true,
+
     label: 'Available',
     align: 'right',
     field: (row: TokenAccount) => row.uiAmount,
@@ -52,7 +58,6 @@ const columns = ref([
   },
   {
     name: 'uiAmountSelected',
-    required: true,
     label: 'Selected',
     align: 'right',
     field: (row: TokenAccount) => row.uiAmountSelected,
@@ -63,7 +68,6 @@ const columns = ref([
 if (props.action)
   columns.value.push({
     name: 'action',
-    required: true,
     label: 'Action',
     align: 'right',
     field: (row: TokenAccount) => row.uiAmountSelected,
@@ -80,7 +84,7 @@ if (props.action)
     :pagination="{
       rowsPerPage: 0,
       sortBy: 'name',
-      descending: true,
+      descending: false,
     }"
     :rows="rows"
     :selection="selection"
@@ -93,7 +97,7 @@ if (props.action)
       <div class="text-grey-5">Found {{ rows.length }} Items</div>
     </template>
     <template v-slot:top-right>
-      <q-input v-model="filter" borderless debounce="300" dense placeholder="Search">
+      <q-input v-model="filter" debounce="300" dense placeholder="Search" standout>
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -102,7 +106,13 @@ if (props.action)
 
     <template v-slot:body-cell="props">
       <q-td :props="props">
-        <div v-if="props.col.name == 'uiAmount'">
+        <div v-if="props.col.name == 'icon'">
+          <q-avatar size="md">
+            <q-img :src="`${props.row['thumbnailUrl']}`" />
+          </q-avatar>
+        </div>
+
+        <div v-else-if="props.col.name == 'uiAmount'">
           <AmountFormatter
             :number="props.row[props.col.name]"
             :url="props.row['thumbnailUrl']"
@@ -127,19 +137,11 @@ if (props.action)
           </q-input>
         </div>
 
-        <TokenDeposit
-          v-else-if="props.col.name == 'action' && action == 'deposit'"
-          :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
+        <TokenDepositWithdrawAction
+          v-else-if="props.col.name == 'action'"
+          :direction="action"
           :item-type="itemType"
-          :mint="props.row.mint"
-        ></TokenDeposit>
-
-        <TokenWithdraw
-          v-else-if="props.col.name == 'action' && action == 'withdraw'"
-          :amount="props.row.uiAmountSelected * Math.pow(10, -props.row.decimals)"
-          :item-type="itemType"
-          :mint="props.row.mint"
-        ></TokenWithdraw>
+        />
 
         <div v-else>{{ props.row[props.col.name] }}</div>
       </q-td>
