@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { TokenAccountInfo, useTokenStore } from 'stores/tokenStore'
-import { computed, onMounted, type PropType, ref } from 'vue'
+import { TokenAccountInfo } from 'stores/tokenStore'
+import { onMounted, type PropType, ref } from 'vue'
 import { Fleet } from '@staratlas/sage'
 import { byteArrayToString, readFromRPC } from '@staratlas/data-source'
 import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
@@ -10,16 +10,13 @@ import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAct
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
 import FleetCargoElement from 'components/fleet/elements/FleetCargoElement.vue'
-import { calculateMiningResults } from 'src/handler/interfaces/FleetInterface'
-import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { useRPCStore } from 'stores/rpcStore'
-import { useGameStore } from 'stores/gameStore'
 import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { PublicKey } from '@solana/web3.js'
 import { FleetShips } from '@staratlas/sage/src'
-import { date } from 'quasar'
-import { formatTimeSpan } from 'components/formatter/formatTimespan'
+import MiningResultsDisplay from 'components/fleet/displays/MiningResultsDisplay.vue'
+import { useGameStore } from '../../../stores/gameStore'
 
 const props = defineProps({
   rows: {
@@ -40,80 +37,6 @@ onMounted(async () => {
     ),
   )
 })
-
-const fleetAmmoTokenBefore = ref()
-const fleetFoodTokenBefore = ref()
-
-onMounted(async () => {
-  const fleet = usePlayerStore().fleets![0]! as Fleet
-
-  fleetAmmoTokenBefore.value = await getAccount(
-    useRPCStore().connection,
-    getAssociatedTokenAddressSync(useTokenStore().AMMO, fleet.data.ammoBank, true),
-    'processed',
-  )
-
-  fleetFoodTokenBefore.value = await getAccount(
-    useRPCStore().connection,
-    getAssociatedTokenAddressSync(useTokenStore().FOOD, fleet.data.cargoHold, true),
-    'processed',
-  )
-})
-
-const miningData = computed(() => {
-  if (!fleetAmmoTokenBefore.value) return 0
-  if (!fleetFoodTokenBefore.value) return 0
-  const fleet = usePlayerStore().fleets![0]! as Fleet
-
-  if (!fleet.state.MineAsteroid) return 'Fleet not mining...'
-
-  console.log(fleet.state.MineAsteroid.resource)
-
-  const mineItem = useGameStore().mineItems?.find(
-    (m) => m.data.mint.toString() == useTokenStore().getTokenBySymbol('HYG').toString(),
-  )
-  const resource = useGameStore().resources?.find(
-    (r) => r.key.toString() == fleet.state.MineAsteroid?.resource.toString(),
-  )
-  console.log('mineItem', mineItem)
-  console.log('resource', resource)
-
-  const penalty = 0
-
-  return calculateMiningResults(
-    fleet,
-    fleetFoodTokenBefore.value,
-    fleetAmmoTokenBefore.value,
-    mineItem.data,
-    resource.data,
-    penalty,
-  )
-})
-
-const remaining = ref(Date.now())
-
-setInterval(() => {
-  const fleet = usePlayerStore().fleets![0]! as Fleet
-
-  const mineItem = useGameStore().mineItems?.find(
-    (m) => m.data.mint.toString() == useTokenStore().getTokenBySymbol('HYG').toString(),
-  )
-  const resource = useGameStore().resources?.find(
-    (r) => r.key.toString() == fleet.state.MineAsteroid?.resource.toString(),
-  )
-
-  const timeResource = Fleet.calculateAsteroidMiningResourceExtractionDuration(
-    usePlayerStore().fleets[0]!.data.stats,
-    mineItem.data,
-    resource.data,
-    10963 - 304,
-  )
-  console.log(timeResource)
-
-  const temp =
-    usePlayerStore().fleets[0].state.MineAsteroid?.lastUpdate - Date.now() / 1000 + timeResource
-  remaining.value = formatTimeSpan(temp * 1000)
-}, 1000)
 
 const columns = ref([
   {
@@ -165,6 +88,14 @@ const columns = ref([
   },
 
   {
+    name: 'info',
+    required: false,
+    label: 'Info',
+    align: 'left',
+    sortable: false,
+  },
+
+  {
     name: 'actions',
     required: false,
     label: 'Actions',
@@ -175,15 +106,7 @@ const columns = ref([
 </script>
 
 <template>
-  {{ remaining }}
-  {{
-    date.formatDate(
-      usePlayerStore().fleets[0].state.MineAsteroid?.lastUpdate * 1000,
-      'YYYY-MM-DDTHH:mm:ss.SSSZ',
-    )
-  }}
-
-  {{ miningData }}
+  <MiningResultsDisplay v-if="usePlayerStore().fleets[0]?.state.MineAsteroid" />
   <q-table
     v-if="props.rows"
     :columns="columns"
@@ -276,6 +199,17 @@ const columns = ref([
             :fleet="props.row.key.toString()"
             symbol="CARGO"
           />
+          <div v-else-if="col.name == 'info'">
+            <div v-if="props.row.state?.Idle">
+              {{
+                `${useGameStore().getStarbaseNameByCoordinates([
+                  props.row.state.Idle.sector[0].toNumber(),
+                  props.row.state.Idle.sector[1].toNumber(),
+                ])}`
+              }}
+            </div>
+          </div>
+
           <div v-else>
             {{ col.value }}
           </div>

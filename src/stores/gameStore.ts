@@ -9,6 +9,7 @@ import {
   loadShips,
   loadStarbases,
 } from 'src/handler/interfaces/GameInterface'
+import { byteArrayToString } from '@staratlas/data-source'
 
 const STORE_NAME = 'gameStore'
 
@@ -24,6 +25,18 @@ export const useGameStore = defineStore(STORE_NAME, {
     resources: [] as Resource[] | undefined,
     ships: [] as Ship[] | undefined,
   }),
+  getters: {
+    getStarbaseNameByCoordinates: (state) => {
+      return (coordinates: [number, number]) => {
+        const starbase = state.starbases?.find((starbase) =>
+          byteArrayToString(starbase.data?.name).includes(`x: ${coordinates[0]}, y: -39`),
+        )
+
+        if (starbase) return byteArrayToString(starbase.data.name)
+        return 'NOT FOUND!'
+      }
+    },
+  },
 
   actions: {
     async updateStore() {
