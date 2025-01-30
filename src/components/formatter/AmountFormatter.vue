@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { formatNumber } from './formatNumer'
+import { padNumber } from './padNumber'
 
 const props = defineProps(['number', 'decimals', 'padStart', 'url'])
 
@@ -8,7 +8,7 @@ const styledNumber = computed(() => {
   // Regular expression to separate leading zeros
   const regex = /^(0+)(.+)/
 
-  const match = formatNumber(props.number, props.decimals, props.padStart).match(regex)
+  const match = padNumber(props.number, props.decimals, props.padStart).match(regex)
 
   if (match) {
     const leadingZeros = match[1] // Group 1: Leading zeros

@@ -125,6 +125,20 @@ function getCargoAmount(mint: PublicKey) {
       )
   }
 }
+
+function getStarbaseAmount(mint: PublicKey) {
+  return (
+    usePlayerStore().starbaseTokenAccounts?.find((t) => t.mint.toString() == mint.toString())
+      ?.uiAmount ?? 0
+  )
+}
+
+function getLoadableAmount(mint: PublicKey) {
+  const remainingCapacity = getRemainingCapacity(mint)
+  const starbaseAmount = getStarbaseAmount(mint)
+
+  return starbaseAmount > remainingCapacity ? remainingCapacity : starbaseAmount
+}
 </script>
 
 <template>
@@ -170,11 +184,7 @@ function getCargoAmount(mint: PublicKey) {
               <div class="col">@Starbase</div>
               <div class="col-1">∞</div>
               <AmountFormatter
-                :number="
-                  usePlayerStore().starbaseTokenAccounts?.find(
-                    (t) => t.mint.toString() == props.row.mint.toString(),
-                  )?.uiAmount ?? 0
-                "
+                :number="getStarbaseAmount(props.row.mint)"
                 :url="props.row['thumbnailUrl']"
                 class="col"
                 decimals="1"
@@ -227,7 +237,7 @@ function getCargoAmount(mint: PublicKey) {
 
                     <q-slider
                       v-model="props.row.uiAmountChange"
-                      :max="getRemainingCapacity(props.row.mint)"
+                      :max="getLoadableAmount(props.row.mint)"
                       :min="-props.row.uiAmount"
                       :step="1"
                       class="col q-mx-md"

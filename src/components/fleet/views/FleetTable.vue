@@ -9,7 +9,7 @@ import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
 import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
 import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
-import FleetCargoElement from 'components/fleet/elements/FleetCargoElement.vue'
+import FleetCargoDisplay from 'components/fleet/displays/FleetCargoDisplay.vue'
 import { useRPCStore } from 'stores/rpcStore'
 import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import { useWorkspaceAdapter } from 'src/handler/connector'
@@ -184,17 +184,17 @@ const columns = ref([
             <FleetStartMiningAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
             <FleetStopMiningAction v-if="props.row.state['MineAsteroid']" :fleet="props.row.key" />
           </q-btn-group>
-          <FleetCargoElement
+          <FleetCargoDisplay
             v-else-if="col.name == 'fuel'"
             :fleet="props.row.key.toString()"
             symbol="FUEL"
           />
-          <FleetCargoElement
+          <FleetCargoDisplay
             v-else-if="col.name == 'ammo'"
             :fleet="props.row.key.toString()"
             symbol="AMMO"
           />
-          <FleetCargoElement
+          <FleetCargoDisplay
             v-else-if="col.name == 'cargo'"
             :fleet="props.row.key.toString()"
             symbol="CARGO"

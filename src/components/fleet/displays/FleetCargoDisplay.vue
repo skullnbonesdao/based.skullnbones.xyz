@@ -1,12 +1,14 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, PropType, ref, watch } from 'vue'
 import { toTokenAccount } from 'stores/interfaces/toTokenAccount'
 import { getAccounts } from 'stores/interfaces/rpc'
 import { FleetCargoAccount, usePlayerStore } from 'stores/playerStore'
+import { useTokenStore } from 'stores/tokenStore'
+import { formatNumber } from 'components/formatter/formatNumber'
 
 const props = defineProps({
   symbol: {
-    type: String,
+    type: String as PropType<'AMMO' | 'FUEL' | 'CARGO'>,
     default: 'CARGOELEMENT',
   },
   fleet: {
@@ -47,55 +49,55 @@ function getCargoAddress() {
   }
 }
 
-const tokenAmount = ref(0)
-onMounted(async () => {
+async function load() {
   tokenAmount.value = toTokenAccount<FleetCargoAccount>(await getAccounts([getCargoAddress()]))
     .flatMap((tA) => tA.uiAmount)
     .reduce((acc, amount) => acc + amount, 0)
+}
+
+const tokenAmount = ref(0)
+onMounted(async () => {
+  await load()
 })
+
+watch(
+  () => usePlayerStore().fleets?.find((f) => f.key.toString() == props.fleet?.toString()),
+  async () => {
+    await load()
+  },
+)
 
 const percentage = computed(() => {
-  return (tokenAmount.value / getCargoMax()).toFixed(3)
-})
-
-const color = computed(() => {
-  switch (props.symbol) {
-    case 'AMMO':
-      return 'orange'
-    case 'FUEL':
-      return 'purple'
-    case 'CARGO':
-      return 'blue'
-    default:
-      return 'red'
-  }
+  return parseFloat(((tokenAmount.value / getCargoMax()) * 100).toFixed(1))
 })
 </script>
 
 <template>
   <div class="col">
-    <!--    <div class="col text-center">
-          <q-avatar size="xs">
-            <q-img
-              :src="useTokenStore().tokenList.find((t) => t.symbol == props.symbol)?.thumbnailUrl"
-            />
-          </q-avatar>
-        </div>-->
-
-    <q-linear-progress
-      :color="color"
+    <q-circular-progress
+      :thickness="0.13"
       :value="percentage"
       class="q-mb-xs"
-      font-size="16px"
+      color="accent"
+      font-size="12px"
       show-value
-      size="20px"
-      track-color="grey-3"
+      size="60px"
+      track-color="primary"
     >
-      <div class="absolute-full flex flex-center">
-        <q-badge :label="percentage * 100" color="white" text-color="accent" />
+      <div class="col q-gutter-y-xs">
+        <q-icon v-if="props.symbol === 'CARGO'" name="inventory_2" size="sm" />
+        <q-avatar v-else size="sm">
+          <q-img
+            :src="useTokenStore().tokenList.find((t) => t.symbol == props.symbol)?.thumbnailUrl"
+          />
+        </q-avatar>
+        <div>{{ percentage }}%</div>
       </div>
-    </q-linear-progress>
-    <div class="col text-center">{{ tokenAmount }}/{{ getCargoMax() }}</div>
+    </q-circular-progress>
+
+    <div class="col text-center">
+      {{ formatNumber(tokenAmount) }}/{{ formatNumber(getCargoMax()) }}
+    </div>
   </div>
 </template>
 
