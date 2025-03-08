@@ -7,7 +7,7 @@ import { useTokenStore } from 'stores/tokenStore'
 import { calculateMiningResults } from 'src/handler/interfaces/FleetInterface'
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { useRPCStore } from 'stores/rpcStore'
-import { formatTimeSpan } from 'components/formatter/formatTimespan'
+import { formatTimeSpan } from '../../formatter/formatTimespan'
 
 const fleetAmmoTokenBefore = ref()
 const fleetFoodTokenBefore = ref()
@@ -28,37 +28,11 @@ onMounted(async () => {
   )
 })
 
-const miningData = computed(() => {
-  if (!fleetAmmoTokenBefore.value) return 0
-  if (!fleetFoodTokenBefore.value) return 0
-  const fleet = usePlayerStore().fleets![0]! as Fleet
-
-  if (!fleet.state.MineAsteroid) return 'Fleet not mining...'
-
-  console.log(fleet.state.MineAsteroid.resource)
-
-  const mineItem = useGameStore().mineItems?.find(
-    (m) => m.data.mint.toString() == useTokenStore().getTokenBySymbol('HYG').toString(),
-  )
-  const resource = useGameStore().resources?.find(
-    (r) => r.key.toString() == fleet.state.MineAsteroid?.resource.toString(),
-  )
-  console.log('mineItem', mineItem)
-  console.log('resource', resource)
-
-  const penalty = 0
-
-  return calculateMiningResults(
-    fleet,
-    fleetFoodTokenBefore.value,
-    fleetAmmoTokenBefore.value,
-    mineItem.data,
-    resource.data,
-    penalty,
-  )
-})
-
 const remaining = ref(Date.now())
+
+const fleet = computed(() => {
+  return usePlayerStore().fleets![0]! as Fleet
+})
 
 const mineItem = computed(() => {
   return useGameStore().mineItems?.find(
@@ -78,6 +52,7 @@ const calculateAsteroidMiningResourceExtractionDuration = ref()
 const calculateAsteroidMiningAmmoDuration = ref()
 const calculateAsteroidMiningFoodDuration = ref()
 const calculateAsteroidMiningFoodToConsume = ref()
+const miningData = ref()
 
 setInterval(() => {
   calculateAsteroidMiningResourceExtractionDuration.value =
@@ -112,13 +87,16 @@ setInterval(() => {
       10963 - 398 + 199.5,
     )
 
-  const temp =
-    usePlayerStore().fleets[0].state.MineAsteroid?.lastUpdate -
-    Date.now() / 1000 +
-    calculateAsteroidMiningResourceExtractionDuration.value
-  remaining.value = formatTimeSpan(temp * 1000)
-
-  console.log(temp)
+  miningData.value = !fleet.value.state.MineAsteroid
+    ? 'Fleet not mining'
+    : calculateMiningResults(
+        fleet.value,
+        fleetFoodTokenBefore.value,
+        fleetAmmoTokenBefore.value,
+        mineItem.value.data,
+        resource.value.data,
+        0,
+      )
 }, 1000)
 </script>
 
@@ -141,11 +119,23 @@ setInterval(() => {
       <div class="col">calculateAsteroidMiningFoodToConsume</div>
       <div>{{ calculateAsteroidMiningFoodToConsume }}</div>
     </div>
+
+    <div v-for="(data, index) in Object.keys(miningData)" v-if="miningData" class="row">
+      <div class="col">{{ data }}</div>
+      <div v-if="data.includes('Duration')">
+        {{ formatTimeSpan(miningData[data].toFixed(1) * 1000) }}
+      </div>
+      <div v-else-if="data.includes('timeRemaining')">
+        {{ formatTimeSpan(miningData[data].toFixed(1) * 1000) }}
+      </div>
+      <div v-else>{{ miningData[data].toFixed(1) }}</div>
+    </div>
   </div>
 
   <div>
     {{ remaining }}
-    {{ miningData }}
+
+    {{ usePlayerStore().fleets[0].state.MineAsteroid.lastUpdate }}
   </div>
 </template>
 

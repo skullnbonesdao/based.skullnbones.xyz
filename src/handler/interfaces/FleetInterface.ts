@@ -1,5 +1,6 @@
 import {Fleet, MineItemAccount, ResourceAccount, ShipStats} from '@staratlas/sage'
 import {BN} from '@staratlas/anchor'
+import {Account} from '@solana/web3.js'
 
 /**
  * Calculate mining results i.e. duration and amount of resource extracted
@@ -14,51 +15,65 @@ import {BN} from '@staratlas/anchor'
  */
 export const calculateMiningResults = (
   fleetAccount: Fleet /** after harvesting */,
-  fleetFoodToken: TokenAccount /** before harvesting */,
-  fleetAmmoToken: TokenAccount /** before harvesting */,
+  fleetFoodToken: Account /** before harvesting */,
+  fleetAmmoToken: Account /** before harvesting */,
   mineItem: MineItemAccount,
   resource: ResourceAccount,
   penalty: number,
-  startTime?: BN,
 ) => {
   if (!fleetAccount.state.MineAsteroid) {
     throw 'Fleet not mining'
   }
-  const miningStart = startTime ?? fleetAccount.state.MineAsteroid.start
-  const miningDuration = fleetAccount.state.MineAsteroid.lastUpdate.sub(miningStart).toNumber()
-  const maxFoodDuration = Fleet.calculateAsteroidMiningFoodDuration(
+  const timestampNow = new BN(Date.now() / 1000)
+  const miningDuration = timestampNow.sub(fleetAccount.state.MineAsteroid.lastUpdate).toNumber()
+
+  const fuelDurationMax = 0
+
+  const foodDurationMax = Fleet.calculateAsteroidMiningFoodDuration(
     <ShipStats>fleetAccount.data.stats,
     Number(fleetFoodToken.delegatedAmount),
   )
-  const maxAmmoDuration = Fleet.calculateAsteroidMiningAmmoDuration(
+  const ammoDurationMax = Fleet.calculateAsteroidMiningAmmoDuration(
     <ShipStats>fleetAccount.data.stats,
     Number(fleetAmmoToken.delegatedAmount),
   )
+
+  const fuelConsumed = 0
+
   const foodConsumed = Fleet.calculateAsteroidMiningFoodToConsume(
     <ShipStats>fleetAccount.data.stats,
     Number(fleetFoodToken.delegatedAmount),
-    Math.min(miningDuration, Math.floor(maxFoodDuration)),
+    Math.min(miningDuration, Math.floor(foodDurationMax)),
   )
   const ammoConsumed = Fleet.calculateAsteroidMiningAmmoToConsume(
     <ShipStats>fleetAccount.data.stats,
     Number(fleetAmmoToken.delegatedAmount),
-    Math.min(miningDuration, Math.floor(maxFoodDuration), Math.floor(maxAmmoDuration)),
+    Math.min(miningDuration, Math.floor(foodDurationMax), Math.floor(ammoDurationMax)),
   )
   const resourceExtracted = Fleet.calculateAsteroidMiningResourceToExtract(
     <ShipStats>fleetAccount.data.stats,
     mineItem,
     resource,
-    Math.min(miningDuration, Math.floor(maxFoodDuration), Math.floor(maxAmmoDuration)),
-    1_000_000 /** arbitrary large number */,
+    Math.min(miningDuration, Math.floor(foodDurationMax), Math.floor(ammoDurationMax)),
+    1_000_000_000 /** arbitrary large number */,
     penalty,
   )
 
+  const timeRemaining =
+    Math.min(Math.floor(foodDurationMax), Math.floor(ammoDurationMax)) - miningDuration
+
   return {
+    fuelConsumed,
     ammoConsumed,
     foodConsumed,
-    maxAmmoDuration,
-    maxFoodDuration,
+
+    fuelDurationMax,
+    ammoDurationMax,
+    foodDurationMax,
+
     miningDuration,
     resourceExtracted,
+
+    timeRemaining,
   }
 }

@@ -3,20 +3,12 @@ import { TokenAccountInfo } from 'stores/tokenStore'
 import { onMounted, type PropType, ref } from 'vue'
 import { Fleet } from '@staratlas/sage'
 import { byteArrayToString, readFromRPC } from '@staratlas/data-source'
-import FleetShipDialog from 'components/fleet/dialogs/FleetShipDialog.vue'
-import FleetCargoDialog from 'components/fleet/dialogs/FleetCargoDialog.vue'
-import FleetDockAction from 'components/fleet/actions/FleetDockAction.vue'
-import FleetStartMiningAction from 'components/fleet/actions/FleetStartMiningAction.vue'
-import FleetStopMiningAction from 'components/fleet/actions/FleetStopMiningAction.vue'
 import { usePlayerStore } from 'stores/playerStore'
-import FleetCargoDisplay from 'components/fleet/displays/FleetCargoDisplay.vue'
 import { useRPCStore } from 'stores/rpcStore'
-import FleetUndockAction from 'components/fleet/actions/FleetUndockAction.vue'
 import { useWorkspaceAdapter } from 'src/handler/connector'
 import { PublicKey } from '@solana/web3.js'
 import { FleetShips } from '@staratlas/sage/src'
-import MiningResultsDisplay from 'components/fleet/displays/MiningResultsDisplay.vue'
-import { useGameStore } from '../../../stores/gameStore'
+import FleetTableRrow from 'components/fleet/views/FleetTableRrow.vue'
 
 const props = defineProps({
   rows: {
@@ -62,6 +54,15 @@ const columns = ref([
       Object.keys(row.state)[0] == 'MineAsteroid' ? 'MineAsteroid' : Object.keys(row.state)[0],
     sortable: true,
   },
+
+  {
+    name: 'info',
+    required: false,
+    label: 'Sate info',
+    align: 'left',
+    sortable: false,
+  },
+
   {
     name: 'fuel',
     required: true,
@@ -88,14 +89,6 @@ const columns = ref([
   },
 
   {
-    name: 'info',
-    required: false,
-    label: 'Info',
-    align: 'left',
-    sortable: false,
-  },
-
-  {
     name: 'actions',
     required: false,
     label: 'Actions',
@@ -106,7 +99,7 @@ const columns = ref([
 </script>
 
 <template>
-  <MiningResultsDisplay v-if="usePlayerStore().fleets[0]?.state.MineAsteroid" />
+  <!--  <MiningResultsDisplay v-if="usePlayerStore().fleets[0]?.state.MineAsteroid" />-->
   <q-table
     v-if="props.rows"
     :columns="columns"
@@ -164,55 +157,7 @@ const columns = ref([
         </q-td>
 
         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-          <q-btn-group v-if="col.name == 'actions'" class="">
-            <FleetShipDialog
-              v-if="props.row.state['StarbaseLoadingBay']"
-              :fleet="props.row.key"
-              :name="byteArrayToString(props.row.data.fleetLabel)"
-            />
-            <FleetCargoDialog
-              v-if="props.row.state['StarbaseLoadingBay']"
-              :fleet="props.row.key"
-              :name="byteArrayToString(props.row.data.fleetLabel)"
-            />
-            <FleetDockAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
-            <FleetUndockAction
-              v-if="props.row.state['StarbaseLoadingBay']"
-              :fleet="props.row.key"
-            />
-
-            <FleetStartMiningAction v-if="props.row.state['Idle']" :fleet="props.row.key" />
-            <FleetStopMiningAction v-if="props.row.state['MineAsteroid']" :fleet="props.row.key" />
-          </q-btn-group>
-          <FleetCargoDisplay
-            v-else-if="col.name == 'fuel'"
-            :fleet="props.row.key.toString()"
-            symbol="FUEL"
-          />
-          <FleetCargoDisplay
-            v-else-if="col.name == 'ammo'"
-            :fleet="props.row.key.toString()"
-            symbol="AMMO"
-          />
-          <FleetCargoDisplay
-            v-else-if="col.name == 'cargo'"
-            :fleet="props.row.key.toString()"
-            symbol="CARGO"
-          />
-          <div v-else-if="col.name == 'info'">
-            <div v-if="props.row.state?.Idle">
-              {{
-                `${useGameStore().getStarbaseNameByCoordinates([
-                  props.row.state.Idle.sector[0].toNumber(),
-                  props.row.state.Idle.sector[1].toNumber(),
-                ])}`
-              }}
-            </div>
-          </div>
-
-          <div v-else>
-            {{ col.value }}
-          </div>
+          <FleetTableRrow :col="col" :row="props.row" />
         </q-td>
       </q-tr>
       <q-tr v-show="props.expand" :props="props">
