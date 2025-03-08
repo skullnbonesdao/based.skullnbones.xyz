@@ -19,19 +19,36 @@ import { getPointsCategoryEnumString } from 'src/handler/convert/EnumToString'
           label="Wallet"
         ></q-expansion-item>
 
-        <AccountExpansionItem :account="useProfileStore().playerProfile" label="Player Profile" />
+        <AccountExpansionItem
+          :account="useProfileStore().playerProfile"
+          hide-expand-icon
+          label="Player Profile"
+        />
 
-        <AccountExpansionItem :account="useProfileStore().nameProfile" label="Name Profile" />
+        <AccountExpansionItem
+          :account="useProfileStore().nameProfile"
+          hide-expand-icon
+          label="Name Profile"
+        />
 
-        <AccountExpansionItem :account="useProfileStore().factionProfile" label="Faction Profile" />
+        <AccountExpansionItem
+          :account="useProfileStore().factionProfile"
+          hide-expand-icon
+          label="Faction Profile"
+        />
 
-        <AccountExpansionItem :account="useProfileStore().sageProfile" label="Sage Profile" />
+        <AccountExpansionItem
+          :account="useProfileStore().sageProfile"
+          hide-expand-icon
+          label="Sage Profile"
+        />
 
         <AccountExpansionItem
           v-for="(point, idx) in useProfileStore().points"
           :key="idx"
           :account="point.points"
           :label="getPointsCategoryEnumString(point.category) + ' Points'"
+          hide-expand-icon
         />
       </q-list>
     </q-card-section>
