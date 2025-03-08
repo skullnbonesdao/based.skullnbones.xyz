@@ -14,6 +14,7 @@ import { keypairToAsyncSigner } from '@staratlas/data-source'
 import { PointsCategories } from 'src/handler/interfaces/PointsInterface'
 import { getAsyncSigner, publicKeyToAsyncSigner } from 'src/handler/convert/ToSigner'
 import { FeeInstructionHandler } from 'src/handler/instructions/FeeInstructionHandler'
+import { useGlobalStore } from 'stores/globalStore'
 
 const enable_createPlayerProfile = ref(false)
 const enable_createPlayerProfileName = ref(false)
@@ -156,106 +157,114 @@ async function sendTx() {
     bordered
     flat
   >
+    <q-inner-loading
+      :showing="useGlobalStore().is_loading"
+      label="Please wait..."
+      label-style="font-size: 1.2em"
+    />
+
     <q-card-section class="row items-center q-gutter-md">
       <q-icon name="create" size="md"></q-icon>
       <div class="text-h6">Create Accounts</div>
     </q-card-section>
 
-    <q-card-section>
-      <q-list bordered class="rounded-borders" separator>
-        <q-item v-ripple clickable>
-          <q-toggle
-            v-model="enable_createPlayerProfile"
-            checked-icon="check"
-            color="secondary"
-            unchecked-icon="clear"
-          />
-          <div>
-            <q-item-section>Profile</q-item-section>
-            <q-item-label caption>Create player profile</q-item-label>
-          </div>
-        </q-item>
-        <q-item v-ripple clickable>
-          <div class="col row q-gutter-sm">
-            <div class="col row">
-              <q-toggle
-                v-model="enable_createPlayerProfileName"
-                checked-icon="check"
-                color="secondary"
-                unchecked-icon="clear"
-              />
-              <div>
-                <q-item-section>Name</q-item-section>
-                <q-item-label caption>Create player name</q-item-label>
-              </div>
+    <div>
+      <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+        <q-list bordered class="rounded-borders" separator>
+          <q-item v-ripple clickable>
+            <q-toggle
+              v-model="enable_createPlayerProfile"
+              checked-icon="check"
+              color="secondary"
+              unchecked-icon="clear"
+            />
+            <div>
+              <q-item-section>Profile</q-item-section>
+              <q-item-label caption>Create player profile</q-item-label>
             </div>
-            <q-input v-model="inputName" class="col" dense label="Player name" standout />
-          </div>
-        </q-item>
+          </q-item>
+          <q-item v-ripple clickable>
+            <div class="col row q-gutter-sm">
+              <div class="col row">
+                <q-toggle
+                  v-model="enable_createPlayerProfileName"
+                  checked-icon="check"
+                  color="secondary"
+                  unchecked-icon="clear"
+                />
+                <div>
+                  <q-item-section>Name</q-item-section>
+                  <q-item-label caption>Create player name</q-item-label>
+                </div>
+              </div>
+              <q-input v-model="inputName" class="col" dense label="Player name" standout />
+            </div>
+          </q-item>
 
-        <q-item v-ripple clickable>
-          <div class="col row q-gutter-sm">
-            <div class="col row">
-              <q-toggle
-                v-model="enable_chooseFaction"
-                checked-icon="check"
-                color="secondary"
-                unchecked-icon="clear"
-              />
-              <div>
-                <q-item-section>Faction</q-item-section>
-                <q-item-label caption>Choose faction</q-item-label>
+          <q-item v-ripple clickable>
+            <div class="col row q-gutter-sm">
+              <div class="col row">
+                <q-toggle
+                  v-model="enable_chooseFaction"
+                  checked-icon="check"
+                  color="secondary"
+                  unchecked-icon="clear"
+                />
+                <div>
+                  <q-item-section>Faction</q-item-section>
+                  <q-item-label caption>Choose faction</q-item-label>
+                </div>
               </div>
-            </div>
 
-            <q-select
-              v-model="inputFaction"
-              :option-label="(option) => getFactionEnumString(option)"
-              :options="factionOptions"
-              class="col"
-              dense
-              label="Faction"
-              standout
-            ></q-select>
-          </div>
-        </q-item>
-        <q-item v-ripple clickable>
-          <div class="col row q-gutter-sm">
-            <div class="col row">
-              <q-toggle
-                v-model="enable_createSagePlayerProfile"
-                checked-icon="check"
-                color="secondary"
-                unchecked-icon="clear"
-              />
-              <div>
-                <q-item-section>Sage Profile</q-item-section>
-                <q-item-label caption>Create sage profile</q-item-label>
+              <q-select
+                v-model="inputFaction"
+                :option-label="(option) => getFactionEnumString(option)"
+                :options="factionOptions"
+                class="col"
+                dense
+                label="Faction"
+                standout
+              ></q-select>
+            </div>
+          </q-item>
+          <q-item v-ripple clickable>
+            <div class="col row q-gutter-sm">
+              <div class="col row">
+                <q-toggle
+                  v-model="enable_createSagePlayerProfile"
+                  checked-icon="check"
+                  color="secondary"
+                  unchecked-icon="clear"
+                />
+                <div>
+                  <q-item-section>Sage Profile</q-item-section>
+                  <q-item-label caption>Create sage profile</q-item-label>
+                </div>
               </div>
             </div>
-          </div>
-        </q-item>
+          </q-item>
 
-        <q-item v-for="(point, idx) in useProfileStore().points" :key="idx" v-ripple clickable>
-          <div class="col row q-gutter-sm">
-            <div class="col row">
-              <q-toggle
-                v-model="enable_createPoints[idx]"
-                checked-icon="check"
-                color="secondary"
-                unchecked-icon="clear"
-              />
-              <div>
-                <q-item-section
-                  >Points {{ getPointsCategoryEnumString(point.category) }}
-                </q-item-section>
-                <q-item-label caption>Create point</q-item-label>
+          <q-item v-for="(point, idx) in useProfileStore().points" :key="idx" v-ripple clickable>
+            <div class="col row q-gutter-sm">
+              <div class="col row">
+                <q-toggle
+                  v-model="enable_createPoints[idx]"
+                  checked-icon="check"
+                  color="secondary"
+                  unchecked-icon="clear"
+                />
+                <div>
+                  <q-item-section
+                    >Points {{ getPointsCategoryEnumString(point.category) }}
+                  </q-item-section>
+                  <q-item-label caption>Create point</q-item-label>
+                </div>
               </div>
             </div>
-          </div>
-        </q-item>
-      </q-list>
-    </q-card-section>
+          </q-item>
+        </q-list>
+      </transition>
+    </div>
 
     <q-card-section>
       <q-btn class="full-width" color="primary" label="Send" @click="sendTx"></q-btn>

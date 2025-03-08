@@ -18,19 +18,21 @@ import { permissionOptions } from '../../../handler/instructions/ProfileInstruct
       <div class="text-h5">View and edit permissions</div>
     </q-card-section>
 
-    <q-card-section v-if="useProfileStore().playerProfile" class="q-gutter-y-md">
+    <div v-if="useProfileStore().playerProfile" class="q-gutter-y-md">
       <q-card
         v-for="(k, idx) in useProfileStore().playerProfile!.profileKeys"
         :key="idx"
-        bordered
         class="col"
         flat
       >
+        <q-separator />
         <q-card-section>
           <div class="text-h6">
             {{ permissionOptions.find((p) => p.address == k.scope.toString())?.label }}
           </div>
         </q-card-section>
+        <q-separator />
+
         <q-card-section>
           <div class="row items-center q-gutter-md">
             <div>Key</div>
@@ -59,14 +61,13 @@ import { permissionOptions } from '../../../handler/instructions/ProfileInstruct
           ></PermissionEditable>
         </q-card-section>
       </q-card>
-    </q-card-section>
-  </q-card>
-
-  <q-card v-if="!useGlobalStore().loading" bordered class="q-mt-xl" flat>
+    </div>
+    <q-separator />
     <q-card-section class="row items-center q-gutter-md">
       <q-icon name="add_circle_outline" size="md"></q-icon>
       <div class="text-h5">Add permission</div>
     </q-card-section>
+    <q-separator />
 
     <q-card-section>
       <PermissionsAddAccount />

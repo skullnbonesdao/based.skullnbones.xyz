@@ -62,6 +62,6 @@ watch(
 
 <style>
 body {
-  zoom: 75%;
+  zoom: 100%;
 }
 </style>

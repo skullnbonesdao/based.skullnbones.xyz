@@ -75,24 +75,31 @@ async function sendTX() {
 </script>
 
 <template>
-  <q-card bordered flat>
-    <q-card-section class="q-gutter-y-sm">
-      <q-input v-model="inputKey" label="Wallet (Key)" standout />
+  <div class="q-gutter-y-sm">
+    <q-input v-model="inputKey" dense label="Wallet (Key)" standout />
 
+    <div class="row q-gutter-x-sm">
       <q-select
         v-model="inputScope"
         :option-label="(option) => option.label"
         :options="permissionOptions.slice(1)"
+        class="col"
+        dense
         label="Scope"
         standout
       />
 
-      <q-input v-model="inputExpireTime" label="Expire Time" standout type="number" />
-    </q-card-section>
-    <q-card-actions>
-      <q-btn class="full-width" color="primary" @click="sendTX">ADD</q-btn>
-    </q-card-actions>
-  </q-card>
+      <q-input
+        v-model="inputExpireTime"
+        class="col"
+        dense
+        label="Expire Time"
+        standout
+        type="number"
+      />
+    </div>
+    <q-btn class="full-width" color="primary" rounded @click="sendTX">ADD</q-btn>
+  </div>
 </template>
 
 <style scoped></style>

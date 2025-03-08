@@ -124,10 +124,12 @@ async function sendUpdate() {
       :key="permission"
       class="row items-center q-gutter-x-md"
     >
-      <div class="">
+      <q-space class="col" />
+
+      <div class="col-3">
         {{ permission }}
       </div>
-      <q-separator class="col" />
+
       <div>
         <q-toggle
           v-model="permissions[permission]"
@@ -146,13 +148,22 @@ async function sendUpdate() {
     v-if="scope.toString() != PLAYER_PROFILE_PROGRAM_ID.toString()"
     class="q-gutter-x-sm row"
   >
-    <q-btn class="col" color="primary" label="Delete" @click.prevent="sendDelete"></q-btn>
+    <q-btn
+      class="col"
+      color="primary"
+      icon="delete"
+      label="Delete"
+      rounded
+      @click.prevent="sendDelete"
+    ></q-btn>
 
     <q-btn
       :disable="permissions?.getPermissions().toString() == inputPermissions.toString()"
       class="col"
       color="primary"
+      icon="update"
       label="Update"
+      rounded
       @click.prevent="sendUpdate"
     ></q-btn>
   </q-card-section>
