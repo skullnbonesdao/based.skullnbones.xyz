@@ -267,7 +267,13 @@ async function sendTx() {
     </div>
 
     <q-card-section>
-      <q-btn class="full-width" color="primary" label="Send" @click="sendTx"></q-btn>
+      <q-btn
+        class="full-width"
+        color="primary"
+        label="Create Accounts"
+        rounded
+        @click="sendTx"
+      ></q-btn>
     </q-card-section>
   </q-card>
 </template>

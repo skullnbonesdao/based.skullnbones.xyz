@@ -97,10 +97,12 @@ async function sendTx() {
 <template>
   <q-btn
     :icon-right="props.direction === 'deposit' ? 'call_made' : 'call_received'"
-    :label="props.direction === 'deposit' ? 'Deposit' : 'Withdraw'"
     color="primary"
+    size="sm"
     @click.prevent="sendTx"
-  ></q-btn>
+  >
+    <q-tooltip>{{ props.direction === 'deposit' ? 'Deposit' : 'Withdraw' }}</q-tooltip>
+  </q-btn>
 </template>
 
 <style scoped></style>

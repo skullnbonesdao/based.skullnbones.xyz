@@ -88,6 +88,7 @@ if (props.action)
     }"
     :rows="rows"
     :selection="selection"
+    dense
     flat
     hide-bottom
     row-key="name"

@@ -1,6 +1,6 @@
 <template>
   <q-layout view="Hh Lpr lFf">
-    <q-header class="bg-black q-ma-none q-pa-none">
+    <q-header class="bg-dark q-ma-none q-pa-none">
       <q-toolbar class="q-ma-none q-pa-none">
         <q-btn aria-label="Menu" dense flat icon="menu" round @click="toggleLeftDrawer" />
 
@@ -8,7 +8,7 @@
         <div class="q-mx-xs q-mt-sm">v{{ display_version }}</div>
 
         <q-space />
-        <RPCPriorityFee class="q-pa-sm" />
+        <RPCPriorityFee class="q-px-sm" />
         <WalletMultiButton dark />
       </q-toolbar>
       <q-separator />

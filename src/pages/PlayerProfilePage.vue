@@ -35,6 +35,7 @@ const tab = ref('overview')
       <q-tab icon="dashboard" label="Overview" name="overview" />
       <q-tab icon="settings" label="Permissions" name="permissions" />
     </q-tabs>
+    <q-separator />
     <q-tab-panels v-model="tab">
       <q-tab-panel class="q-gutter-md" name="overview">
         <PlayerProfileOverview />
