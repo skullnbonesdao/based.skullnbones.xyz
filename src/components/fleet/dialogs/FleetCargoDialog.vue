@@ -36,7 +36,13 @@ watch(
     <q-tooltip>Cargo</q-tooltip>
   </q-btn>
 
-  <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
+  <q-dialog
+    v-model="showDialog"
+    full-width
+    position="bottom"
+    transition-hide="fade"
+    transition-show="fade"
+  >
     <q-card bordered flat>
       <HeaderBanner text="Cargo" />
 

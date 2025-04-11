@@ -8,7 +8,6 @@ import InfoBanner from 'components/general/InfoBanner.vue'
 import LoadingAnimation from 'components/general/LoadingAnimation.vue'
 import FleetCreateView from 'components/fleet/views/FleetCreateView.vue'
 import FleetTable from 'components/fleet/views/FleetTable.vue'
-import HeaderBanner from 'components/general/HeaderBanner.vue'
 import { usePlayerStore } from 'stores/playerStore'
 
 const tabAction = ref('manage')
@@ -23,8 +22,6 @@ onMounted(async () => {
     <LoadingAnimation />
   </q-page>
   <q-page v-else class="">
-    <HeaderBanner text="Fleet Manager" />
-
     <div>
       <q-separator />
       <q-tabs v-model="tabAction" active-bg-color="primary" align="justify" inline-label>

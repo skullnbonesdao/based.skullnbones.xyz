@@ -40,7 +40,13 @@ async function sendTx() {
 </script>
 
 <template>
-  <q-btn class="full-width" color="secondary" label="Disband" @click.prevent="sendTx" />
+  <q-btn
+    class="full-width"
+    color="secondary"
+    label="Disband fleet"
+    rounded
+    @click.prevent="sendTx"
+  />
 </template>
 
 <style scoped></style>

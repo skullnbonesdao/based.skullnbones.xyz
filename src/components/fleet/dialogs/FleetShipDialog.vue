@@ -32,14 +32,27 @@ watch(
 </script>
 
 <template>
-  <q-btn color="primary" icon="workspaces" @click="showDialog = true">
+  <q-btn color="primary" icon="workspaces" @click="showDialog = !showDialog">
     <q-tooltip>Fleet</q-tooltip>
   </q-btn>
 
-  <q-dialog v-model="showDialog" full-width transition-hide="rotate" transition-show="rotate">
+  <q-dialog
+    v-model="showDialog"
+    full-width
+    position="bottom"
+    square
+    transition-hide="fade"
+    transition-show="fade"
+  >
     <q-card bordered flat>
-      <HeaderBanner2 :caption="props.name" :text="'Fleet '" />
-
+      <div class="row items-center">
+        <HeaderBanner2 :subtitle="`Fleet: ${name}`" :title="name" class="col" />
+        <div>
+          <q-btn class="q-mr-sm" color="primary" icon="close" round @click="showDialog = false">
+            <q-tooltip>Close</q-tooltip>
+          </q-btn>
+        </div>
+      </div>
       <q-separator />
 
       <q-tabs v-model="tabAction" active-bg-color="primary" align="justify" inline-label>
